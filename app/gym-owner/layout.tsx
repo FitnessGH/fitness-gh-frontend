@@ -11,12 +11,14 @@ export default function GymOwnerLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, logout, isAuthenticated } = useAuth()
+  const { user, logout, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   React.useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.replace("/")
       return
@@ -31,7 +33,7 @@ export default function GymOwnerLayout({
         router.push("/gym-owner")
       }
     }
-  }, [isAuthenticated, user, router, pathname])
+  }, [isAuthenticated, user, router, pathname, isLoading])
 
   if (!user) {
     return null

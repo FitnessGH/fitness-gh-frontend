@@ -11,15 +11,17 @@ export default function CustomerLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, logout, isAuthenticated } = useAuth()
+  const { user, logout, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   React.useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.replace("/")
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, router, isLoading])
 
   if (!user) {
     return null
@@ -29,9 +31,8 @@ export default function CustomerLayout({
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside
-        className={`${
-          sidebarOpen ? "w-64" : "w-20"
-        } border-r border-border bg-sidebar transition-all duration-300 hidden md:flex flex-col`}
+        className={`${sidebarOpen ? "w-64" : "w-20"
+          } border-r border-border bg-sidebar transition-all duration-300 hidden md:flex flex-col`}
       >
         <div className="p-4 border-b border-sidebar-border flex items-center justify-center h-16">
           <h1 className="text-xl font-bold text-sidebar-primary">FitHub</h1>

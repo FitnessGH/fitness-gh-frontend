@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth-context"
 import { getDashboardPath } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Dumbbell, Zap, BarChart3, Users, TrendingUp, Shield } from "lucide-react"
+import Link from "next/link"
 
 export default function Home() {
   const router = useRouter()
@@ -38,9 +39,20 @@ export default function Home() {
             <Dumbbell className="w-8 h-8 text-primary" />
             <span className="text-2xl font-bold text-foreground">FitHub</span>
           </div>
-          <Button onClick={() => setShowLogin(true)} className="bg-primary hover:bg-primary/90">
-            Sign In
-          </Button>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/apply"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              Apply as Owner
+            </Link>
+            <Button
+              onClick={() => setShowLogin(true)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Sign In
+            </Button>
+          </div>
         </div>
       </nav>
 

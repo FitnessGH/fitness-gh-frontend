@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from "react"
 import type { AuthUser, UserRole } from "@/lib/auth"
-import { validateCredentials } from "@/lib/auth"
+import { validateCredentials, registerUser } from "@/lib/auth"
 
 interface AuthContextType {
   user: AuthUser | null
@@ -12,13 +12,14 @@ interface AuthContextType {
   logout: () => void
   switchRole: (role: UserRole) => void
   updateUser: (updates: Partial<AuthUser>) => void
+  signup: (data: { name: string; email: string; role: UserRole }) => Promise<AuthUser>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true)
@@ -60,10 +61,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (user) {
         const updatedUser = { ...user, ...updates }
         setUser(updatedUser)
-        sessionStorage.setItem("user", JSON.stringify(updatedUser))
       }
     },
     [user],
+  )
+
+  const signup = useCallback(
+    async (data: { name: string; email: string; role: UserRole }) => {
+      setIsLoading(true)
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        const newUser = await registerUser(data)
+        setUser(newUser)
+        sessionStorage.setItem("user", JSON.stringify(newUser))
+        return newUser
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [setUser],
   )
 
   // Initialize from sessionStorage on mount
@@ -76,10 +92,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.removeItem("user")
       }
     }
+    setIsLoading(false)
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout, switchRole, updateUser }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout, switchRole, updateUser, signup }}>
       {children}
     </AuthContext.Provider>
   )

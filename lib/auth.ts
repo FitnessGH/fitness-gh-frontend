@@ -112,3 +112,18 @@ export function getApprovalStatus(userId: string): "pending" | "approved" | "rej
   const user = Object.values(mockUsers).find((u) => u.id === userId)
   return user?.approvalStatus
 }
+
+// Mock signup
+export async function registerUser(data: { name: string; email: string; role: UserRole }): Promise<AuthUser> {
+  const newId = (Object.keys(mockUsers).length + 1).toString()
+  const newUser: AuthUser = {
+    id: newId,
+    email: data.email,
+    name: data.name,
+    role: data.role,
+    avatar: data.name.slice(0, 2).toUpperCase(),
+  }
+  // In a real app, save to DB
+  mockUsers[data.email.toLowerCase()] = newUser
+  return newUser
+}

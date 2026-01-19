@@ -19,7 +19,17 @@ interface Employee {
   hireDate: string
   salary: number
   status: "Active" | "On Leave" | "Inactive"
+  permissions: string[]
 }
+
+const AVAILABLE_PERMISSIONS = [
+  { id: "view_dashboard", label: "View Dashboard", description: "Access to the main dashboard and analytics" },
+  { id: "manage_members", label: "Manage Members", description: "Add, edit, and view member profiles" },
+  { id: "manage_employees", label: "Manage Employees", description: "Manage staff roles and permissions" },
+  { id: "manage_schedules", label: "Manage Schedules", description: "Create and edit class schedules" },
+  { id: "view_financials", label: "View Financials", description: "Access to revenue and payment reports" },
+  { id: "gym_settings", label: "Gym Settings", description: "Edit gym information and settings" },
+]
 
 const mockEmployees: Employee[] = [
   {
@@ -31,6 +41,7 @@ const mockEmployees: Employee[] = [
     hireDate: "2023-01-15",
     salary: 65000,
     status: "Active",
+    permissions: ["view_dashboard", "manage_members", "manage_employees", "manage_schedules", "view_financials", "gym_settings"],
   },
   {
     id: "E002",
@@ -41,6 +52,7 @@ const mockEmployees: Employee[] = [
     hireDate: "2023-06-20",
     salary: 45000,
     status: "Active",
+    permissions: ["view_dashboard", "manage_schedules"],
   },
   {
     id: "E003",
@@ -51,6 +63,7 @@ const mockEmployees: Employee[] = [
     hireDate: "2023-12-10",
     salary: 32000,
     status: "Active",
+    permissions: ["view_dashboard", "manage_members"],
   },
   {
     id: "E004",
@@ -61,6 +74,7 @@ const mockEmployees: Employee[] = [
     hireDate: "2024-03-05",
     salary: 45000,
     status: "On Leave",
+    permissions: ["view_dashboard", "manage_schedules"],
   },
 ]
 
@@ -69,7 +83,19 @@ export default function EmployeesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterRole, setFilterRole] = useState<string>("All")
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", role: "Personal Trainer", salary: "" })
+  const [isRolesModalOpen, setIsRolesModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
+  const [roleEmployee, setRoleEmployee] = useState<Employee | null>(null)
+  const [deleteEmployeeId, setDeleteEmployeeId] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "Personal Trainer",
+    salary: "",
+    status: "Active" as "Active" | "On Leave" | "Inactive"
+  })
 
   const filteredEmployees = employees.filter((emp) => {
     const matchesSearch =
@@ -81,25 +107,91 @@ export default function EmployeesPage() {
 
   const uniqueRoles = Array.from(new Set(employees.map((e) => e.role)))
 
-  const handleAddEmployee = () => {
-    const newEmployee: Employee = {
-      id: `E${Date.now()}`,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      role: formData.role,
-      hireDate: new Date().toISOString().split("T")[0],
-      salary: Number.parseInt(formData.salary) || 0,
-      status: "Active",
-    }
-    setEmployees([...employees, newEmployee])
-    setFormData({ name: "", email: "", phone: "", role: "Personal Trainer", salary: "" })
-    setIsModalOpen(false)
-    console.log("[v0] Employee added:", newEmployee)
+  const handleOpenAddModal = () => {
+    setEditingEmployee(null)
+    setFormData({ name: "", email: "", phone: "", role: "Personal Trainer", salary: "", status: "Active" })
+    setIsModalOpen(true)
   }
 
-  const handleDeleteEmployee = (id: string) => {
-    setEmployees(employees.filter((e) => e.id !== id))
+  const handleOpenEditModal = (emp: Employee) => {
+    setEditingEmployee(emp)
+    setFormData({
+      name: emp.name,
+      email: emp.email,
+      phone: emp.phone,
+      role: emp.role,
+      salary: emp.salary.toString(),
+      status: emp.status
+    })
+    setIsModalOpen(true)
+  }
+
+  const handleSubmitEmployee = () => {
+    if (editingEmployee) {
+      const updatedEmployees = employees.map((e) =>
+        e.id === editingEmployee.id
+          ? {
+            ...e,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            role: formData.role,
+            salary: Number.parseInt(formData.salary) || 0,
+            status: formData.status
+          }
+          : e
+      )
+      setEmployees(updatedEmployees)
+      console.log("[v0] Employee updated:", editingEmployee.id)
+    } else {
+      const newEmployee: Employee = {
+        id: `E${Date.now()}`,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+        hireDate: new Date().toISOString().split("T")[0],
+        salary: Number.parseInt(formData.salary) || 0,
+        status: "Active",
+        permissions: ["view_dashboard"],
+      }
+      setEmployees([...employees, newEmployee])
+      console.log("[v0] Employee added:", newEmployee)
+    }
+    setIsModalOpen(false)
+  }
+
+  const handleOpenRolesModal = (emp: Employee) => {
+    setRoleEmployee(emp)
+    setIsRolesModalOpen(true)
+  }
+
+  const handleTogglePermission = (permissionId: string) => {
+    if (!roleEmployee) return
+
+    const hasPermission = roleEmployee.permissions.includes(permissionId)
+    const newPermissions = hasPermission
+      ? roleEmployee.permissions.filter((p: string) => p !== permissionId)
+      : [...roleEmployee.permissions, permissionId]
+
+    const updatedEmployee = { ...roleEmployee, permissions: newPermissions }
+    setRoleEmployee(updatedEmployee)
+
+    setEmployees(employees.map(e => e.id === roleEmployee.id ? updatedEmployee : e))
+  }
+
+  const handleConfirmDelete = (id: string) => {
+    setDeleteEmployeeId(id)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteEmployee = () => {
+    if (deleteEmployeeId) {
+      setEmployees(employees.filter((e) => e.id !== deleteEmployeeId))
+      setIsDeleteModalOpen(false)
+      setDeleteEmployeeId(null)
+      console.log("[v0] Employee removed:", deleteEmployeeId)
+    }
   }
 
   return (
@@ -109,7 +201,7 @@ export default function EmployeesPage() {
           <h1 className="text-3xl font-bold text-foreground">Employees</h1>
           <p className="text-muted-foreground">Manage gym staff and assign roles</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-2" onClick={() => setIsModalOpen(true)}>
+        <Button className="bg-primary hover:bg-primary/90 gap-2" onClick={handleOpenAddModal}>
           <Plus className="w-4 h-4" />
           Add Employee
         </Button>
@@ -207,9 +299,9 @@ export default function EmployeesPage() {
                       <DropdownMenuItem asChild>
                         <Link href={`/gym-owner/employees/${emp.id}`}>View Details</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>Edit Details</DropdownMenuItem>
-                      <DropdownMenuItem>Manage Roles</DropdownMenuItem>
-                      <DropdownMenuItem variant="destructive" onClick={() => handleDeleteEmployee(emp.id)}>
+                      <DropdownMenuItem onClick={() => handleOpenEditModal(emp)}>Edit Details</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleOpenRolesModal(emp)}>Manage Roles</DropdownMenuItem>
+                      <DropdownMenuItem variant="destructive" onClick={() => handleConfirmDelete(emp.id)}>
                         Remove
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -221,11 +313,11 @@ export default function EmployeesPage() {
         </table>
       </Card>
 
-      {/* Add Employee Modal */}
+      {/* Add/Edit Employee Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Employee</DialogTitle>
+            <DialogTitle>{editingEmployee ? "Edit Employee" : "Add New Employee"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -253,18 +345,34 @@ export default function EmployeesPage() {
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               />
             </div>
-            <div>
-              <label className="text-sm font-medium">Role</label>
-              <select
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
-              >
-                <option>Manager</option>
-                <option>Personal Trainer</option>
-                <option>Group Fitness Instructor</option>
-                <option>Receptionist</option>
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Role</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                >
+                  <option>Manager</option>
+                  <option>Personal Trainer</option>
+                  <option>Group Fitness Instructor</option>
+                  <option>Receptionist</option>
+                </select>
+              </div>
+              {editingEmployee && (
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="On Leave">On Leave</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+              )}
             </div>
             <div>
               <label className="text-sm font-medium">Annual Salary</label>
@@ -279,10 +387,84 @@ export default function EmployeesPage() {
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleAddEmployee} className="bg-primary hover:bg-primary/90">
-                Add Employee
+              <Button onClick={handleSubmitEmployee} className="bg-primary hover:bg-primary/90">
+                {editingEmployee ? "Update Employee" : "Add Employee"}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Roles Modal */}
+      <Dialog open={isRolesModalOpen} onOpenChange={setIsRolesModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Manage Roles & Permissions</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-4 mb-6 p-4 bg-secondary/30 rounded-lg">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">
+                {roleEmployee?.name.charAt(0)}
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">{roleEmployee?.name}</h3>
+                <p className="text-sm text-muted-foreground">{roleEmployee?.role} • {roleEmployee?.status}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-base font-semibold">Permissions</Label>
+              <div className="grid gap-3">
+                {AVAILABLE_PERMISSIONS.map((permission) => (
+                  <div
+                    key={permission.id}
+                    className="flex items-start gap-3 p-3 border border-border rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => handleTogglePermission(permission.id)}
+                  >
+                    <div className={`mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors ${roleEmployee?.permissions.includes(permission.id)
+                      ? "bg-primary border-primary text-white"
+                      : "border-muted-foreground/30 bg-background"
+                      }`}>
+                      {roleEmployee?.permissions.includes(permission.id) && <Plus className="w-3 h-3 rotate-45 scale-150 transition-all" style={{ transform: 'rotate(0deg)' }} />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{permission.label}</p>
+                      <p className="text-xs text-muted-foreground">{permission.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsRolesModalOpen(false)}>
+              Close
+            </Button>
+            <Button className="bg-primary hover:bg-primary/90" onClick={() => setIsRolesModalOpen(false)}>
+              Save Permissions
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to remove <span className="font-bold text-foreground">{employees.find(e => e.id === deleteEmployeeId)?.name}</span>? This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteEmployee}>
+              Delete Employee
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

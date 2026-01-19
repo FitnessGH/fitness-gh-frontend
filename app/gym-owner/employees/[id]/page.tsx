@@ -1,5 +1,7 @@
 "use client"
 
+import React, { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -12,7 +14,9 @@ import {
     MoreVertical,
     ChevronLeft,
     ChevronRight,
-    Users
+    Users,
+    ArrowLeft,
+    Pencil
 } from "lucide-react"
 import {
     AreaChart,
@@ -23,6 +27,16 @@ import {
     Tooltip,
     ResponsiveContainer
 } from "recharts"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 const ACTIVITY_DATA = [
     { time: "1 Hour", value: 30 },
@@ -53,15 +67,114 @@ const SCHEDULE_DATA = [
 ]
 
 export default function TrainerDetailsPage() {
+    const router = useRouter()
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [trainer, setTrainer] = useState({
+        name: "Brooklyn Simmons",
+        role: "Strength Coach",
+        email: "brooklyn.s@fitclub.com",
+        phone: "+1 (555) 123-4567",
+        address: "4517 Washington Ave. Manchester, Kentucky 39495",
+        experience: "5 yrs",
+        members: "150+",
+        rating: "4.9/5"
+    })
+
+    const [editData, setEditData] = useState({ ...trainer })
+
+    const handleSave = () => {
+        setTrainer(editData)
+        setIsEditOpen(false)
+    }
+
     return (
         <div className="p-6 space-y-6 h-full overflow-y-auto">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-foreground">Trainer Details</h1>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                    <span>Trainer List</span>
-                    <span>{">"}</span>
-                    <span className="text-foreground">Trainer Details</span>
+            <div className="flex flex-col gap-4">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.back()}
+                    className="w-fit h-8 px-2 -ml-2 text-muted-foreground hover:text-foreground"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back
+                </Button>
+                <div className="flex justify-between items-end">
+                    <div>
+                        <h1 className="text-2xl font-bold text-foreground">Trainer Details</h1>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <span>Trainer List</span>
+                            <span>{">"}</span>
+                            <span className="text-foreground">Trainer Details</span>
+                        </div>
+                    </div>
+
+                    <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white">
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Edit Record
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] bg-card border-border">
+                            <DialogHeader>
+                                <DialogTitle>Edit Employee Record</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="name" className="text-right">Name</Label>
+                                    <Input
+                                        id="name"
+                                        value={editData.name}
+                                        onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                        className="col-span-3 bg-secondary/50"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="role" className="text-right">Role</Label>
+                                    <Input
+                                        id="role"
+                                        value={editData.role}
+                                        onChange={(e) => setEditData({ ...editData, role: e.target.value })}
+                                        className="col-span-3 bg-secondary/50"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="email" className="text-right">Email</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        value={editData.email}
+                                        onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                                        className="col-span-3 bg-secondary/50"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="phone" className="text-right">Phone</Label>
+                                    <Input
+                                        id="phone"
+                                        value={editData.phone}
+                                        onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                        className="col-span-3 bg-secondary/50"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="address" className="text-right">Address</Label>
+                                    <Input
+                                        id="address"
+                                        value={editData.address}
+                                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                                        className="col-span-3 bg-secondary/50"
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                                <Button onClick={handleSave} className="bg-[#2c9d9d] hover:bg-[#32b0b0]">Save Changes</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
 
@@ -78,25 +191,25 @@ export default function TrainerDetailsPage() {
                                 <div className="w-24 h-24 rounded-full border-2 border-primary p-1">
                                     <Avatar className="w-full h-full">
                                         <AvatarImage src="https://i.pravatar.cc/300?u=brooklyn" />
-                                        <AvatarFallback>BS</AvatarFallback>
+                                        <AvatarFallback>{trainer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                     </Avatar>
                                 </div>
                             </div>
-                            <h2 className="text-xl font-bold text-foreground">Brooklyn Simmons</h2>
-                            <p className="text-muted-foreground text-sm mb-6">Strength Coach</p>
+                            <h2 className="text-xl font-bold text-foreground">{trainer.name}</h2>
+                            <p className="text-muted-foreground text-sm mb-6">{trainer.role}</p>
 
                             <div className="grid grid-cols-3 gap-4 w-full border-t border-border pt-6">
                                 <div>
-                                    <p className="text-lg font-bold text-foreground">5 yrs</p>
+                                    <p className="text-lg font-bold text-foreground">{trainer.experience}</p>
                                     <p className="text-xs text-muted-foreground">Experience</p>
                                 </div>
                                 <div className="border-l border-r border-border px-2">
-                                    <p className="text-lg font-bold text-foreground">150+</p>
+                                    <p className="text-lg font-bold text-foreground">{trainer.members}</p>
                                     <p className="text-xs text-muted-foreground">Member</p>
                                 </div>
                                 <div>
                                     <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                                        4.9/5 <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                        {trainer.rating} <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                                     </p>
                                     <p className="text-xs text-muted-foreground">Rating</p>
                                 </div>
@@ -117,9 +230,9 @@ export default function TrainerDetailsPage() {
                                 <div className="bg-secondary/50 p-2.5 rounded-lg text-muted-foreground">
                                     <Mail className="w-5 h-5" />
                                 </div>
-                                <div>
+                                <div className="min-w-0 flex-1">
                                     <p className="text-xs text-muted-foreground">Email</p>
-                                    <p className="text-sm font-medium text-foreground">www.yourmail.com</p>
+                                    <p className="text-sm font-medium text-foreground truncate">{trainer.email}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -128,7 +241,7 @@ export default function TrainerDetailsPage() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground">Phone</p>
-                                    <p className="text-sm font-medium text-foreground">+01234567890</p>
+                                    <p className="text-sm font-medium text-foreground">{trainer.phone}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -137,8 +250,7 @@ export default function TrainerDetailsPage() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground">Address</p>
-                                    <p className="text-sm font-medium text-foreground">4517 Washington Ave.</p>
-                                    <p className="text-sm font-medium text-foreground">Manchester, Kentucky 39495</p>
+                                    <p className="text-sm font-medium text-foreground max-w-[200px]">{trainer.address}</p>
                                 </div>
                             </div>
                         </div>
@@ -237,28 +349,44 @@ export default function TrainerDetailsPage() {
                         </Card>
 
                         {/* Schedule List */}
-                        <Card className="md:col-span-3 p-6 bg-card border-border">
-                            <div className="mb-6">
-                                <h3 className="font-semibold text-foreground">Brooklyn's Schedule</h3>
+                        <Card className="md:col-span-3 p-6 bg-card border-border flex flex-col">
+                            <div className="mb-6 flex justify-between items-center">
+                                <h3 className="font-semibold text-foreground text-lg">Brooklyn's Schedule</h3>
+                                <div className="text-xs text-muted-foreground bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">
+                                    {SCHEDULE_DATA.length} Sessions Today
+                                </div>
                             </div>
-                            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                            <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                                 {SCHEDULE_DATA.map((item, i) => (
-                                    <div key={i} className="flex items-center justify-between group">
-                                        <div>
-                                            <p className="text-xs text-muted-foreground">{item.day}</p>
-                                            <p className="text-xs text-muted-foreground">{item.time}</p>
+                                    <div
+                                        key={i}
+                                        className="flex items-center gap-4 p-4 rounded-xl bg-[#0a2a2b]/40 border border-border/30 group hover:border-primary/30 hover:bg-[#0a2a2b]/60 transition-all duration-300"
+                                    >
+                                        <div className="flex flex-col items-center justify-center min-w-[80px] py-1 border-r border-border/30">
+                                            <p className="text-xs font-bold text-primary uppercase tracking-wider">{item.day.split(',')[0]}</p>
+                                            <p className="text-sm font-semibold text-foreground">{item.time}</p>
                                         </div>
-                                        <div className="flex-1 px-6">
-                                            <p className="text-sm font-medium text-foreground">{item.title}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
-                                                <span className="w-3 h-3"><Users className="w-full h-full" /></span> {item.participants} Participants
+
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-base font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                                                {item.title}
                                             </p>
-                                            <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
-                                                <span className="w-3 h-3">⏱</span> {item.duration}
-                                            </p>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                    <Users className="w-3.5 h-3.5 text-primary/70" />
+                                                    <span>{item.participants} Participants</span>
+                                                </div>
+                                                <div className="w-1 h-1 rounded-full bg-border" />
+                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                    <span className="text-primary/70">⏱</span>
+                                                    <span>{item.duration}</span>
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            Details
+                                        </Button>
                                     </div>
                                 ))}
                             </div>

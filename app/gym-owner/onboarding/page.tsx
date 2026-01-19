@@ -139,10 +139,10 @@ export default function GymOwnerOnboarding() {
               >
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center ${currentStep === step.id
-                      ? "bg-primary text-primary-foreground"
-                      : index < steps.findIndex((s) => s.id === currentStep)
-                        ? "bg-green-500 text-white"
-                        : "bg-muted text-muted-foreground"
+                    ? "bg-primary text-primary-foreground"
+                    : index < steps.findIndex((s) => s.id === currentStep)
+                      ? "bg-green-500 text-white"
+                      : "bg-muted text-muted-foreground"
                     }`}
                 >
                   {step.icon}
@@ -232,8 +232,8 @@ export default function GymOwnerOnboarding() {
                       key={amenity}
                       onClick={() => handleAmenityToggle(amenity)}
                       className={`p-3 rounded-lg border-2 font-medium transition-colors ${gymData.amenities.includes(amenity)
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-background text-foreground hover:border-primary/50"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-background text-foreground hover:border-primary/50"
                         }`}
                     >
                       {amenity}
