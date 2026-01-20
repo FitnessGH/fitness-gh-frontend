@@ -4,7 +4,8 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreVertical, DollarSign } from "lucide-react"
+import { MoreVertical, DollarSign, Search, ChevronLeft, ChevronRight, Download, Plus } from "lucide-react"
+import { Input } from "@/components/ui/input"
 
 interface PayrollEntry {
   id: string
@@ -81,101 +82,150 @@ export default function PayrollPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Payroll Management</h1>
-          <p className="text-muted-foreground">Manage employee salaries, bonuses, and deductions</p>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Payroll Management</h1>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+          <span>Payroll</span>
+          <span>{">"}</span>
+          <span className="text-foreground">Management</span>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">Process Payroll</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 border-border/50">
+        <Card className="p-4 bg-card border-none">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Payroll</p>
               <p className="text-2xl font-bold text-foreground mt-2">${totalPayroll.toFixed(2)}</p>
             </div>
-            <DollarSign className="w-8 h-8 text-primary opacity-20" />
+            <div className="w-12 h-12 rounded-full bg-[#2c9d9d]/10 flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-[#2c9d9d]" />
+            </div>
           </div>
         </Card>
-        <Card className="p-4 border-border/50">
-          <div>
-            <p className="text-sm text-muted-foreground">Already Paid</p>
-            <p className="text-2xl font-bold text-green-600 mt-2">${paidAmount.toFixed(2)}</p>
+        <Card className="p-4 bg-card border-none">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Already Paid</p>
+              <p className="text-2xl font-bold text-green-500 mt-2">${paidAmount.toFixed(2)}</p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+              <div className="w-6 h-6 text-green-500 flex items-center justify-center font-bold">✓</div>
+            </div>
           </div>
         </Card>
-        <Card className="p-4 border-border/50">
-          <div>
-            <p className="text-sm text-muted-foreground">Pending</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-2">${pendingAmount.toFixed(2)}</p>
+        <Card className="p-4 bg-card border-none">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Pending</p>
+              <p className="text-2xl font-bold text-yellow-500 mt-2">${pendingAmount.toFixed(2)}</p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center">
+              <div className="w-6 h-6 text-yellow-500 flex items-center justify-center font-bold">!</div>
+            </div>
           </div>
         </Card>
       </div>
 
-      <Card className="p-6 border-border/50 overflow-x-auto">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Payroll Summary</h2>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Employee</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Role</th>
-              <th className="text-right py-3 px-4 font-semibold text-foreground">Base Salary</th>
-              <th className="text-right py-3 px-4 font-semibold text-foreground">Bonus</th>
-              <th className="text-right py-3 px-4 font-semibold text-foreground">Deductions</th>
-              <th className="text-right py-3 px-4 font-semibold text-foreground">Net Pay</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
-              <th className="text-center py-3 px-4 font-semibold text-foreground">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payroll.map((entry) => (
-              <tr key={entry.id} className="border-b border-border/50 hover:bg-muted/30">
-                <td className="py-3 px-4">
-                  <p className="font-medium text-foreground">{entry.employeeName}</p>
-                </td>
-                <td className="py-3 px-4 text-muted-foreground">{entry.role}</td>
-                <td className="py-3 px-4 text-right">${entry.baseSalary.toFixed(2)}</td>
-                <td className="py-3 px-4 text-right text-green-600 font-semibold">+${entry.bonus.toFixed(2)}</td>
-                <td className="py-3 px-4 text-right text-red-600 font-semibold">-${entry.deductions.toFixed(2)}</td>
-                <td className="py-3 px-4 text-right font-bold text-foreground">${entry.netPay.toFixed(2)}</td>
-                <td className="py-3 px-4">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      entry.status === "Paid"
-                        ? "bg-green-100 text-green-700"
-                        : entry.status === "Processing"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {entry.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="p-1 hover:bg-muted rounded">
-                        <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleProcessPayment(entry.id)}
-                        disabled={entry.status === "Paid"}
-                      >
-                        Process Payment
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>Download Slip</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-card p-4 rounded-lg">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-0 w-full md:w-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search here...."
+                className="pl-10 bg-secondary/50 border-none w-full md:w-[300px] rounded-r-none focus-visible:ring-0"
+              />
+            </div>
+            <Button className="rounded-l-none bg-secondary hover:bg-secondary/80 text-foreground border-l border-white/10">Search</Button>
+          </div>
+        </div>
+        <Button className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white w-full md:w-auto">
+          <Plus className="w-4 h-4 mr-2" />
+          Process Payroll
+        </Button>
+      </div>
+
+      {/* Payroll Table */}
+      <div className="bg-card rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-[#1f2937] text-gray-400">
+              <tr>
+                <th className="py-4 px-6 font-medium">Employee</th>
+                <th className="py-4 px-6 font-medium">Role</th>
+                <th className="py-4 px-6 font-medium text-right">Base Salary</th>
+                <th className="py-4 px-6 font-medium text-right">Bonus</th>
+                <th className="py-4 px-6 font-medium text-right">Deductions</th>
+                <th className="py-4 px-6 font-medium text-right">Net Pay</th>
+                <th className="py-4 px-6 font-medium text-center">Status</th>
+                <th className="py-4 px-6 font-medium text-center">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody className="divide-y divide-border/20">
+              {payroll.map((entry) => (
+                <tr key={entry.id} className="hover:bg-muted/10 transition-colors">
+                  <td className="py-4 px-6 font-medium text-foreground">{entry.employeeName}</td>
+                  <td className="py-4 px-6 text-muted-foreground">{entry.role}</td>
+                  <td className="py-4 px-6 text-right text-muted-foreground">${entry.baseSalary.toFixed(2)}</td>
+                  <td className="py-4 px-6 text-right text-green-500 font-medium">+${entry.bonus.toFixed(2)}</td>
+                  <td className="py-4 px-6 text-right text-red-500 font-medium">-${entry.deductions.toFixed(2)}</td>
+                  <td className="py-4 px-6 text-right font-bold text-foreground">${entry.netPay.toFixed(2)}</td>
+                  <td className="py-4 px-6 text-center">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${entry.status === "Paid"
+                        ? "bg-green-100/10 text-green-500"
+                        : entry.status === "Processing"
+                          ? "bg-blue-100/10 text-blue-500"
+                          : "bg-yellow-100/10 text-yellow-500"
+                        }`}
+                    >
+                      {entry.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-1.5 hover:bg-muted/10 rounded transition-colors">
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleProcessPayment(entry.id)}
+                            disabled={entry.status === "Paid"}
+                          >
+                            Process Payment
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>Download Slip</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between p-4 border-t border-border/20">
+          <p className="text-sm text-muted-foreground">Showing 1-{payroll.length} from {payroll.length}</p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8 disabled:opacity-50 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button size="icon" className="h-8 w-8 bg-[#2c9d9d] hover:bg-[#32b0b0] text-white border-0">1</Button>
+            <Button variant="outline" size="icon" className="h-8 w-8 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

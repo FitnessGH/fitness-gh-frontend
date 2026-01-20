@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CalendarIcon, MapPin, Users, Plus, Edit2, Trash2, Clock } from "lucide-react"
+import { CalendarIcon, MapPin, Users, Plus, Pencil, Trash, Clock, Search, ChevronLeft, ChevronRight, Eye } from "lucide-react"
 
 interface GymEvent {
   id: string
@@ -136,94 +136,136 @@ export default function EventsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Pump Sessions</h1>
-          <p className="text-muted-foreground">Create and manage gym events and classes</p>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Pump Sessions</h1>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+          <span>Events</span>
+          <span>{">"}</span>
+          <span className="text-foreground">Pump Sessions</span>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-2" onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+      </div>
+
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-card p-4 rounded-lg">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-0 w-full md:w-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search here...."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-secondary/50 border-none w-full md:w-[300px] rounded-r-none focus-visible:ring-0"
+              />
+            </div>
+            <Button className="rounded-l-none bg-secondary hover:bg-secondary/80 text-foreground border-l border-white/10">Search</Button>
+          </div>
+        </div>
+        <Button className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white w-full md:w-auto" onClick={() => setIsModalOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
           Create Session
         </Button>
       </div>
 
-      <Card className="p-4 border-border/50">
-        <Label className="text-xs text-muted-foreground mb-2 block">Search Events</Label>
-        <Input
-          placeholder="Search by event name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </Card>
+      {/* Events Table */}
+      <div className="bg-card rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-[#1f2937] text-gray-400">
+              <tr>
+                <th className="py-4 px-6 font-medium">Session Title</th>
+                <th className="py-4 px-6 font-medium">Schedule</th>
+                <th className="py-4 px-6 font-medium">Location</th>
+                <th className="py-4 px-6 font-medium text-center">Attendees</th>
+                <th className="py-4 px-6 font-medium">Instructor</th>
+                <th className="py-4 px-6 font-medium text-center">Status</th>
+                <th className="py-4 px-6 font-medium text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/20">
+              {filteredEvents.map((event) => (
+                <tr key={event.id} className="hover:bg-muted/10 transition-colors">
+                  <td className="py-4 px-6">
+                    <div className="space-y-1">
+                      <p className="font-medium text-foreground">{event.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{event.description}</p>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="w-3 h-3 text-[#2c9d9d]" />
+                        {event.date}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3 h-3 text-[#2c9d9d]" />
+                        {event.time}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      {event.location}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-foreground font-medium">{event.attendees}/{event.capacity}</span>
+                      <div className="w-16 bg-secondary/50 rounded-full h-1">
+                        <div
+                          className="bg-[#2c9d9d] h-1 rounded-full"
+                          style={{ width: `${(event.attendees / event.capacity) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-muted-foreground">{event.instructor}</td>
+                  <td className="py-4 px-6 text-center">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(event.status).replace("bg-", "bg-opacity-10 bg-").replace("text-", "text-")}`}
+                      style={{ backgroundColor: 'rgba(0,0,0,0.1)', color: getStatusColor(event.status).split(' ')[1].replace('text-', '') }}
+                    >
+                      {/* Note: In a real app I'd refine the color logic, but for now matching the text color */}
+                      {event.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-center gap-2">
+                      <button className="p-1.5 text-green-500 border border-green-500/20 rounded hover:bg-green-500/10 transition-colors">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button className="p-1.5 text-yellow-500 border border-yellow-500/20 rounded hover:bg-yellow-500/10 transition-colors">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1.5 text-red-500 border border-red-500/20 rounded hover:bg-red-500/10 transition-colors"
+                        onClick={() => handleDeleteEvent(event.id)}
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      <div className="space-y-4">
-        {filteredEvents.map((event) => (
-          <Card key={event.id} className="p-6 border-border/50 hover:border-primary/50 transition-colors">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-lg font-semibold text-foreground">{event.title}</h3>
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(event.status)}`}>
-                    {event.status}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">{event.description}</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="bg-transparent">
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-transparent text-destructive"
-                  onClick={() => handleDeleteEvent(event.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div className="flex items-center gap-2 text-sm">
-                <CalendarIcon className="w-4 h-4 text-primary" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Date</p>
-                  <p className="font-medium text-foreground">{event.date}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="w-4 h-4 text-primary" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Time</p>
-                  <p className="font-medium text-foreground">{event.time}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="w-4 h-4 text-primary" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="font-medium text-foreground">{event.location}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Users className="w-4 h-4 text-primary" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Attendees</p>
-                  <p className="font-medium text-foreground">
-                    {event.attendees}/{event.capacity}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">
-                Instructor: <span className="font-medium text-foreground">{event.instructor}</span>
-              </p>
-            </div>
-          </Card>
-        ))}
+        {/* Pagination */}
+        <div className="flex items-center justify-between p-4 border-t border-border/20">
+          <p className="text-sm text-muted-foreground">Showing 1-{filteredEvents.length} from {filteredEvents.length}</p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8 disabled:opacity-50 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button size="icon" className="h-8 w-8 bg-[#2c9d9d] hover:bg-[#32b0b0] text-white border-0">1</Button>
+            <Button variant="outline" size="icon" className="h-8 w-8 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Create Event Modal */}

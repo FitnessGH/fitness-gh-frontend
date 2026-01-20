@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Search, Plus, MoreVertical, Mail, Phone, Briefcase } from "lucide-react"
+import { Search, Plus, Eye, Pencil, Trash, ChevronLeft, ChevronRight, Mail, Phone, Briefcase } from "lucide-react"
 import Link from "next/link"
 
 interface Employee {
@@ -196,37 +196,36 @@ export default function EmployeesPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Employees</h1>
-          <p className="text-muted-foreground">Manage gym staff and assign roles</p>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Employees</h1>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+          <span>Employee</span>
+          <span>{">"}</span>
+          <span className="text-foreground">Employee List</span>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-2" onClick={handleOpenAddModal}>
-          <Plus className="w-4 h-4" />
-          Add Employee
-        </Button>
       </div>
 
-      <Card className="p-4 border-border/50">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <Label className="text-xs text-muted-foreground mb-2 block">Search</Label>
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-card p-4 rounded-lg">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-0 w-full md:w-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name or email..."
+                placeholder="Search here...."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-secondary/50 border-none w-full md:w-[300px] rounded-r-none focus-visible:ring-0"
               />
             </div>
+            <Button className="rounded-l-none bg-secondary hover:bg-secondary/80 text-foreground border-l border-white/10">Search</Button>
           </div>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-2 block">Role</Label>
+          <div className="w-full md:w-auto">
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              className="w-full h-10 px-3 py-2 bg-secondary/50 border-none rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#2c9d9d]"
             >
               <option>All</option>
               {uniqueRoles.map((role) => (
@@ -235,83 +234,118 @@ export default function EmployeesPage() {
             </select>
           </div>
         </div>
-      </Card>
+        <Button className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white w-full md:w-auto" onClick={handleOpenAddModal}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Employee
+        </Button>
+      </div>
 
-      <Card className="p-6 border-border/50 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Name</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Contact</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Role</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Hire Date</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Salary</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
-              <th className="text-center py-3 px-4 font-semibold text-foreground">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredEmployees.map((emp) => (
-              <tr key={emp.id} className="border-b border-border/50 hover:bg-muted/30">
-                <td className="py-3 px-4">
-                  <p className="font-medium text-foreground">{emp.name}</p>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-3 h-3" />
-                      {emp.email}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-3 h-3" />
-                      {emp.phone}
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-3 h-3 text-primary" />
-                    <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium">{emp.role}</span>
-                  </div>
-                </td>
-                <td className="py-3 px-4 text-muted-foreground">{emp.hireDate}</td>
-                <td className="py-3 px-4 font-semibold text-foreground">${emp.salary.toLocaleString()}</td>
-                <td className="py-3 px-4">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${emp.status === "Active"
-                      ? "bg-green-100 text-green-700"
-                      : emp.status === "On Leave"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-gray-100 text-gray-700"
-                      }`}
-                  >
-                    {emp.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="p-1 hover:bg-muted rounded">
-                        <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/gym-owner/employees/${emp.id}`}>View Details</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleOpenEditModal(emp)}>Edit Details</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleOpenRolesModal(emp)}>Manage Roles</DropdownMenuItem>
-                      <DropdownMenuItem variant="destructive" onClick={() => handleConfirmDelete(emp.id)}>
-                        Remove
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
+      {/* Employees Table */}
+      <div className="bg-card rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-[#1f2937] text-gray-400">
+              <tr>
+                <th className="py-4 px-6 font-medium">Name</th>
+                <th className="py-4 px-6 font-medium">Contact</th>
+                <th className="py-4 px-6 font-medium">Role</th>
+                <th className="py-4 px-6 font-medium">Hire Date</th>
+                <th className="py-4 px-6 font-medium text-right">Salary</th>
+                <th className="py-4 px-6 font-medium text-center">Status</th>
+                <th className="py-4 px-6 font-medium text-center">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody className="divide-y divide-border/20">
+              {filteredEmployees.map((emp) => (
+                <tr key={emp.id} className="hover:bg-muted/10 transition-colors">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center text-secondary-foreground font-bold">
+                        {emp.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <p className="font-medium text-foreground">{emp.name}</p>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-3 h-3" />
+                        {emp.email}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-3 h-3" />
+                        {emp.phone}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-3 h-3 text-[#2c9d9d]" />
+                      <span className="text-muted-foreground">{emp.role}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-muted-foreground">{emp.hireDate}</td>
+                  <td className="py-4 px-6 text-right font-semibold text-foreground">${emp.salary.toLocaleString()}</td>
+                  <td className="py-4 px-6 text-center">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${emp.status === "Active"
+                        ? "bg-green-100/10 text-green-500"
+                        : emp.status === "On Leave"
+                          ? "bg-yellow-100/10 text-yellow-500"
+                          : "bg-gray-100/10 text-gray-500"
+                        }`}
+                    >
+                      {emp.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-center gap-2">
+                      <Link
+                        href={`/gym-owner/employees/${emp.id}`}
+                        className="p-1.5 text-green-500 border border-green-500/20 rounded hover:bg-green-500/10 transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      <button
+                        className="p-1.5 text-yellow-500 border border-yellow-500/20 rounded hover:bg-yellow-500/10 transition-colors"
+                        onClick={() => handleOpenEditModal(emp)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1.5 text-purple-500 border border-purple-500/20 rounded hover:bg-purple-500/10 transition-colors"
+                        onClick={() => handleOpenRolesModal(emp)}
+                      >
+                        <Briefcase className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1.5 text-red-500 border border-red-500/20 rounded hover:bg-red-500/10 transition-colors"
+                        onClick={() => handleConfirmDelete(emp.id)}
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between p-4 border-t border-border/20">
+          <p className="text-sm text-muted-foreground">Showing 1-{filteredEmployees.length} from {filteredEmployees.length}</p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8 disabled:opacity-50 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button size="icon" className="h-8 w-8 bg-[#2c9d9d] hover:bg-[#32b0b0] text-white border-0">1</Button>
+            <Button variant="outline" size="icon" className="h-8 w-8 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Add/Edit Employee Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

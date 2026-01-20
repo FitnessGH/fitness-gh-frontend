@@ -4,7 +4,8 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, Download, Eye, DollarSign } from "lucide-react"
+import { Search, Download, Eye, DollarSign, ChevronLeft, ChevronRight, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface Payment {
   id: string
@@ -72,55 +73,72 @@ export default function PaymentsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Payments & Invoices</h1>
-        <p className="text-muted-foreground">Track membership payments and generate receipts</p>
+        <h1 className="text-2xl font-bold text-foreground">Payments & Invoices</h1>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+          <span>Payments</span>
+          <span>{">"}</span>
+          <span className="text-foreground">History</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 border-border/50">
+        <Card className="p-4 bg-card border-none">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Revenue</p>
               <p className="text-2xl font-bold text-foreground mt-2">${totalRevenue.toFixed(2)}</p>
             </div>
-            <DollarSign className="w-8 h-8 text-green-600 opacity-20" />
+            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-green-500" />
+            </div>
           </div>
         </Card>
-        <Card className="p-4 border-border/50">
-          <div>
-            <p className="text-sm text-muted-foreground">Pending Payments</p>
-            <p className="text-2xl font-bold text-foreground mt-2">${pendingAmount.toFixed(2)}</p>
+        <Card className="p-4 bg-card border-none">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Pending Payments</p>
+              <p className="text-2xl font-bold text-foreground mt-2">${pendingAmount.toFixed(2)}</p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center">
+              <div className="w-6 h-6 text-yellow-500 flex items-center justify-center font-bold font-serif">$</div>
+            </div>
           </div>
         </Card>
-        <Card className="p-4 border-border/50">
-          <div>
-            <p className="text-sm text-muted-foreground">Total Payments</p>
-            <p className="text-2xl font-bold text-foreground mt-2">{payments.length}</p>
+        <Card className="p-4 bg-card border-none">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Payments</p>
+              <p className="text-2xl font-bold text-foreground mt-2">{payments.length}</p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-[#2c9d9d]/10 flex items-center justify-center">
+              <Download className="w-6 h-6 text-[#2c9d9d]" />
+            </div>
           </div>
         </Card>
       </div>
 
-      <Card className="p-4 border-border/50">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <Label className="text-xs text-muted-foreground mb-2 block">Search</Label>
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-card p-4 rounded-lg">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-0 w-full md:w-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search by member name..."
+                placeholder="Search here...."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-secondary/50 border-none w-full md:w-[300px] rounded-r-none focus-visible:ring-0"
               />
             </div>
+            <Button className="rounded-l-none bg-secondary hover:bg-secondary/80 text-foreground border-l border-white/10">Search</Button>
           </div>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-2 block">Status</Label>
+          <div className="w-full md:w-auto">
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              className="w-full h-10 px-3 py-2 bg-secondary/50 border-none rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#2c9d9d]"
             >
               <option>All</option>
               <option>Completed</option>
@@ -129,65 +147,79 @@ export default function PaymentsPage() {
             </select>
           </div>
         </div>
-      </Card>
+        <Button className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white w-full md:w-auto">
+          <Download className="w-4 h-4 mr-2" />
+          Export Report
+        </Button>
+      </div>
 
-      <Card className="p-6 border-border/50 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Member</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Plan</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Amount</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Date</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Receipt ID</th>
-              <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
-              <th className="text-center py-3 px-4 font-semibold text-foreground">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPayments.map((payment) => (
-              <tr key={payment.id} className="border-b border-border/50 hover:bg-muted/30">
-                <td className="py-3 px-4">
-                  <p className="font-medium text-foreground">{payment.memberName}</p>
-                </td>
-                <td className="py-3 px-4 text-muted-foreground">{payment.plan}</td>
-                <td className="py-3 px-4">
-                  <p className="font-semibold text-foreground">${payment.amount.toFixed(2)}</p>
-                </td>
-                <td className="py-3 px-4 text-muted-foreground">{payment.date}</td>
-                <td className="py-3 px-4">
-                  <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium">
-                    {payment.receiptId}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      payment.status === "Completed"
-                        ? "bg-green-100 text-green-700"
-                        : payment.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {payment.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-2 justify-center">
-                    <button className="p-1 hover:bg-muted rounded">
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    <button className="p-1 hover:bg-muted rounded">
-                      <Download className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </div>
-                </td>
+      {/* Payments Table */}
+      <div className="bg-card rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-[#1f2937] text-gray-400">
+              <tr>
+                <th className="py-4 px-6 font-medium">Member</th>
+                <th className="py-4 px-6 font-medium">Plan</th>
+                <th className="py-4 px-6 font-medium">Amount</th>
+                <th className="py-4 px-6 font-medium">Date</th>
+                <th className="py-4 px-6 font-medium">Receipt ID</th>
+                <th className="py-4 px-6 font-medium">Status</th>
+                <th className="py-4 px-6 font-medium text-center">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody className="divide-y divide-border/20">
+              {filteredPayments.map((payment) => (
+                <tr key={payment.id} className="hover:bg-muted/10 transition-colors">
+                  <td className="py-4 px-6 font-medium text-foreground">{payment.memberName}</td>
+                  <td className="py-4 px-6 text-muted-foreground">{payment.plan}</td>
+                  <td className="py-4 px-6 text-foreground font-semibold">${payment.amount.toFixed(2)}</td>
+                  <td className="py-4 px-6 text-muted-foreground">{payment.date}</td>
+                  <td className="py-4 px-6">
+                    <span className="text-[#2c9d9d] font-medium">{payment.receiptId}</span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${payment.status === "Completed"
+                        ? "bg-green-100/10 text-green-500"
+                        : payment.status === "Pending"
+                          ? "bg-yellow-100/10 text-yellow-500"
+                          : "bg-red-100/10 text-red-500"
+                        }`}
+                    >
+                      {payment.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-center gap-2">
+                      <button className="p-1.5 text-green-500 border border-green-500/20 rounded hover:bg-green-500/10 transition-colors">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button className="p-1.5 text-[#2c9d9d] border border-[#2c9d9d]/20 rounded hover:bg-[#2c9d9d]/10 transition-colors">
+                        <Download className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between p-4 border-t border-border/20">
+          <p className="text-sm text-muted-foreground">Showing 1-{filteredPayments.length} from {filteredPayments.length}</p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8 disabled:opacity-50 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button size="icon" className="h-8 w-8 bg-[#2c9d9d] hover:bg-[#32b0b0] text-white border-0">1</Button>
+            <Button variant="outline" size="icon" className="h-8 w-8 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10" disabled>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
