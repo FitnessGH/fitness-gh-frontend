@@ -167,7 +167,7 @@ export function SidebarNav({ role, onLogout }: SidebarNavProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <nav className="flex-1 space-y-2 p-4">
+      <nav className="flex-1 space-y-6 p-4">
         {items.map((item) => (
           <Link
             key={item.href}
@@ -176,7 +176,7 @@ export function SidebarNav({ role, onLogout }: SidebarNavProps) {
             <Button
               variant="ghost"
               className={cn(
-                'w-full justify-start gap-3 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                'w-full justify-start gap-3 h-11 px-4 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 pathname === item.href &&
                   'bg-primary text-primary-foreground hover:bg-primary',
               )}
