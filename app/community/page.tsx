@@ -3,9 +3,9 @@
 import { Suspense, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from "@/components/ui/input-group"
 import { PostCard } from "@/components/community/post-card"
-import { Plus, Search, Users, Lock } from "lucide-react"
+import { MessageSquareText, Plus, Search, Users, Lock } from "lucide-react"
 
 interface CommunityGroup {
   id: string
@@ -158,15 +158,17 @@ function CommunityContent() {
               <h2 className="text-lg font-semibold text-foreground">Groups</h2>
 
               {/* Search Groups */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
+              <InputGroup>
+                <InputGroupAddon>
+                  <Search className="size-5" />
+                </InputGroupAddon>
+                <InputGroupInput
                   placeholder="Search groups..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 text-sm"
+                  className="text-sm"
                 />
-              </div>
+              </InputGroup>
 
               {/* Groups List */}
               <div className="space-y-2">
@@ -228,13 +230,17 @@ function CommunityContent() {
             {showNewPostForm && (
               <Card className="p-4 border-border/50">
                 <div className="space-y-4">
-                  <textarea
-                    placeholder="What's on your mind?"
-                    value={newPostContent}
-                    onChange={(e) => setNewPostContent(e.target.value)}
-                    className="w-full p-3 border border-border rounded-lg bg-background text-foreground resize-none focus:outline-none focus:border-primary"
-                    rows={3}
-                  />
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <MessageSquareText className="size-5" />
+                    </InputGroupAddon>
+                    <InputGroupTextarea
+                      placeholder="What's on your mind?"
+                      value={newPostContent}
+                      onChange={(e) => setNewPostContent(e.target.value)}
+                      rows={3}
+                    />
+                  </InputGroup>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
