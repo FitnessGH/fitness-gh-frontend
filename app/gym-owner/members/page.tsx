@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Column, DataTable } from '@/components/ui/data-table';
 import {
   Dialog,
   DialogContent,
@@ -27,8 +28,6 @@ import {
   updateMember,
 } from '@/lib/members-data';
 import {
-  ChevronLeft,
-  ChevronRight,
   DollarSign,
   Eye,
   MoreHorizontal,
@@ -64,6 +63,103 @@ export default function MembersPage() {
 
   const { toast } = useToast();
   const router = useRouter();
+
+  const columns: Column<Member>[] = [
+    {
+      header: 'Photo',
+      cell: (member) => (
+        <Avatar className="w-10 h-10 rounded-md">
+          <AvatarImage src={`https://i.pravatar.cc/150?u=${member.id}`} />
+          <AvatarFallback className="rounded-md bg-secondary text-secondary-foreground">
+            {member.name.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      ),
+    },
+    {
+      header: 'Name',
+      accessorKey: 'name',
+      className: 'text-foreground font-medium',
+    },
+    {
+      header: 'Member Id',
+      accessorKey: 'memberId',
+      className: 'text-muted-foreground',
+    },
+    {
+      header: 'Package',
+      accessorKey: 'package',
+      className: 'text-muted-foreground',
+    },
+    {
+      header: 'Joining Date',
+      accessorKey: 'joinDate',
+      className: 'text-muted-foreground',
+    },
+    {
+      header: 'Expire Date',
+      accessorKey: 'expireDate',
+      className: 'text-muted-foreground',
+    },
+    {
+      header: 'Paid',
+      accessorKey: 'paid',
+      className: 'text-muted-foreground',
+    },
+    {
+      header: 'Due',
+      accessorKey: 'due',
+      className: 'text-muted-foreground',
+    },
+    {
+      header: 'Status',
+      cell: (member) => (
+        <span className="text-muted-foreground">{member.status}</span>
+      ),
+    },
+    {
+      header: 'Action',
+      headerClassName: 'text-center',
+      cell: (member) => (
+        <div className="flex items-center justify-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-8 w-8 p-0"
+              >
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleOpenPaymentModal(member)}>
+                <DollarSign className="mr-2 h-4 w-4" />
+                <span>Receive Payment</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleViewDetails(member)}>
+                <Eye className="mr-2 h-4 w-4" />
+                <span>View Details</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleOpenEditModal(member)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                <span>Edit Member</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleConfirmDelete(member.id)}
+                className="text-red-600 focus:text-red-600"
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                <span>Delete Member</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ),
+    },
+  ];
 
   const filteredMembers = members.filter(
     (member) =>
@@ -258,177 +354,12 @@ export default function MembersPage() {
         </Button>
       </div>
 
-      <div className="bg-card rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-[#1f2937] text-gray-400">
-              <tr>
-                <th className="py-4 px-6 font-medium">Photo</th>
-                <th className="py-4 px-6 font-medium">Name</th>
-                <th className="py-4 px-6 font-medium">Member Id</th>
-                <th className="py-4 px-6 font-medium">Package</th>
-                <th className="py-4 px-6 font-medium">Joining Date</th>
-                <th className="py-4 px-6 font-medium">Expire Date</th>
-                <th className="py-4 px-6 font-medium">Paid</th>
-                <th className="py-4 px-6 font-medium">Due</th>
-                <th className="py-4 px-6 font-medium">Status</th>
-                <th className="py-4 px-6 font-medium text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/20">
-              {filteredMembers.map((member) => (
-                <tr
-                  key={member.id}
-                  className="hover:bg-muted/10 transition-colors"
-                >
-                  <td className="py-4 px-6">
-                    <Avatar className="w-10 h-10 rounded-md">
-                      <AvatarImage
-                        src={`https://i.pravatar.cc/150?u=${member.id}`}
-                      />
-                      <AvatarFallback className="rounded-md bg-secondary text-secondary-foreground">
-                        {member.name.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </td>
-                  <td className="py-4 px-6 text-foreground font-medium">
-                    {member.name}
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">
-                    {member.memberId}
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">
-                    {member.package}
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">
-                    {member.joinDate}
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">
-                    {member.expireDate}
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">
-                    {member.paid}
-                  </td>
-                  <td className="py-4 px-6 text-muted-foreground">
-                    {member.due}
-                  </td>
-                  <td className="py-4 px-6">
-                    <span
-                      className={
-                        member.status === 'Paid'
-                          ? 'text-muted-foreground'
-                          : 'text-muted-foreground'
-                      }
-                    >
-                      {member.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center justify-center gap-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                          >
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => handleOpenPaymentModal(member)}
-                          >
-                            <DollarSign className="mr-2 h-4 w-4" />
-                            <span>Receive Payment</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleViewDetails(member)}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            <span>View Details</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleOpenEditModal(member)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            <span>Edit Member</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleConfirmDelete(member.id)}
-                            className="text-red-600 focus:text-red-600"
-                          >
-                            <Trash className="mr-2 h-4 w-4" />
-                            <span>Delete Member</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="flex items-center justify-between p-4 border-t border-border/20">
-          <p className="text-sm text-muted-foreground">Showing 1-10 from 100</p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 disabled:opacity-50 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10"
-              disabled
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              size="icon"
-              className="h-8 w-8 bg-[#2c9d9d] hover:bg-[#32b0b0] text-white border-0"
-            >
-              1
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 text-muted-foreground hover:bg-muted/10 hover:text-foreground"
-            >
-              2
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 text-muted-foreground hover:bg-muted/10 hover:text-foreground"
-            >
-              3
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 text-muted-foreground hover:bg-muted/10 hover:text-foreground"
-            >
-              4
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 text-muted-foreground hover:bg-muted/10 hover:text-foreground"
-            >
-              5
-            </Button>
-            <span className="text-muted-foreground">...</span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 border-border/20 bg-transparent text-muted-foreground hover:bg-muted/10"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={filteredMembers}
+        pageSize={10}
+        className="bg-card p-4 rounded-lg"
+      />
 
       <Dialog
         open={isModalOpen}

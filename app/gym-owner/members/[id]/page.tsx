@@ -2,7 +2,8 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { getMember, Member } from '@/lib/members-data';
+import { Column, DataTable } from '@/components/ui/data-table';
+import { getMember, Member, Transaction } from '@/lib/members-data';
 import { ChevronLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -12,6 +13,28 @@ export default function MemberDetailsPage() {
 
   const router = useRouter();
   const params = useParams();
+
+  const columns: Column<Transaction>[] = [
+    {
+      header: 'Date',
+      accessorKey: 'date',
+    },
+    {
+      header: 'Transaction ID',
+      accessorKey: 'id',
+      className: 'font-mono text-muted-foreground text-xs',
+    },
+    {
+      header: 'Payment Method',
+      accessorKey: 'method',
+    },
+    {
+      header: 'Amount',
+      headerClassName: 'text-right',
+      className: 'text-right font-medium text-green-500',
+      cell: (tx) => `$${tx.amount.toFixed(2)}`,
+    },
+  ];
 
   useEffect(() => {
     if (params.id) {
@@ -135,35 +158,12 @@ export default function MemberDetailsPage() {
       <div className="space-y-4">
         <h3 className="text-xl font-bold">Transaction History</h3>
         {member.transactions && member.transactions.length > 0 ? (
-          <div className="bg-card rounded-lg overflow-hidden border border-border/40 shadow-sm">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-[#1f2937] text-gray-400">
-                <tr>
-                  <th className="py-3 px-6 font-medium">Date</th>
-                  <th className="py-3 px-6 font-medium">Transaction ID</th>
-                  <th className="py-3 px-6 font-medium">Payment Method</th>
-                  <th className="py-3 px-6 font-medium text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {member.transactions.map((tx) => (
-                  <tr
-                    key={tx.id}
-                    className="hover:bg-muted/10"
-                  >
-                    <td className="py-3 px-6">{tx.date}</td>
-                    <td className="py-3 px-6 font-mono text-muted-foreground text-xs">
-                      {tx.id}
-                    </td>
-                    <td className="py-3 px-6">{tx.method}</td>
-                    <td className="py-3 px-6 text-right font-medium text-green-500">
-                      ${tx.amount.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={columns}
+            data={member.transactions}
+            className="border border-border/40 shadow-sm p-4 bg-card rounded-lg"
+            pageSize={5}
+          />
         ) : (
           <div className="p-8 text-center border-2 border-dashed border-border/40 rounded-lg text-muted-foreground">
             No transaction history available.
