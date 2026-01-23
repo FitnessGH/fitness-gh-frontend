@@ -171,6 +171,17 @@ export default function PayrollPage() {
     console.log('[v0] Payment processed for:', id);
   };
 
+  const handleProcessAll = () => {
+    setPayroll(
+      payroll.map((p) =>
+        p.status === 'Pending' || p.status === 'Processing'
+          ? { ...p, status: 'Paid' as const }
+          : p,
+      ),
+    );
+    console.log('[v0] All pending payroll processed');
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -245,7 +256,11 @@ export default function PayrollPage() {
             </Button>
           </div>
         </div>
-        <Button className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white w-full md:w-auto">
+        <Button
+          className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white w-full md:w-auto"
+          onClick={handleProcessAll}
+          disabled={!payroll.some((p) => p.status !== 'Paid')}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Process Payroll
         </Button>

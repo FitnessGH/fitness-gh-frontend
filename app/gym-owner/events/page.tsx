@@ -8,12 +8,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
   CalendarIcon,
   Clock,
   Eye,
   MapPin,
+  MoreVertical,
   Pencil,
   Plus,
   Search,
@@ -90,6 +97,10 @@ export default function EventsPage() {
   const [events, setEvents] = useState<GymEvent[]>(mockEvents);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>(
+    'create',
+  );
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -99,6 +110,37 @@ export default function EventsPage() {
     capacity: '',
     instructor: '',
   });
+
+  const handleOpenModal = (
+    mode: 'create' | 'edit' | 'view',
+    event?: GymEvent,
+  ) => {
+    setModalMode(mode);
+    if (event) {
+      setSelectedEventId(event.id);
+      setFormData({
+        title: event.title,
+        description: event.description,
+        date: event.date,
+        time: event.time,
+        location: event.location,
+        capacity: event.capacity.toString(),
+        instructor: event.instructor,
+      });
+    } else {
+      setSelectedEventId(null);
+      setFormData({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        location: '',
+        capacity: '',
+        instructor: '',
+      });
+    }
+    setIsModalOpen(true);
+  };
 
   const columns: Column<GymEvent>[] = [
     {
@@ -181,19 +223,40 @@ export default function EventsPage() {
       header: 'Action',
       headerClassName: 'text-center',
       cell: (event) => (
-        <div className="flex items-center justify-center gap-2">
-          <button className="p-1.5 text-green-500 border border-green-500/20 rounded hover:bg-green-500/10 transition-colors">
-            <Eye className="w-4 h-4" />
-          </button>
-          <button className="p-1.5 text-yellow-500 border border-yellow-500/20 rounded hover:bg-yellow-500/10 transition-colors">
-            <Pencil className="w-4 h-4" />
-          </button>
-          <button
-            className="p-1.5 text-red-500 border border-red-500/20 rounded hover:bg-red-500/10 transition-colors"
-            onClick={() => handleDeleteEvent(event.id)}
-          >
-            <Trash className="w-4 h-4" />
-          </button>
+        <div className="flex items-center justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1.5 hover:bg-muted/10 rounded transition-colors">
+                <MoreVertical className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-40"
+            >
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => handleOpenModal('view', event)}
+              >
+                <Eye className="w-4 h-4 text-green-500" />
+                <span>View Details</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => handleOpenModal('edit', event)}
+              >
+                <Pencil className="w-4 h-4 text-yellow-500" />
+                <span>Edit Session</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer text-red-500 hover:text-red-500"
+                onClick={() => handleDeleteEvent(event.id)}
+              >
+                <Trash className="w-4 h-4" />
+                <span>Delete Session</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       ),
     },
@@ -218,31 +281,45 @@ export default function EventsPage() {
     }
   };
 
-  const handleCreateEvent = () => {
-    const newEvent: GymEvent = {
-      id: `EV${Date.now()}`,
-      title: formData.title,
-      description: formData.description,
-      date: formData.date,
-      time: formData.time,
-      location: formData.location,
-      capacity: Number.parseInt(formData.capacity) || 0,
-      attendees: 0,
-      instructor: formData.instructor,
-      status: 'Upcoming',
-    };
-    setEvents([...events, newEvent]);
-    setFormData({
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      location: '',
-      capacity: '',
-      instructor: '',
-    });
+  const handleSaveEvent = () => {
+    if (modalMode === 'view') return;
+
+    if (modalMode === 'edit' && selectedEventId) {
+      setEvents(
+        events.map((e) =>
+          e.id === selectedEventId
+            ? {
+                ...e,
+                title: formData.title,
+                description: formData.description,
+                date: formData.date,
+                time: formData.time,
+                location: formData.location,
+                capacity: Number.parseInt(formData.capacity) || 0,
+                instructor: formData.instructor,
+              }
+            : e,
+        ),
+      );
+      console.log('[v0] Event updated:', selectedEventId);
+    } else {
+      const newEvent: GymEvent = {
+        id: `EV${Date.now()}`,
+        title: formData.title,
+        description: formData.description,
+        date: formData.date,
+        time: formData.time,
+        location: formData.location,
+        capacity: Number.parseInt(formData.capacity) || 0,
+        attendees: 0,
+        instructor: formData.instructor,
+        status: 'Upcoming',
+      };
+      setEvents([...events, newEvent]);
+      console.log('[v0] Event created:', newEvent);
+    }
+
     setIsModalOpen(false);
-    console.log('[v0] Event created:', newEvent);
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -279,7 +356,7 @@ export default function EventsPage() {
         </div>
         <Button
           className="bg-[#2c9d9d] hover:bg-[#32b0b0] text-white w-full md:w-auto"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => handleOpenModal('create')}
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Session
@@ -299,7 +376,13 @@ export default function EventsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Pump Session</DialogTitle>
+            <DialogTitle>
+              {modalMode === 'create'
+                ? 'Create New Pump Session'
+                : modalMode === 'edit'
+                  ? 'Edit Pump Session'
+                  : 'Session Details'}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -310,6 +393,7 @@ export default function EventsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
+                disabled={modalMode === 'view'}
               />
             </div>
             <div>
@@ -320,6 +404,7 @@ export default function EventsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
+                disabled={modalMode === 'view'}
               />
             </div>
             <div>
@@ -330,6 +415,7 @@ export default function EventsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, date: e.target.value })
                 }
+                disabled={modalMode === 'view'}
               />
             </div>
             <div>
@@ -340,6 +426,7 @@ export default function EventsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, time: e.target.value })
                 }
+                disabled={modalMode === 'view'}
               />
             </div>
             <div>
@@ -350,6 +437,7 @@ export default function EventsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, location: e.target.value })
                 }
+                disabled={modalMode === 'view'}
               />
             </div>
             <div>
@@ -361,6 +449,7 @@ export default function EventsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, capacity: e.target.value })
                 }
+                disabled={modalMode === 'view'}
               />
             </div>
             <div>
@@ -371,6 +460,7 @@ export default function EventsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, instructor: e.target.value })
                 }
+                disabled={modalMode === 'view'}
               />
             </div>
             <div className="flex gap-2 justify-end">
@@ -378,14 +468,16 @@ export default function EventsPage() {
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
               >
-                Cancel
+                {modalMode === 'view' ? 'Close' : 'Cancel'}
               </Button>
-              <Button
-                onClick={handleCreateEvent}
-                className="bg-primary hover:bg-primary/90"
-              >
-                Create Session
-              </Button>
+              {modalMode !== 'view' && (
+                <Button
+                  onClick={handleSaveEvent}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  {modalMode === 'create' ? 'Create Session' : 'Save Changes'}
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>
