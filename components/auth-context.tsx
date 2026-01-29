@@ -1,111 +1,123 @@
-"use client"
+'use client';
 
-import React, { createContext, useContext, useState, useCallback } from "react"
-import type { AuthUser, UserRole } from "@/lib/auth"
-import { validateCredentials, registerUser } from "@/lib/auth"
+import type { AuthUser, UserRole } from '@/lib/auth';
+import { registerUser, validateCredentials } from '@/lib/auth';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 
 interface AuthContextType {
-  user: AuthUser | null
-  isLoading: boolean
-  isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  switchRole: (role: UserRole) => void
-  updateUser: (updates: Partial<AuthUser>) => void
-  signup: (data: { name: string; email: string; role: UserRole }) => Promise<AuthUser>
+  user: AuthUser | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  switchRole: (role: UserRole) => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
+  signup: (data: {
+    name: string;
+    email: string;
+    role: UserRole;
+  }) => Promise<AuthUser>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null)
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const authUser = validateCredentials(email, password)
+      const authUser = validateCredentials(email, password);
       if (!authUser) {
-        throw new Error("Invalid credentials")
+        throw new Error('Invalid credentials');
       }
 
-      setUser(authUser)
-      // Store in sessionStorage for demo purposes
-      sessionStorage.setItem("user", JSON.stringify(authUser))
+      setUser(authUser);
+      sessionStorage.setItem('user', JSON.stringify(authUser));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  }, []);
 
   const logout = useCallback(() => {
-    setUser(null)
-    sessionStorage.removeItem("user")
-  }, [])
+    setUser(null);
+    sessionStorage.removeItem('user');
+  }, []);
 
   const switchRole = useCallback(
     (role: UserRole) => {
       if (user) {
-        const updatedUser = { ...user, role }
-        setUser(updatedUser)
-        sessionStorage.setItem("user", JSON.stringify(updatedUser))
+        const updatedUser = { ...user, role };
+        setUser(updatedUser);
+        sessionStorage.setItem('user', JSON.stringify(updatedUser));
       }
     },
     [user],
-  )
+  );
 
   const updateUser = useCallback(
     (updates: Partial<AuthUser>) => {
       if (user) {
-        const updatedUser = { ...user, ...updates }
-        setUser(updatedUser)
+        const updatedUser = { ...user, ...updates };
+        setUser(updatedUser);
       }
     },
     [user],
-  )
+  );
 
   const signup = useCallback(
     async (data: { name: string; email: string; role: UserRole }) => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        const newUser = await registerUser(data)
-        setUser(newUser)
-        sessionStorage.setItem("user", JSON.stringify(newUser))
-        return newUser
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const newUser = await registerUser(data);
+        setUser(newUser);
+        sessionStorage.setItem('user', JSON.stringify(newUser));
+        return newUser;
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     },
     [setUser],
-  )
+  );
 
-  // Initialize from sessionStorage on mount
   React.useEffect(() => {
-    const stored = sessionStorage.getItem("user")
+    const stored = sessionStorage.getItem('user');
     if (stored) {
       try {
-        setUser(JSON.parse(stored))
+        setUser(JSON.parse(stored));
       } catch (e) {
-        sessionStorage.removeItem("user")
+        sessionStorage.removeItem('user');
       }
     }
-    setIsLoading(false)
-  }, [])
+    setIsLoading(false);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout, switchRole, updateUser, signup }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAuthenticated: !!user,
+        login,
+        logout,
+        switchRole,
+        updateUser,
+        signup,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within AuthProvider")
+    throw new Error('useAuth must be used within AuthProvider');
   }
-  return context
+  return context;
 }

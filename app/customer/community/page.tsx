@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { MessageCircle, Users, Plus, Heart } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Heart, MessageCircle, Plus, Users } from 'lucide-react';
 
 export default function CustomerCommunityPage() {
   return (
@@ -10,7 +10,9 @@ export default function CustomerCommunityPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Community</h1>
-          <p className="text-muted-foreground">Connect with other gym members</p>
+          <p className="text-muted-foreground">
+            Connect with other gym members
+          </p>
         </div>
         <Button className="bg-primary hover:bg-primary/90 gap-2">
           <Plus className="w-4 h-4" />
@@ -18,13 +20,14 @@ export default function CustomerCommunityPage() {
         </Button>
       </div>
 
-      {/* Joined Groups */}
       <Card className="p-6 border-border/50">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Your Groups</h2>
+        <h2 className="text-lg font-semibold mb-4 text-foreground">
+          Your Groups
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { name: "General Discussion", members: 234 },
-            { name: "Workout Tips", members: 189 },
+            { name: 'General Discussion', members: 234 },
+            { name: 'Workout Tips', members: 189 },
           ].map((group, i) => (
             <div
               key={i}
@@ -45,34 +48,38 @@ export default function CustomerCommunityPage() {
         </div>
       </Card>
 
-      {/* Feed */}
       <Card className="p-6 border-border/50">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Recent Posts</h2>
+        <h2 className="text-lg font-semibold mb-4 text-foreground">
+          Recent Posts
+        </h2>
         <div className="space-y-4">
           {[
             {
-              author: "Sarah M.",
-              group: "Workout Tips",
-              content: "Just completed my first 5K run! Feeling amazing 💪",
+              author: 'Sarah M.',
+              group: 'Workout Tips',
+              content: 'Just completed my first 5K run! Feeling amazing 💪',
               likes: 24,
               replies: 5,
             },
             {
-              author: "Mike K.",
-              group: "General Discussion",
-              content: "New spinning class starting next Monday at 6 PM!",
+              author: 'Mike K.',
+              group: 'General Discussion',
+              content: 'New spinning class starting next Monday at 6 PM!',
               likes: 18,
               replies: 3,
             },
             {
-              author: "Emma W.",
-              group: "Workout Tips",
-              content: "Share your favorite post-workout meal ideas!",
+              author: 'Emma W.',
+              group: 'Workout Tips',
+              content: 'Share your favorite post-workout meal ideas!',
               likes: 42,
               replies: 12,
             },
           ].map((post, i) => (
-            <div key={i} className="p-4 border border-border rounded-lg hover:border-primary/50 transition-colors">
+            <div
+              key={i}
+              className="p-4 border border-border rounded-lg hover:border-primary/50 transition-colors"
+            >
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="font-semibold text-foreground">{post.author}</p>
@@ -95,5 +102,5 @@ export default function CustomerCommunityPage() {
         </div>
       </Card>
     </div>
-  )
+  );
 }
