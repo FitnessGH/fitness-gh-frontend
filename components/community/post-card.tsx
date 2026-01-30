@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
+import { Card } from '@ui/card';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
 

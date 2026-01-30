@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import {
   Pagination,
   PaginationContent,
@@ -5,7 +6,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
+} from '@ui/pagination';
 import {
   Table,
   TableBody,
@@ -13,8 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { cn } from '@/lib/utils';
+} from '@ui/table';
 
 import * as React from 'react';
 

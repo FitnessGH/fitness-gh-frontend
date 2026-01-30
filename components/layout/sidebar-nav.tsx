@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import type { UserRole } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+import { Button } from '@ui/button';
 import {
   BarChart3,
   Briefcase,
