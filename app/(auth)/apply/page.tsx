@@ -1,8 +1,6 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import { Footer } from '@/components/layout/footer';
-import { PublicHeader } from '@/components/layout/public-header';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
@@ -70,7 +68,6 @@ export default function ApplyPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-secondary/5 to-background flex flex-col">
-      <PublicHeader />
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="max-w-md w-full">
           <Card className="p-8 border-border bg-card/50 backdrop-blur-sm shadow-2xl">
@@ -180,7 +177,6 @@ export default function ApplyPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

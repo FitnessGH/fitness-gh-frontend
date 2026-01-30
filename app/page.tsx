@@ -1,11 +1,4 @@
-'use client';
-
-import { useAuth } from '@/components/auth-context';
-import { Footer } from '@/components/layout/footer';
-import { PublicHeader } from '@/components/layout/public-header';
-import { LoginForm } from '@/components/login-form';
-import { BebasFont, SpaceFont } from '@/constant';
-import { getDashboardPath } from '@/lib/auth';
+import { BebasFont } from '@/constant';
 import { Button } from '@ui/button';
 import {
   BarChart3,
@@ -16,50 +9,20 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'FitnessGH - Gym Management & Community Platform',
+  description: 'Modern gym management, membership, and community platform',
+};
 
 export default function HomePage() {
-  const [showLogin, setShowLogin] = useState(false);
-
-  const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
-
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      router.replace(getDashboardPath(user.role));
-    }
-  }, [isAuthenticated, user, router]);
-
-  if (showLogin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/10 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <LoginForm />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      className={`${SpaceFont.className} min-h-screen bg-background text-foreground`}
-    >
+    <div className={`min-h-screen bg-background text-foreground`}>
       <div className="relative overflow-hidden">
         <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute top-20 right-10 h-72 w-72 rounded-full bg-secondary/30 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(50,176,176,0.18),_transparent_55%)]" />
-
-        <PublicHeader
-          signInSlot={
-            <Button
-              onClick={() => setShowLogin(true)}
-              className="bg-primary hover:bg-primary/90"
-            >
-              Sign In
-            </Button>
-          }
-        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(50,176,176,0.18),transparent_55%)]" />
 
         <section className="pt-32 px-6 pb-16">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
@@ -68,9 +31,7 @@ export default function HomePage() {
                 Operator-first gym OS
               </div>
               <div className="space-y-6">
-                <h1
-                  className={`${BebasFont.className} text-6xl md:text-7xl leading-[0.95]`}
-                >
+                <h1 className={`text-6xl md:text-7xl leading-[0.95]`}>
                   Turn every session into a story your members share.
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-xl">
@@ -81,7 +42,6 @@ export default function HomePage() {
               </div>
               <div className="flex flex-wrap items-center gap-4">
                 <Button
-                  onClick={() => setShowLogin(true)}
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-base px-8 py-6"
                 >
@@ -125,13 +85,13 @@ export default function HomePage() {
             </div>
 
             <div className="relative animate-in fade-in slide-in-from-bottom-10 duration-700 delay-150">
-              <div className="absolute -inset-6 rounded-[32px] border border-primary/30 bg-primary/10 blur-2xl" />
+              <div className="absolute -inset-6 rounded-4xl border border-primary/30 bg-primary/10 blur-2xl" />
               <div className="relative rounded-[28px] border border-border bg-card/80 p-6 backdrop-blur">
                 <div className="flex items-center justify-between mb-4 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   <span>Live session</span>
                   <span className="text-primary">Now playing</span>
                 </div>
-                <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-primary/20">
+                <div className="aspect-4/3 rounded-2xl overflow-hidden border border-primary/20">
                   <video
                     className="h-full w-full object-cover"
                     autoPlay
@@ -315,10 +275,7 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={() => setShowLogin(true)}
-                className="w-full bg-primary hover:bg-primary/90"
-              >
+              <Button className="w-full bg-primary hover:bg-primary/90">
                 Book a Platform Tour
               </Button>
             </div>
@@ -327,7 +284,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-6 pb-20">
-        <div className="max-w-6xl mx-auto rounded-[32px] border border-primary/30 bg-gradient-to-r from-primary/20 via-secondary/10 to-primary/10 p-10 md:p-14">
+        <div className="max-w-6xl mx-auto rounded-4xl border border-primary/30 bg-linear-to-r from-primary/20 via-secondary/10 to-primary/10 p-10 md:p-14">
           <div className="grid md:grid-cols-[1.2fr_0.8fr] gap-8 items-center">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-primary">
@@ -345,7 +302,6 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col gap-4">
               <Button
-                onClick={() => setShowLogin(true)}
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
               >
@@ -362,8 +318,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

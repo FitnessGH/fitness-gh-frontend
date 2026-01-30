@@ -1,5 +1,3 @@
-import { Footer } from '@/components/layout/footer';
-import { PublicHeader } from '@/components/layout/public-header';
 import { Button } from '@/components/ui/button';
 import { BebasFont, SpaceFont } from '@/constant';
 import { LifeBuoy, Mail, MessageSquare } from 'lucide-react';
@@ -12,8 +10,6 @@ export default function SupportPage() {
       <div className="relative overflow-hidden flex-1">
         <div className="absolute -top-40 -left-32 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute top-24 right-0 h-72 w-72 rounded-full bg-secondary/30 blur-3xl" />
-
-        <PublicHeader />
 
         <main className="max-w-6xl mx-auto px-6 py-14">
           <div className="space-y-6">
@@ -107,7 +103,6 @@ export default function SupportPage() {
           </section>
         </main>
       </div>
-      <Footer />
     </div>
   );
 }
