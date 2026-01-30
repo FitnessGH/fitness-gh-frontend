@@ -1,6 +1,7 @@
 'use client';
 
 import { BebasFont } from '@/constant';
+import { getDashboardPath } from '@/lib/auth';
 import { Button } from '@ui/button';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
@@ -25,7 +26,9 @@ export function LoginForm() {
 
     try {
       await login(email, password);
-      router.push('/dashboard');
+      const stored = sessionStorage.getItem('user');
+      const user = stored ? JSON.parse(stored) : null;
+      router.push(getDashboardPath(user?.role || 'customer'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     }

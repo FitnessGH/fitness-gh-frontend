@@ -1,6 +1,4 @@
 import { AuthProvider } from '@/components/auth-context';
-import { Footer } from '@/components/layout/footer';
-import { PublicHeader } from '@/components/layout/public-header';
 import { SpaceFont } from '@/constant';
 import type { Metadata } from 'next';
 
@@ -39,11 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${SpaceFont.className} font-sans antialiased`}>
-        <AuthProvider>
-          <PublicHeader />
-          {children}
-          <Footer />
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

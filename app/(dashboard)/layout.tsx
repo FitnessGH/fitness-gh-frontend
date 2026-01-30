@@ -11,15 +11,24 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, logout, isAuthenticated } = useAuth();
-  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
   React.useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.replace('/');
+      return;
     }
-  }, [isAuthenticated, router]);
+
+    if (user?.role !== 'gym_owner') {
+      router.replace('/');
+      return;
+    }
+  }, [isAuthenticated, user, router, isLoading]);
 
   if (!user) {
     return null;
