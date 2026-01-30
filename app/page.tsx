@@ -1,9 +1,12 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
+import { Footer } from '@/components/layout/footer';
+import { PublicHeader } from '@/components/layout/public-header';
 import { LoginForm } from '@/components/login-form';
-import { Button } from '@/components/ui/button';
+import { BebasFont, SpaceFont } from '@/constant';
 import { getDashboardPath } from '@/lib/auth';
+import { Button } from '@ui/button';
 import {
   BarChart3,
   Dumbbell,
@@ -13,30 +16,16 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { Bebas_Neue, Space_Grotesk } from 'next/font/google';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import React from 'react';
+export default function HomePage() {
+  const [showLogin, setShowLogin] = useState(false);
 
-const bebas = Bebas_Neue({
-  subsets: ['latin'],
-  weight: '400',
-  display: 'swap',
-});
-
-const space = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
-
-export default function Home() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
-  const [showLogin, setShowLogin] = React.useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated && user) {
       router.replace(getDashboardPath(user.role));
     }
@@ -54,39 +43,23 @@ export default function Home() {
 
   return (
     <div
-      className={`${space.className} min-h-screen bg-background text-foreground`}
+      className={`${SpaceFont.className} min-h-screen bg-background text-foreground`}
     >
       <div className="relative overflow-hidden">
         <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute top-20 right-10 h-72 w-72 rounded-full bg-secondary/30 blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(50,176,176,0.18),_transparent_55%)]" />
 
-        <nav className="fixed top-0 w-full bg-background/70 backdrop-blur border-b border-border z-50">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                <Dumbbell className="w-5 h-5 text-primary" />
-              </div>
-              <span className={`${bebas.className} text-3xl tracking-wider`}>
-                FitnessGH
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/apply"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground"
-              >
-                Apply as Owner
-              </Link>
-              <Button
-                onClick={() => setShowLogin(true)}
-                className="bg-primary hover:bg-primary/90"
-              >
-                Sign In
-              </Button>
-            </div>
-          </div>
-        </nav>
+        <PublicHeader
+          signInSlot={
+            <Button
+              onClick={() => setShowLogin(true)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Sign In
+            </Button>
+          }
+        />
 
         <section className="pt-32 px-6 pb-16">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
@@ -96,7 +69,7 @@ export default function Home() {
               </div>
               <div className="space-y-6">
                 <h1
-                  className={`${bebas.className} text-6xl md:text-7xl leading-[0.95]`}
+                  className={`${BebasFont.className} text-6xl md:text-7xl leading-[0.95]`}
                 >
                   Turn every session into a story your members share.
                 </h1>
@@ -126,7 +99,7 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-6 pt-4 text-sm text-muted-foreground">
                 <div>
                   <div
-                    className={`${bebas.className} text-3xl text-foreground`}
+                    className={`${BebasFont.className} text-3xl text-foreground`}
                   >
                     92%
                   </div>
@@ -134,7 +107,7 @@ export default function Home() {
                 </div>
                 <div>
                   <div
-                    className={`${bebas.className} text-3xl text-foreground`}
+                    className={`${BebasFont.className} text-3xl text-foreground`}
                   >
                     24/7
                   </div>
@@ -142,7 +115,7 @@ export default function Home() {
                 </div>
                 <div>
                   <div
-                    className={`${bebas.className} text-3xl text-foreground`}
+                    className={`${BebasFont.className} text-3xl text-foreground`}
                   >
                     4.9★
                   </div>
@@ -175,7 +148,9 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="rounded-xl border border-border bg-background/50 p-4">
-                    <p className={`${bebas.className} text-3xl text-primary`}>
+                    <p
+                      className={`${BebasFont.className} text-3xl text-primary`}
+                    >
                       5,890
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -184,7 +159,7 @@ export default function Home() {
                   </div>
                   <div className="rounded-xl border border-border bg-background/50 p-4">
                     <p
-                      className={`${bebas.className} text-3xl text-foreground`}
+                      className={`${BebasFont.className} text-3xl text-foreground`}
                     >
                       +2,000
                     </p>
@@ -206,7 +181,7 @@ export default function Home() {
               <p className="text-xs uppercase tracking-[0.3em] text-primary">
                 What you get
               </p>
-              <h2 className={`${bebas.className} text-4xl md:text-5xl`}>
+              <h2 className={`${BebasFont.className} text-4xl md:text-5xl`}>
                 Built for busy floors
               </h2>
             </div>
@@ -286,7 +261,7 @@ export default function Home() {
             <p className="text-xs uppercase tracking-[0.3em] text-primary">
               Workflow
             </p>
-            <h2 className={`${bebas.className} text-4xl md:text-5xl`}>
+            <h2 className={`${BebasFont.className} text-4xl md:text-5xl`}>
               Launch in days, not months
             </h2>
             <p className="text-muted-foreground">
@@ -317,7 +292,7 @@ export default function Home() {
                 <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">
                   Coach view
                 </p>
-                <p className={`${bebas.className} text-3xl`}>
+                <p className={`${BebasFont.className} text-3xl`}>
                   Today: 14 classes, 3 waitlists
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
@@ -327,13 +302,15 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-border p-4">
                   <p className="text-xs text-muted-foreground">Revenue lift</p>
-                  <p className={`${bebas.className} text-3xl text-primary`}>
+                  <p className={`${BebasFont.className} text-3xl text-primary`}>
                     +18%
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border p-4">
                   <p className="text-xs text-muted-foreground">Avg. check-in</p>
-                  <p className={`${bebas.className} text-3xl text-foreground`}>
+                  <p
+                    className={`${BebasFont.className} text-3xl text-foreground`}
+                  >
                     12s
                   </p>
                 </div>
@@ -356,7 +333,9 @@ export default function Home() {
               <p className="text-xs uppercase tracking-[0.3em] text-primary">
                 Ready to grow
               </p>
-              <h2 className={`${bebas.className} text-4xl md:text-5xl mt-3`}>
+              <h2
+                className={`${BebasFont.className} text-4xl md:text-5xl mt-3`}
+              >
                 Give your members a reason to show up tomorrow.
               </h2>
               <p className="text-muted-foreground mt-4">
@@ -384,31 +363,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-border px-6 py-10 bg-card/40">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>&copy; 2026 FitnessGH. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/privacy"
-              className="hover:text-foreground transition-colors"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="hover:text-foreground transition-colors"
-            >
-              Terms
-            </Link>
-            <Link
-              href="/support"
-              className="hover:text-foreground transition-colors"
-            >
-              Support
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

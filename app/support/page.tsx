@@ -1,58 +1,26 @@
+import { Footer } from '@/components/layout/footer';
+import { PublicHeader } from '@/components/layout/public-header';
 import { Button } from '@/components/ui/button';
-import { Headset, LifeBuoy, Mail, MessageSquare } from 'lucide-react';
-import { Bebas_Neue, Space_Grotesk } from 'next/font/google';
-import Link from 'next/link';
-
-const bebas = Bebas_Neue({
-  subsets: ['latin'],
-  weight: '400',
-  display: 'swap',
-});
-
-const space = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
+import { BebasFont, SpaceFont } from '@/constant';
+import { LifeBuoy, Mail, MessageSquare } from 'lucide-react';
 
 export default function SupportPage() {
   return (
     <div
-      className={`${space.className} min-h-screen bg-background text-foreground`}
+      className={`${SpaceFont.className} min-h-screen bg-background text-foreground flex flex-col`}
     >
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden flex-1">
         <div className="absolute -top-40 -left-32 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute top-24 right-0 h-72 w-72 rounded-full bg-secondary/30 blur-3xl" />
 
-        <header className="border-b border-border bg-background/70 backdrop-blur">
-          <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-            <Link
-              href="/"
-              className="flex items-center gap-3"
-            >
-              <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                <Headset className="w-5 h-5 text-primary" />
-              </div>
-              <span className={`${bebas.className} text-3xl tracking-wider`}>
-                FitHub
-              </span>
-            </Link>
-            <Button
-              asChild
-              variant="outline"
-              className="border-primary/40 hover:bg-primary/10"
-            >
-              <Link href="/">Back to Home</Link>
-            </Button>
-          </div>
-        </header>
+        <PublicHeader />
 
         <main className="max-w-6xl mx-auto px-6 py-14">
           <div className="space-y-6">
             <p className="text-xs uppercase tracking-[0.3em] text-primary">
               Support
             </p>
-            <h1 className={`${bebas.className} text-5xl md:text-6xl`}>
+            <h1 className={`${BebasFont.className} text-5xl md:text-6xl`}>
               Real humans, real help.
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl">
@@ -114,7 +82,9 @@ export default function SupportPage() {
                 <p className="text-xs uppercase tracking-[0.3em] text-primary">
                   Onboarding
                 </p>
-                <h2 className={`${bebas.className} text-4xl md:text-5xl mt-3`}>
+                <h2
+                  className={`${BebasFont.className} text-4xl md:text-5xl mt-3`}
+                >
                   Need a guided rollout?
                 </h2>
                 <p className="text-muted-foreground mt-4">
@@ -137,6 +107,7 @@ export default function SupportPage() {
           </section>
         </main>
       </div>
+      <Footer />
     </div>
   );
 }
