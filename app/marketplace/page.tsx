@@ -33,7 +33,8 @@ const mockProducts: Product[] = [
     price: 29.99,
     rating: 4.8,
     reviews: 234,
-    image: '🥤',
+    image:
+      'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
     category: 'Supplements',
   },
   {
@@ -43,7 +44,8 @@ const mockProducts: Product[] = [
     price: 34.99,
     rating: 4.6,
     reviews: 156,
-    image: '🧘',
+    image:
+      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=450&fit=crop',
     category: 'Equipment',
   },
   {
@@ -53,7 +55,8 @@ const mockProducts: Product[] = [
     price: 24.99,
     rating: 4.7,
     reviews: 289,
-    image: '💧',
+    image:
+      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=450&fit=crop',
     category: 'Accessories',
   },
   {
@@ -63,7 +66,8 @@ const mockProducts: Product[] = [
     price: 44.99,
     rating: 4.9,
     reviews: 178,
-    image: '🎯',
+    image:
+      'https://images.unsplash.com/photo-1599058918144-1ffabb6ab9a0?w=600&h=450&fit=crop',
     category: 'Equipment',
   },
   {
@@ -73,7 +77,8 @@ const mockProducts: Product[] = [
     price: 19.99,
     rating: 4.5,
     reviews: 112,
-    image: '🥗',
+    image:
+      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=450&fit=crop',
     category: 'Supplements',
   },
   {
@@ -83,7 +88,8 @@ const mockProducts: Product[] = [
     price: 39.99,
     rating: 4.4,
     reviews: 98,
-    image: '🧴',
+    image:
+      'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=600&h=450&fit=crop',
     category: 'Accessories',
   },
   {
@@ -93,7 +99,8 @@ const mockProducts: Product[] = [
     price: 89.99,
     rating: 4.7,
     reviews: 201,
-    image: '🏋️',
+    image:
+      'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=450&fit=crop',
     category: 'Equipment',
   },
   {
@@ -103,7 +110,8 @@ const mockProducts: Product[] = [
     price: 34.99,
     rating: 4.6,
     reviews: 145,
-    image: '💪',
+    image:
+      'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=600&h=450&fit=crop',
     category: 'Supplements',
   },
 ];

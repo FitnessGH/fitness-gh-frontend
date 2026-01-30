@@ -25,7 +25,8 @@ const mockProducts: Product[] = [
     price: 29.99,
     rating: 4.8,
     reviews: 234,
-    image: '🥤',
+    image:
+      'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
     category: 'Supplements',
   },
   {
@@ -35,7 +36,8 @@ const mockProducts: Product[] = [
     price: 34.99,
     rating: 4.6,
     reviews: 156,
-    image: '🧘',
+    image:
+      'https://images.unsplash.com/photo-1603985529862-9d9f6f82f80a?w=600&h=450&fit=crop',
     category: 'Equipment',
   },
   {
@@ -45,7 +47,8 @@ const mockProducts: Product[] = [
     price: 24.99,
     rating: 4.7,
     reviews: 289,
-    image: '💧',
+    image:
+      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=450&fit=crop',
     category: 'Accessories',
   },
   {
@@ -55,7 +58,8 @@ const mockProducts: Product[] = [
     price: 44.99,
     rating: 4.9,
     reviews: 178,
-    image: '🎯',
+    image:
+      'https://images.unsplash.com/photo-1599058918144-1ffabb6ab9a0?w=600&h=450&fit=crop',
     category: 'Equipment',
   },
   {
@@ -65,7 +69,8 @@ const mockProducts: Product[] = [
     price: 19.99,
     rating: 4.5,
     reviews: 112,
-    image: '🥗',
+    image:
+      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=450&fit=crop',
     category: 'Supplements',
   },
   {
@@ -75,7 +80,8 @@ const mockProducts: Product[] = [
     price: 39.99,
     rating: 4.4,
     reviews: 98,
-    image: '🧴',
+    image:
+      'https://images.unsplash.com/photo-1600180758895-55efb1f89c27?w=600&h=450&fit=crop',
     category: 'Accessories',
   },
 ];
@@ -156,7 +162,14 @@ export default function CustomerMarketplacePage() {
             className="border-border/50 overflow-hidden hover:border-primary/50 transition-colors"
           >
             <div className="p-4 pb-3 bg-muted/30">
-              <div className="text-4xl text-center">{product.image}</div>
+              <div className="aspect-4/3 overflow-hidden rounded-lg border border-border/40 bg-background">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
             </div>
 
             <div className="p-4 space-y-3">
@@ -187,7 +200,7 @@ export default function CustomerMarketplacePage() {
 
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <p className="text-lg font-bold text-primary">
-                  ${product.price.toFixed(2)}
+                  GH₵{product.price.toFixed(2)}
                 </p>
                 <Button
                   size="sm"

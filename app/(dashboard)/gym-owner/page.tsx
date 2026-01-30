@@ -54,7 +54,7 @@ export default function GymOwnerDashboard() {
 
       <div className="grid grid-cols-12 gap-6 h-full">
         <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-          <div className="relative rounded-3xl overflow-hidden bg-card border border-border min-h-[300px] flex">
+          <div className="relative rounded-3xl overflow-hidden bg-card border border-border min-h-75 flex">
             <div className="relative z-10 p-10 flex flex-col justify-center max-w-lg">
               <p className="text-muted-foreground mb-2">January 11, 2024</p>
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
@@ -75,7 +75,7 @@ export default function GymOwnerDashboard() {
             </div>
 
             <div className="absolute top-0 right-0 h-full w-2/3">
-              <div className="absolute inset-0 bg-linear-to-r from-card via-card/50 to-transparent z-[1]" />
+              <div className="absolute inset-0 bg-linear-to-r from-card via-card/50 to-transparent z-1" />
               <img
                 src="/hero-fitness.png"
                 alt="Fitness"
@@ -150,7 +150,7 @@ export default function GymOwnerDashboard() {
                 </div>
               </div>
             </div>
-            <div className="h-[250px] w-full">
+            <div className="h-62.5 w-full">
               <ResponsiveContainer
                 width="100%"
                 height="100%"
@@ -215,7 +215,7 @@ export default function GymOwnerDashboard() {
               </h3>
               <MoreVertical className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="h-[200px] w-full relative">
+            <div className="h-50 w-full relative">
               <ResponsiveContainer
                 width="100%"
                 height="100%"
@@ -266,7 +266,7 @@ export default function GymOwnerDashboard() {
               <MoreVertical className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="flex-1 flex flex-col items-center justify-center relative">
-              <div className="h-[200px] w-full">
+              <div className="h-50 w-full">
                 <ResponsiveContainer
                   width="100%"
                   height="100%"
