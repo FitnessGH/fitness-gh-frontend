@@ -102,6 +102,24 @@ export function LoginForm() {
         </Button>
       </form>
 
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span>New here?</span>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/signup/customer"
+            className="text-primary hover:text-primary/80"
+          >
+            Create Member Account
+          </Link>
+          <Link
+            href="/signup/vendor"
+            className="text-primary hover:text-primary/80"
+          >
+            Create Vendor Account
+          </Link>
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-border bg-background/70 p-4">
         <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Demo accounts
