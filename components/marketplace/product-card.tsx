@@ -1,25 +1,36 @@
-"use client"
+'use client';
 
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Star, ShoppingCart, Heart } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Heart, ShoppingCart, Star } from 'lucide-react';
 
 interface ProductCardProps {
-  id: string
-  name: string
-  vendor: string
-  price: number
-  rating: number
-  reviews: number
-  image: string
-  onAddToCart: (id: string) => void
+  id: string;
+  name: string;
+  vendor: string;
+  price: number;
+  rating: number;
+  reviews: number;
+  image: string;
+  onAddToCart: (id: string) => void;
 }
 
-export function ProductCard({ id, name, vendor, price, rating, reviews, image, onAddToCart }: ProductCardProps) {
+export function ProductCard({
+  id,
+  name,
+  vendor,
+  price,
+  rating,
+  reviews,
+  image,
+  onAddToCart,
+}: ProductCardProps) {
   return (
     <Card className="border-border/50 overflow-hidden hover:border-primary/50 transition-all group">
       <div className="p-4 pb-3 bg-muted/30 relative overflow-hidden">
-        <div className="text-5xl text-center group-hover:scale-110 transition-transform">{image}</div>
+        <div className="text-5xl text-center group-hover:scale-110 transition-transform">
+          {image}
+        </div>
         <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform">
           <Heart className="w-4 h-4 text-red-500 hover:fill-red-500" />
         </button>
@@ -27,7 +38,9 @@ export function ProductCard({ id, name, vendor, price, rating, reviews, image, o
 
       <div className="p-4 space-y-3">
         <div>
-          <p className="font-semibold text-foreground text-sm line-clamp-2">{name}</p>
+          <p className="font-semibold text-foreground text-sm line-clamp-2">
+            {name}
+          </p>
           <p className="text-xs text-muted-foreground">{vendor}</p>
         </div>
 
@@ -36,20 +49,28 @@ export function ProductCard({ id, name, vendor, price, rating, reviews, image, o
             <Star
               key={i}
               className={`w-3 h-3 ${
-                i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                i < Math.floor(rating)
+                  ? 'fill-yellow-400 text-yellow-400'
+                  : 'text-muted-foreground'
               }`}
             />
           ))}
-          <span className="text-xs text-muted-foreground ml-1">({reviews})</span>
+          <span className="text-xs text-muted-foreground ml-1">
+            ({reviews})
+          </span>
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-border">
           <p className="text-lg font-bold text-primary">${price.toFixed(2)}</p>
-          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => onAddToCart(id)}>
+          <Button
+            size="sm"
+            className="bg-primary hover:bg-primary/90"
+            onClick={() => onAddToCart(id)}
+          >
             <ShoppingCart className="w-3 h-3" />
           </Button>
         </div>
       </div>
     </Card>
-  )
+  );
 }

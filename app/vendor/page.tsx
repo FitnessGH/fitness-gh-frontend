@@ -1,21 +1,36 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ShoppingCart, Package, DollarSign, TrendingUp, Plus } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+  DollarSign,
+  Package,
+  Plus,
+  ShoppingCart,
+  TrendingUp,
+} from 'lucide-react';
+import { useState } from 'react';
 
 export default function VendorDashboard() {
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false)
-  const [formData, setFormData] = useState({ name: "", price: "", category: "" })
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    price: '',
+    category: '',
+  });
 
   const handleAddProduct = () => {
-    console.log("[v0] Adding product:", formData)
-    setFormData({ name: "", price: "", category: "" })
-    setIsAddProductOpen(false)
-  }
+    console.log('[v0] Adding product:', formData);
+    setFormData({ name: '', price: '', category: '' });
+    setIsAddProductOpen(false);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -24,40 +39,65 @@ export default function VendorDashboard() {
         <p className="text-muted-foreground">Manage your products and orders</p>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Orders", value: "156", icon: ShoppingCart, color: "bg-blue-100 text-blue-600" },
-          { label: "Products Listed", value: "24", icon: Package, color: "bg-green-100 text-green-600" },
-          { label: "Revenue", value: "$3,240", icon: DollarSign, color: "bg-purple-100 text-purple-600" },
-          { label: "Growth", value: "+12%", icon: TrendingUp, color: "bg-orange-100 text-orange-600" },
+          {
+            label: 'Total Orders',
+            value: '156',
+            icon: ShoppingCart,
+            color: 'bg-blue-100 text-blue-600',
+          },
+          {
+            label: 'Products Listed',
+            value: '24',
+            icon: Package,
+            color: 'bg-green-100 text-green-600',
+          },
+          {
+            label: 'Revenue',
+            value: '$3,240',
+            icon: DollarSign,
+            color: 'bg-purple-100 text-purple-600',
+          },
+          {
+            label: 'Growth',
+            value: '+12%',
+            icon: TrendingUp,
+            color: 'bg-orange-100 text-orange-600',
+          },
         ].map((stat, i) => {
-          const Icon = stat.icon
+          const Icon = stat.icon;
           return (
-            <Card key={i} className="p-4 border-border/50 hover:border-primary/50 transition-colors">
+            <Card
+              key={i}
+              className="p-4 border-border/50 hover:border-primary/50 transition-colors"
+            >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold mt-2 text-foreground">{stat.value}</p>
+                  <p className="text-2xl font-bold mt-2 text-foreground">
+                    {stat.value}
+                  </p>
                 </div>
                 <div className={`${stat.color} p-3 rounded-lg`}>
                   <Icon className="w-5 h-5" />
                 </div>
               </div>
             </Card>
-          )
+          );
         })}
       </div>
 
-      {/* Orders & Products */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-6 border-border/50">
-          <h2 className="text-lg font-semibold mb-4 text-foreground">Recent Orders</h2>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">
+            Recent Orders
+          </h2>
           <div className="space-y-4">
             {[
-              { id: "#ORD-001", items: 3, amount: "$245", status: "Pending" },
-              { id: "#ORD-002", items: 2, amount: "$120", status: "Shipped" },
-              { id: "#ORD-003", items: 5, amount: "$890", status: "Delivered" },
+              { id: '#ORD-001', items: 3, amount: '$245', status: 'Pending' },
+              { id: '#ORD-002', items: 2, amount: '$120', status: 'Shipped' },
+              { id: '#ORD-003', items: 5, amount: '$890', status: 'Delivered' },
             ].map((order, i) => (
               <div
                 key={i}
@@ -65,17 +105,21 @@ export default function VendorDashboard() {
               >
                 <div>
                   <p className="font-medium text-foreground">{order.id}</p>
-                  <p className="text-sm text-muted-foreground">{order.items} items</p>
+                  <p className="text-sm text-muted-foreground">
+                    {order.items} items
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-foreground">{order.amount}</p>
+                  <p className="font-semibold text-foreground">
+                    {order.amount}
+                  </p>
                   <p
                     className={`text-xs font-semibold px-2 py-1 rounded ${
-                      order.status === "Delivered"
-                        ? "bg-green-100 text-green-700"
-                        : order.status === "Shipped"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-yellow-100 text-yellow-700"
+                      order.status === 'Delivered'
+                        ? 'bg-green-100 text-green-700'
+                        : order.status === 'Shipped'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-yellow-100 text-yellow-700'
                     }`}
                   >
                     {order.status}
@@ -87,7 +131,9 @@ export default function VendorDashboard() {
         </Card>
 
         <Card className="p-6 border-border/50">
-          <h2 className="text-lg font-semibold mb-4 text-foreground">Quick Actions</h2>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">
+            Quick Actions
+          </h2>
           <div className="space-y-2">
             <button
               onClick={() => setIsAddProductOpen(true)}
@@ -109,8 +155,10 @@ export default function VendorDashboard() {
         </Card>
       </div>
 
-      {/* Add Product Modal */}
-      <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+      <Dialog
+        open={isAddProductOpen}
+        onOpenChange={setIsAddProductOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Product</DialogTitle>
@@ -121,7 +169,9 @@ export default function VendorDashboard() {
               <Input
                 placeholder="Enter product name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
             <div>
@@ -130,7 +180,9 @@ export default function VendorDashboard() {
                 type="number"
                 placeholder="0.00"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
               />
             </div>
             <div>
@@ -138,14 +190,22 @@ export default function VendorDashboard() {
               <Input
                 placeholder="e.g., Supplements"
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
               />
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsAddProductOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddProductOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleAddProduct} className="bg-primary hover:bg-primary/90">
+              <Button
+                onClick={handleAddProduct}
+                className="bg-primary hover:bg-primary/90"
+              >
                 Add Product
               </Button>
             </div>
@@ -153,5 +213,5 @@ export default function VendorDashboard() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

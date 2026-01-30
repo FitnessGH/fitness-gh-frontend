@@ -1,29 +1,39 @@
-"use client"
+'use client';
 
-import { Card } from "@/components/ui/card"
-import { Heart, MessageCircle, Share2 } from "lucide-react"
-import { useState } from "react"
+import { Card } from '@/components/ui/card';
+import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface PostCardProps {
-  id: string
-  author: string
-  avatar: string
-  group: string
-  content: string
-  timestamp: string
-  likes: number
-  replies: number
-  image?: string
+  id: string;
+  author: string;
+  avatar: string;
+  group: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  replies: number;
+  image?: string;
 }
 
-export function PostCard({ id, author, avatar, group, content, timestamp, likes, replies, image }: PostCardProps) {
-  const [isLiked, setIsLiked] = useState(false)
-  const [likeCount, setLikeCount] = useState(likes)
+export function PostCard({
+  id,
+  author,
+  avatar,
+  group,
+  content,
+  timestamp,
+  likes,
+  replies,
+  image,
+}: PostCardProps) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(likes);
 
   const handleLike = () => {
-    setIsLiked(!isLiked)
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1)
-  }
+    setIsLiked(!isLiked);
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+  };
 
   return (
     <Card className="p-4 border-border/50 hover:border-primary/50 transition-colors">
@@ -52,9 +62,9 @@ export function PostCard({ id, author, avatar, group, content, timestamp, likes,
       <div className="flex items-center gap-4 pt-3 border-t border-border text-xs text-muted-foreground">
         <button
           onClick={handleLike}
-          className={`flex items-center gap-1 hover:text-primary transition-colors ${isLiked ? "text-red-500" : ""}`}
+          className={`flex items-center gap-1 hover:text-primary transition-colors ${isLiked ? 'text-red-500' : ''}`}
         >
-          <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+          <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
           <span>{likeCount}</span>
         </button>
         <button className="flex items-center gap-1 hover:text-primary transition-colors">
@@ -66,5 +76,5 @@ export function PostCard({ id, author, avatar, group, content, timestamp, likes,
         </button>
       </div>
     </Card>
-  )
+  );
 }

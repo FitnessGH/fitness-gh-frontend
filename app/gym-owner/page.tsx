@@ -1,62 +1,65 @@
-"use client"
+'use client';
 
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { OnboardingProgress } from '@/components/onboarding-progress';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
-  Users,
-  TrendingUp,
-  MoreVertical,
   ArrowUpRight,
-  UserPlus
-} from "lucide-react"
+  MoreVertical,
+  TrendingUp,
+  UserPlus,
+  Users,
+} from 'lucide-react';
 import {
-  PieChart,
-  Pie,
+  CartesianGrid,
   Cell,
-  ResponsiveContainer,
-  LineChart,
   Line,
+  LineChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis
-} from "recharts"
+} from 'recharts';
 
 const MEMBER_ACTIVITY_DATA = [
-  { name: "08:00-10:00", value: 90, color: "#2c9d9d" }, // Teal
-  { name: "10:00-14:00", value: 65, color: "#32b0b0" }, // Light Teal
-  { name: "10:00-14:00", value: 30, color: "#082324" }, // Deep Teal
-  { name: "10:00-14:00", value: 89, color: "#ffffff" }, // White
-]
+  { name: '08:00-10:00', value: 90, color: '#2c9d9d' },
+  { name: '10:00-14:00', value: 65, color: '#32b0b0' },
+  { name: '10:00-14:00', value: 30, color: '#082324' },
+  { name: '10:00-14:00', value: 89, color: '#ffffff' },
+];
 
 const STATUS_DATA = [
-  { month: "Jan", gold: 400, silver: 240, platinum: 240 },
-  { month: "Feb", gold: 300, silver: 139, platinum: 221 },
-  { month: "Mar", gold: 200, silver: 980, platinum: 229 },
-  { month: "Apr", gold: 278, silver: 390, platinum: 200 },
-  { month: "May", gold: 189, silver: 480, platinum: 218 },
-  { month: "Jun", gold: 239, silver: 380, platinum: 250 },
-  { month: "Jul", gold: 349, silver: 430, platinum: 210 },
-]
+  { month: 'Jan', gold: 400, silver: 240, platinum: 240 },
+  { month: 'Feb', gold: 300, silver: 139, platinum: 221 },
+  { month: 'Mar', gold: 200, silver: 980, platinum: 229 },
+  { month: 'Apr', gold: 278, silver: 390, platinum: 200 },
+  { month: 'May', gold: 189, silver: 480, platinum: 218 },
+  { month: 'Jun', gold: 239, silver: 380, platinum: 250 },
+  { month: 'Jul', gold: 349, silver: 430, platinum: 210 },
+];
 
-const TARGET_DATA = [
-  { name: "Target", value: 75.55, fill: "#2c9d9d" }
-]
+const TARGET_DATA = [{ name: 'Target', value: 75.55, fill: '#2c9d9d' }];
 
 export default function GymOwnerDashboard() {
   return (
     <div className="p-6 space-y-6 bg-background h-full overflow-y-auto">
+      <div className="max-w-7xl mx-auto">
+        <OnboardingProgress />
+      </div>
+
       <div className="grid grid-cols-12 gap-6 h-full">
-        {/* Left Column - Hero & KPI Cards */}
         <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-          {/* Hero Section */}
           <div className="relative rounded-3xl overflow-hidden bg-card border border-border min-h-[300px] flex">
             <div className="relative z-10 p-10 flex flex-col justify-center max-w-lg">
               <p className="text-muted-foreground mb-2">January 11, 2024</p>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Welcome Back, Emon</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                Welcome Back, Emon
+              </h1>
               <p className="text-xl md:text-2xl text-white/90 mb-8 font-medium">
                 Ready to set up your club's Loyalty Card?
               </p>
@@ -71,7 +74,6 @@ export default function GymOwnerDashboard() {
               </div>
             </div>
 
-            {/* Hero Image Overlay */}
             <div className="absolute top-0 right-0 h-full w-2/3">
               <div className="absolute inset-0 bg-gradient-to-r from-card via-card/50 to-transparent z-[1]" />
               <img
@@ -82,11 +84,12 @@ export default function GymOwnerDashboard() {
             </div>
           </div>
 
-          {/* KPI Cards Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="p-6 bg-card border-border rounded-2xl">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-muted-foreground font-medium">Current Members</h3>
+                <h3 className="text-muted-foreground font-medium">
+                  Current Members
+                </h3>
                 <Users className="w-5 h-5 text-muted-foreground" />
               </div>
               <p className="text-4xl font-bold text-white mb-2">5,890</p>
@@ -98,7 +101,9 @@ export default function GymOwnerDashboard() {
 
             <Card className="p-6 bg-card border-border rounded-2xl">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-muted-foreground font-medium">New Members</h3>
+                <h3 className="text-muted-foreground font-medium">
+                  New Members
+                </h3>
                 <UserPlus className="w-5 h-5 text-muted-foreground" />
               </div>
               <p className="text-4xl font-bold text-white mb-2">2,000</p>
@@ -110,7 +115,9 @@ export default function GymOwnerDashboard() {
 
             <Card className="p-6 bg-card border-border rounded-2xl">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-muted-foreground font-medium">Today Visitor</h3>
+                <h3 className="text-muted-foreground font-medium">
+                  Today Visitor
+                </h3>
                 <TrendingUp className="w-5 h-5 text-muted-foreground" />
               </div>
               <p className="text-4xl font-bold text-white mb-2">5,00</p>
@@ -121,10 +128,11 @@ export default function GymOwnerDashboard() {
             </Card>
           </div>
 
-          {/* Membership Status Report Chart */}
           <Card className="p-6 bg-card border-border rounded-2xl flex-1">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-white">Membership Status Report</h3>
+              <h3 className="text-lg font-semibold text-white">
+                Membership Status Report
+              </h3>
               <div className="flex gap-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-[#2c9d9d]" />
@@ -136,39 +144,82 @@ export default function GymOwnerDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-[#22c55e]" />
-                  <span className="text-sm text-muted-foreground">Platinum</span>
+                  <span className="text-sm text-muted-foreground">
+                    Platinum
+                  </span>
                 </div>
               </div>
             </div>
             <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
                 <LineChart data={STATUS_DATA}>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#333" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af' }} />
+                  <CartesianGrid
+                    vertical={false}
+                    strokeDasharray="3 3"
+                    stroke="#333"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#9ca3af' }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#9ca3af' }}
+                  />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
+                    contentStyle={{
+                      backgroundColor: '#1f2937',
+                      borderColor: '#374151',
+                      color: '#fff',
+                    }}
                     itemStyle={{ color: '#fff' }}
                   />
-                  <Line type="monotone" dataKey="gold" stroke="#2c9d9d" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="silver" stroke="#ec4899" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="platinum" stroke="#22c55e" strokeWidth={2} dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="gold"
+                    stroke="#2c9d9d"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="silver"
+                    stroke="#ec4899"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="platinum"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </Card>
         </div>
 
-        {/* Right Column - Activity & Targets */}
         <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-          {/* Member Activity */}
           <Card className="p-6 bg-card border-border rounded-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-white">Member Activity</h3>
+              <h3 className="text-lg font-semibold text-white">
+                Member Activity
+              </h3>
               <MoreVertical className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="h-[200px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
                 <PieChart>
                   <Pie
                     data={MEMBER_ACTIVITY_DATA}
@@ -180,32 +231,46 @@ export default function GymOwnerDashboard() {
                     stroke="none"
                   >
                     {MEMBER_ACTIVITY_DATA.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                      />
                     ))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-              {/* Custom Legend to match design visually */}
             </div>
             <div className="grid grid-cols-2 gap-4 mt-6">
               {MEMBER_ACTIVITY_DATA.map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}</span>
+                <div
+                  key={i}
+                  className="flex items-center gap-2"
+                >
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {item.name}
+                  </span>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Membership Target */}
           <Card className="p-6 bg-card border-border rounded-2xl flex-1 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">Membership Target</h3>
+              <h3 className="text-lg font-semibold text-white">
+                Membership Target
+              </h3>
               <MoreVertical className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="flex-1 flex flex-col items-center justify-center relative">
               <div className="h-[200px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
                   <RadialBarChart
                     cx="50%"
                     cy="80%"
@@ -216,7 +281,12 @@ export default function GymOwnerDashboard() {
                     startAngle={180}
                     endAngle={0}
                   >
-                    <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                    <PolarAngleAxis
+                      type="number"
+                      domain={[0, 100]}
+                      angleAxisId={0}
+                      tick={false}
+                    />
                     <RadialBar
                       background
                       dataKey="value"
@@ -234,7 +304,9 @@ export default function GymOwnerDashboard() {
               </div>
             </div>
             <div className="text-center mt-4">
-              <p className="text-sm text-muted-foreground mb-2">It's higher than yesterday</p>
+              <p className="text-sm text-muted-foreground mb-2">
+                It's higher than yesterday
+              </p>
               <div className="flex justify-center gap-8">
                 <div>
                   <p className="text-xs text-muted-foreground">Target</p>
@@ -254,5 +326,5 @@ export default function GymOwnerDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

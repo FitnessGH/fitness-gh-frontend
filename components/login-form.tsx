@@ -1,34 +1,34 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group"
-import { Label } from "@/components/ui/label"
-import { useAuth } from "./auth-context"
-import { AlertCircle, Dumbbell, Eye, EyeOff, Lock, Mail } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { AlertCircle, Dumbbell } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import type React from 'react';
+import { useState } from 'react';
+import { useAuth } from './auth-context';
 
 export function LoginForm() {
-  const router = useRouter()
-  const { login, isLoading } = useAuth()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const router = useRouter();
+  const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError('');
 
     try {
-      await login(email, password)
-      router.push("/dashboard")
+      await login(email, password);
+      router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed")
+      setError(err instanceof Error ? err.message : 'Login failed');
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md border-0 shadow-lg">
@@ -36,58 +36,39 @@ export function LoginForm() {
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Dumbbell className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold text-primary">FitHub</h1>
+            <h1 className="text-2xl font-bold text-primary">FitnessGH</h1>
           </div>
           <p className="text-muted-foreground">Gym Management Platform</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <InputGroup>
-              <InputGroupAddon>
-                <Mail className="size-5" />
-              </InputGroupAddon>
-              <InputGroupInput
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </InputGroup>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <InputGroup>
-              <InputGroupAddon>
-                <Lock className="size-5" />
-              </InputGroupAddon>
-              <InputGroupInput
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-              <InputGroupAddon align="inline-end">
-                <InputGroupButton
-                  type="button"
-                  variant="ghost"
-                  size="xs"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  onClick={() => setShowPassword((current) => !current)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </InputGroupButton>
-              </InputGroupAddon>
-            </InputGroup>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+            />
           </div>
 
           {error && (
@@ -97,8 +78,12 @@ export function LoginForm() {
             </div>
           )}
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Sign In"}
+          <Button
+            type="submit"
+            className="w-full bg-primary hover:bg-primary/90"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
 
@@ -118,10 +103,11 @@ export function LoginForm() {
               <span className="text-primary">Admin:</span> admin@fitclub.com
             </p>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">Password: any value works</p>
+          <p className="text-xs text-muted-foreground mt-3">
+            Password: any value works
+          </p>
         </div>
       </div>
     </Card>
-  )
+  );
 }
-

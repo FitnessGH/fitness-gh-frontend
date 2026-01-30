@@ -1,10 +1,9 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Muscular Gym Theme - FitNexus */
   --primary: #32b0b0;
   --primary-foreground: #ffffff;
 
@@ -35,7 +34,6 @@
 
   --radius: 0.625rem;
 
-  /* Sidebar Specifics to match request */
   --sidebar-background: #082324;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #32b0b0;
@@ -45,7 +43,6 @@
   --sidebar-border: #2c9d9d;
   --sidebar-ring: #32b0b0;
 
-  /* Charts */
   --chart-1: #32b0b0;
   --chart-2: #2c9d9d;
   --chart-3: #ffffff;
@@ -85,8 +82,8 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
