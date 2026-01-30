@@ -47,7 +47,7 @@ export function PublicHeader() {
             asChild
             className="bg-primary hover:bg-primary/90"
           >
-            <Link href="/">Sign In</Link>
+            <Link href="/login">Sign In</Link>
           </Button>
         </div>
       </div>

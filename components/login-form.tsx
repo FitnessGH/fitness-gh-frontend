@@ -1,14 +1,15 @@
 'use client';
 
+import { BebasFont } from '@/constant';
 import { Button } from '@ui/button';
-import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
 import { AlertCircle, Dumbbell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import type React from 'react';
 import { useState } from 'react';
 import { useAuth } from './auth-context';
+
+import Link from 'next/link';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -31,83 +32,98 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md border-0 shadow-lg">
-      <div className="p-8">
-        <div className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Dumbbell className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold text-primary">FitnessGH</h1>
-          </div>
-          <p className="text-muted-foreground">Gym Management Platform</p>
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <div className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.25em] text-primary">
+          Sign in
+        </div>
+        <div className="flex items-center justify-center gap-2">
+          <Dumbbell className="w-6 h-6 text-primary" />
+          <h1 className={`${BebasFont.className} text-3xl tracking-wide`}>
+            FitnessGH
+          </h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Welcome back. Your gym operations are one login away.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="name@gym.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isLoading}
+          />
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4"
-        >
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
+            <Link
+              href="/support"
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Forgot password?
+            </Link>
           </div>
-
-          {error && (
-            <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
-              <AlertCircle className="w-4 h-4" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90"
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
             disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
+          />
+        </div>
 
-        <div className="mt-6 pt-6 border-t border-border">
-          <p className="text-sm text-muted-foreground mb-3">Demo Accounts:</p>
-          <div className="space-y-2 text-xs text-muted-foreground font-mono">
-            <p>
-              <span className="text-primary">Gym Owner:</span> owner@fitclub.com
-            </p>
-            <p>
-              <span className="text-primary">Athlete:</span> member@email.com
-            </p>
-            <p>
-              <span className="text-primary">Vendor:</span> vendor@shop.com
-            </p>
-            <p>
-              <span className="text-primary">Admin:</span> admin@fitclub.com
-            </p>
+        {error && (
+          <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
+            <AlertCircle className="w-4 h-4" />
+            <span>{error}</span>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">
-            Password: any value works
+        )}
+
+        <Button
+          type="submit"
+          className="w-full bg-primary hover:bg-primary/90"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Signing in...' : 'Sign In'}
+        </Button>
+      </form>
+
+      <div className="rounded-2xl border border-border bg-background/70 p-4">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Demo accounts
+        </p>
+        <div className="mt-3 space-y-2 text-xs text-muted-foreground font-mono">
+          <p>
+            <span className="text-primary">Gym Owner:</span> owner@fitclub.com
+          </p>
+          <p>
+            <span className="text-primary">Athlete:</span> member@email.com
+          </p>
+          <p>
+            <span className="text-primary">Vendor:</span> vendor@shop.com
+          </p>
+          <p>
+            <span className="text-primary">Admin:</span> admin@fitclub.com
           </p>
         </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          Password: any value works
+        </p>
       </div>
-    </Card>
+    </div>
   );
 }

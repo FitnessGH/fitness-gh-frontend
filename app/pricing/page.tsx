@@ -123,7 +123,7 @@ export default function PricingPage() {
               <Badge className="w-fit border border-primary/30 bg-primary/10 text-primary">
                 Pricing built for real floors
               </Badge>
-              <h1 className={`${BebasFont.className} text-5xl md:text-6xl`}>
+              <h1 className={`text-5xl md:text-6xl`}>
                 Plans that scale from your first 50 members to your 5th
                 location.
               </h1>
