@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
+import { Card } from '@ui/card';
 import { AlertCircle, Bell, CheckCircle, Info } from 'lucide-react';
 
 interface Notification {

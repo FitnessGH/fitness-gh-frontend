@@ -1,21 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import {
-  DollarSign,
-  Package,
-  Plus,
-  ShoppingCart,
-  TrendingUp,
-} from 'lucide-react';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@ui/dialog';
+import { Input } from '@ui/input';
+import { Coins, Package, Plus, ShoppingCart, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
 export default function VendorDashboard() {
@@ -55,8 +44,8 @@ export default function VendorDashboard() {
           },
           {
             label: 'Revenue',
-            value: '$3,240',
-            icon: DollarSign,
+            value: 'GH₵3,240',
+            icon: Coins,
             color: 'bg-purple-100 text-purple-600',
           },
           {
@@ -95,9 +84,19 @@ export default function VendorDashboard() {
           </h2>
           <div className="space-y-4">
             {[
-              { id: '#ORD-001', items: 3, amount: '$245', status: 'Pending' },
-              { id: '#ORD-002', items: 2, amount: '$120', status: 'Shipped' },
-              { id: '#ORD-003', items: 5, amount: '$890', status: 'Delivered' },
+              {
+                id: '#ORD-001',
+                items: 3,
+                amount: 'GH₵245',
+                status: 'Pending',
+              },
+              { id: '#ORD-002', items: 2, amount: 'GH₵120', status: 'Shipped' },
+              {
+                id: '#ORD-003',
+                items: 5,
+                amount: 'GH₵890',
+                status: 'Delivered',
+              },
             ].map((order, i) => (
               <div
                 key={i}

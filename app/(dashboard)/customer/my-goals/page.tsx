@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Progress } from '@ui/progress';
 import { Plus, Target } from 'lucide-react';
 
 interface FitnessGoal {

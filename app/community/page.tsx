@@ -1,9 +1,9 @@
 'use client';
 
 import { PostCard } from '@/components/community/post-card';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Input } from '@ui/input';
 import { Lock, Plus, Search, Users } from 'lucide-react';
 import { Suspense, useState } from 'react';
 
@@ -144,7 +144,7 @@ function CommunityContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/10 p-6">
+    <div className="min-h-screen bg-linear-to-br from-background to-secondary/10 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

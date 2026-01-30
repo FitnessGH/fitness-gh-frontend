@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
 import { Plus, ShoppingCart } from 'lucide-react';
 
 export default function MarketplacePage() {
@@ -45,19 +45,19 @@ export default function MarketplacePage() {
             {
               name: 'Protein Powder',
               vendor: 'Elite Supplements',
-              price: '$29.99',
+              price: 'GH₵29.99',
               orders: 24,
             },
             {
               name: 'Gym Bag',
               vendor: 'Fit Gear Co',
-              price: '$49.99',
+              price: 'GH₵49.99',
               orders: 18,
             },
             {
               name: 'Water Bottle',
               vendor: 'HydroMax',
-              price: '$24.99',
+              price: 'GH₵24.99',
               orders: 32,
             },
           ].map((product, i) => (

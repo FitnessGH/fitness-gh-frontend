@@ -1,15 +1,15 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
 import { CheckCircle2, Clock, LogOut } from 'lucide-react';
 
 export default function ApprovalPendingPage() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/10 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-linear-to-br from-background to-secondary/10 flex items-center justify-center p-6">
       <Card className="max-w-md w-full p-8 text-center space-y-6 border-0 shadow-2xl">
         <div className="flex justify-center">
           <div className="relative">

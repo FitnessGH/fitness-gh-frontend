@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DollarSign, Lock, User } from 'lucide-react';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Input } from '@ui/input';
+import { Label } from '@ui/label';
+import { Coins, Lock, User } from 'lucide-react';
 
 export default function VendorSettingsPage() {
   return (
@@ -66,7 +66,7 @@ export default function VendorSettingsPage() {
 
       <Card className="p-6 border-border/50 space-y-6">
         <div className="flex items-center gap-3 pb-6 border-b border-border">
-          <DollarSign className="w-5 h-5 text-primary" />
+          <Coins className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">
             Payment Methods
           </h2>

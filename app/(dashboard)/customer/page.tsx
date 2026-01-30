@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card';
+import { Card } from '@ui/card';
 import { Calendar, ShoppingBag, Target, Users } from 'lucide-react';
 
 export default function CustomerDashboard() {
@@ -13,7 +13,7 @@ export default function CustomerDashboard() {
         </p>
       </div>
 
-      <Card className="p-6 border-border/50 bg-gradient-to-r from-primary/10 to-accent/10">
+      <Card className="p-6 border-border/50 bg-linear-to-r from-primary/10 to-accent/10">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Membership Status</p>

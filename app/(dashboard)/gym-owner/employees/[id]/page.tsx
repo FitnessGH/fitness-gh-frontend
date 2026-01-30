@@ -1,9 +1,9 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Column, DataTable } from '@/components/ui/data-table';
+import { Avatar, AvatarFallback, AvatarImage } from '@ui/avatar';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Column, DataTable } from '@ui/data-table';
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@ui/dialog';
+import { Input } from '@ui/input';
+import { Label } from '@ui/label';
 import {
   ArrowLeft,
   Award,
@@ -170,25 +170,25 @@ export default function TrainerDetailsPage() {
       header: 'Base Salary',
       headerClassName: 'text-right',
       className: 'text-right text-muted-foreground',
-      cell: (entry) => `$${entry.baseSalary.toFixed(2)}`,
+      cell: (entry) => `GH₵${entry.baseSalary.toFixed(2)}`,
     },
     {
       header: 'Bonus',
       headerClassName: 'text-right',
       className: 'text-right text-green-500 font-medium',
-      cell: (entry) => `+$${entry.bonus.toFixed(2)}`,
+      cell: (entry) => `+GH₵${entry.bonus.toFixed(2)}`,
     },
     {
       header: 'Deductions',
       headerClassName: 'text-right',
       className: 'text-right text-red-500 font-medium',
-      cell: (entry) => `-$${entry.deductions.toFixed(2)}`,
+      cell: (entry) => `-GH₵${entry.deductions.toFixed(2)}`,
     },
     {
       header: 'Net Pay',
       headerClassName: 'text-right',
       className: 'text-right font-bold text-foreground',
-      cell: (entry) => `$${entry.netPay.toFixed(2)}`,
+      cell: (entry) => `GH₵${entry.netPay.toFixed(2)}`,
     },
     {
       header: 'Status',

@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
 import { BebasFont } from '@/constant';
 import { cn } from '@/lib/utils';
+import { Button } from '@ui/button';
 import { Dumbbell } from 'lucide-react';
 
 import Link from 'next/link';
@@ -26,6 +26,12 @@ export function PublicHeader() {
         </Link>
         <div className="flex items-center gap-4">
           <Link
+            href="/pricing"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Pricing
+          </Link>
+          <Link
             href="/marketplace"
             className="text-sm font-medium text-muted-foreground hover:text-foreground"
           >
@@ -36,12 +42,6 @@ export function PublicHeader() {
             className="text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             Apply as Owner
-          </Link>
-          <Link
-            href="/support"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            Support
           </Link>
           <Button
             asChild

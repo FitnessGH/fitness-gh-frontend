@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
+import { Card } from '@ui/card';
 import {
   Bar,
   BarChart,
@@ -41,7 +41,7 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Revenue', value: '$35,500', change: '+12%' },
+          { label: 'Total Revenue', value: 'GH₵35,500', change: '+12%' },
           { label: 'Active Members', value: '400', change: '+8%' },
           { label: 'Avg Check-ins', value: '2,450', change: '+5%' },
           { label: 'Member Growth', value: '18%', change: '+3%' },

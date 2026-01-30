@@ -1,15 +1,15 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@ui/badge';
+import { Card } from '@ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@ui/dropdown-menu';
+import { Input } from '@ui/input';
+import { Label } from '@ui/label';
 import { MapPin, MoreVertical, Search, Users } from 'lucide-react';
 import { useState } from 'react';
 

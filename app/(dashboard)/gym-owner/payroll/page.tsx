@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Column, DataTable } from '@/components/ui/data-table';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Column, DataTable } from '@ui/data-table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { DollarSign, MoreVertical, Plus, Search } from 'lucide-react';
+} from '@ui/dropdown-menu';
+import { Input } from '@ui/input';
+import { Coins, MoreVertical, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 
 interface PayrollEntry {
@@ -90,25 +90,25 @@ export default function PayrollPage() {
       header: 'Base Salary',
       headerClassName: 'text-right',
       className: 'text-right text-muted-foreground',
-      cell: (entry) => `$${entry.baseSalary.toFixed(2)}`,
+      cell: (entry) => `GH₵${entry.baseSalary.toFixed(2)}`,
     },
     {
       header: 'Bonus',
       headerClassName: 'text-right',
       className: 'text-right text-green-500 font-medium',
-      cell: (entry) => `+$${entry.bonus.toFixed(2)}`,
+      cell: (entry) => `+GH₵${entry.bonus.toFixed(2)}`,
     },
     {
       header: 'Deductions',
       headerClassName: 'text-right',
       className: 'text-right text-red-500 font-medium',
-      cell: (entry) => `-$${entry.deductions.toFixed(2)}`,
+      cell: (entry) => `-GH₵${entry.deductions.toFixed(2)}`,
     },
     {
       header: 'Net Pay',
       headerClassName: 'text-right',
       className: 'text-right font-bold text-foreground',
-      cell: (entry) => `$${entry.netPay.toFixed(2)}`,
+      cell: (entry) => `GH₵${entry.netPay.toFixed(2)}`,
     },
     {
       header: 'Status',
@@ -201,11 +201,11 @@ export default function PayrollPage() {
             <div>
               <p className="text-sm text-muted-foreground">Total Payroll</p>
               <p className="text-2xl font-bold text-foreground mt-2">
-                ${totalPayroll.toFixed(2)}
+                GH₵${totalPayroll.toFixed(2)}
               </p>
             </div>
             <div className="w-12 h-12 rounded-full bg-[#2c9d9d]/10 flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-[#2c9d9d]" />
+              <Coins className="w-6 h-6 text-[#2c9d9d]" />
             </div>
           </div>
         </Card>
@@ -214,7 +214,7 @@ export default function PayrollPage() {
             <div>
               <p className="text-sm text-muted-foreground">Already Paid</p>
               <p className="text-2xl font-bold text-green-500 mt-2">
-                ${paidAmount.toFixed(2)}
+                GH₵${paidAmount.toFixed(2)}
               </p>
             </div>
             <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
@@ -229,7 +229,7 @@ export default function PayrollPage() {
             <div>
               <p className="text-sm text-muted-foreground">Pending</p>
               <p className="text-2xl font-bold text-yellow-500 mt-2">
-                ${pendingAmount.toFixed(2)}
+                GH₵${pendingAmount.toFixed(2)}
               </p>
             </div>
             <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center">

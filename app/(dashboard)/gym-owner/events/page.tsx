@@ -1,20 +1,15 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Column, DataTable } from '@/components/ui/data-table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Button } from '@ui/button';
+import { Column, DataTable } from '@ui/data-table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+} from '@ui/dropdown-menu';
+import { Input } from '@ui/input';
 import {
   CalendarIcon,
   Clock,

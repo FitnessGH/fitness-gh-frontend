@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Input } from '@ui/input';
 import { Search, ShoppingCart, Star } from 'lucide-react';
 import { useState } from 'react';
 

@@ -1,11 +1,11 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { submitGymDetails } from '@/lib/auth';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Input } from '@ui/input';
+import { Label } from '@ui/label';
 import { CheckCircle2, Dumbbell, MapPin, Settings, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -142,7 +142,7 @@ export default function GymOwnerOnboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/10 p-6">
+    <div className="min-h-screen bg-linear-to-br from-background to-secondary/10 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">
@@ -320,7 +320,7 @@ export default function GymOwnerOnboarding() {
                         <div>
                           <Label>Price</Label>
                           <Input
-                            placeholder="$29.99"
+                            placeholder="GH₵29.99"
                             value={plan.price}
                             onChange={(e) =>
                               handlePlanChange(index, 'price', e.target.value)

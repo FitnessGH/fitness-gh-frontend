@@ -1,7 +1,5 @@
 'use client';
 
-import { Footer } from '@/components/layout/footer';
-import { PublicHeader } from '@/components/layout/public-header';
 import { ProductCard } from '@/components/marketplace/product-card';
 import { ShoppingCart as ShoppingCartSheet } from '@/components/marketplace/shopping-cart';
 import { Card } from '@ui/card';
@@ -157,8 +155,7 @@ function MarketplaceContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/10 flex flex-col">
-      <PublicHeader />
+    <div className="min-h-screen bg-linear-to-br from-background to-secondary/10 flex flex-col">
       <div className="p-6 flex-1">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
@@ -232,7 +229,6 @@ function MarketplaceContent() {
           )}
         </div>
       </div>
-      <Footer />
 
       <ShoppingCartSheet
         isOpen={isCartOpen}

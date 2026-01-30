@@ -1,9 +1,9 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Column, DataTable } from '@/components/ui/data-table';
 import { getMember, Member, Transaction } from '@/lib/members-data';
+import { Avatar, AvatarFallback, AvatarImage } from '@ui/avatar';
+import { Button } from '@ui/button';
+import { Column, DataTable } from '@ui/data-table';
 import { ChevronLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -32,7 +32,7 @@ export default function MemberDetailsPage() {
       header: 'Amount',
       headerClassName: 'text-right',
       className: 'text-right font-medium text-green-500',
-      cell: (tx) => `$${tx.amount.toFixed(2)}`,
+      cell: (tx) => `GH₵${tx.amount.toFixed(2)}`,
     },
   ];
 

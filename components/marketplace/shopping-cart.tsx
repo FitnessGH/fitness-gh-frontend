@@ -1,12 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Button } from '@ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@ui/sheet';
 import { Trash2 } from 'lucide-react';
 
 interface CartItem {

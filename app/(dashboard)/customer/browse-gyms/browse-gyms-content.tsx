@@ -1,10 +1,10 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { DollarSign, MapPin, Search, Star, Users } from 'lucide-react';
+import { Badge } from '@ui/badge';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Input } from '@ui/input';
+import { Coins, MapPin, Search, Star, Users } from 'lucide-react';
 import { useState } from 'react';
 
 const MOCK_GYMS = [
@@ -12,7 +12,7 @@ const MOCK_GYMS = [
     id: 1,
     name: 'FitClub Downtown',
     location: '123 Main Street, Downtown',
-    price: '$89.99/month',
+    price: 'GH₵89.99/month',
     rating: 4.8,
     reviews: 342,
     members: 1240,
@@ -24,7 +24,7 @@ const MOCK_GYMS = [
     id: 2,
     name: 'PowerLift Gym',
     location: '456 Oak Avenue, Midtown',
-    price: '$79.99/month',
+    price: 'GH₵79.99/month',
     rating: 4.6,
     reviews: 289,
     members: 856,
@@ -36,7 +36,7 @@ const MOCK_GYMS = [
     id: 3,
     name: 'Yoga & Wellness Center',
     location: '789 Pine Road, Westside',
-    price: '$59.99/month',
+    price: 'GH₵59.99/month',
     rating: 4.9,
     reviews: 456,
     members: 645,
@@ -48,7 +48,7 @@ const MOCK_GYMS = [
     id: 4,
     name: 'Elite Sports Complex',
     location: '321 Elm Street, Uptown',
-    price: '$119.99/month',
+    price: 'GH₵119.99/month',
     rating: 4.7,
     reviews: 523,
     members: 2100,
@@ -136,7 +136,7 @@ export function BrowseGymsContent() {
                   </p>
                 </div>
                 <div className="text-center">
-                  <DollarSign className="w-4 h-4 text-green-500 mx-auto mb-1" />
+                  <Coins className="w-4 h-4 text-green-500 mx-auto mb-1" />
                   <p className="text-xs text-muted-foreground">{gym.price}</p>
                 </div>
               </div>

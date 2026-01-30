@@ -1,10 +1,10 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Badge } from '@ui/badge';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Input } from '@ui/input';
+import { Label } from '@ui/label';
 import { Calendar, MapPin, Package, Search } from 'lucide-react';
 import { useState } from 'react';
 

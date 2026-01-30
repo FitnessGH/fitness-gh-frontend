@@ -1,8 +1,8 @@
 'use client';
 
 import { OnboardingProgress } from '@/components/onboarding-progress';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
 import {
   ArrowUpRight,
   MoreVertical,
@@ -75,7 +75,7 @@ export default function GymOwnerDashboard() {
             </div>
 
             <div className="absolute top-0 right-0 h-full w-2/3">
-              <div className="absolute inset-0 bg-gradient-to-r from-card via-card/50 to-transparent z-[1]" />
+              <div className="absolute inset-0 bg-linear-to-r from-card via-card/50 to-transparent z-[1]" />
               <img
                 src="/hero-fitness.png"
                 alt="Fitness"

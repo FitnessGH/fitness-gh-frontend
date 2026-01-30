@@ -1,24 +1,19 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Column, DataTable } from '@/components/ui/data-table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Button } from '@ui/button';
+import { Column, DataTable } from '@ui/data-table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@ui/dropdown-menu';
+import { Input } from '@ui/input';
+import { Label } from '@ui/label';
 import {
   Briefcase,
-  DollarSign,
+  Coins,
   Eye,
   Mail,
   MoreVertical,
@@ -195,7 +190,7 @@ export default function EmployeesPage() {
       header: 'Salary',
       headerClassName: 'text-right',
       className: 'text-right font-semibold text-foreground',
-      cell: (emp) => `$${emp.salary.toLocaleString()}`,
+      cell: (emp) => `GH₵${emp.salary.toLocaleString()}`,
     },
     {
       header: 'Status',
@@ -258,7 +253,7 @@ export default function EmployeesPage() {
                   href="/gym-owner/payroll"
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <DollarSign className="w-4 h-4 text-[#2c9d9d]" />
+                  <Coins className="w-4 h-4 text-[#2c9d9d]" />
                   <span>View Payroll</span>
                 </Link>
               </DropdownMenuItem>

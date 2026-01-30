@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Column, DataTable } from '@/components/ui/data-table';
-import { Input } from '@/components/ui/input';
-import { DollarSign, Download, Eye, Search } from 'lucide-react';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Column, DataTable } from '@ui/data-table';
+import { Input } from '@ui/input';
+import { Coins, Download, Eye, Search } from 'lucide-react';
 import { useState } from 'react';
 
 interface Payment {
@@ -76,7 +76,7 @@ export default function PaymentsPage() {
       header: 'Amount',
       cell: (payment) => (
         <span className="text-foreground font-semibold">
-          ${payment.amount.toFixed(2)}
+          GH₵{payment.amount.toFixed(2)}
         </span>
       ),
     },
@@ -159,11 +159,11 @@ export default function PaymentsPage() {
             <div>
               <p className="text-sm text-muted-foreground">Total Revenue</p>
               <p className="text-2xl font-bold text-foreground mt-2">
-                ${totalRevenue.toFixed(2)}
+                GH₵{totalRevenue.toFixed(2)}
               </p>
             </div>
             <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-500" />
+              <Coins className="w-6 h-6 text-green-500" />
             </div>
           </div>
         </Card>
@@ -172,13 +172,11 @@ export default function PaymentsPage() {
             <div>
               <p className="text-sm text-muted-foreground">Pending Payments</p>
               <p className="text-2xl font-bold text-foreground mt-2">
-                ${pendingAmount.toFixed(2)}
+                GH₵{pendingAmount.toFixed(2)}
               </p>
             </div>
             <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center">
-              <div className="w-6 h-6 text-yellow-500 flex items-center justify-center font-bold font-serif">
-                $
-              </div>
+              <div className="text-yellow-500 font-bold text-sm">GH₵</div>
             </div>
           </div>
         </Card>

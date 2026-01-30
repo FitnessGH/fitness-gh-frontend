@@ -1,8 +1,8 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@ui/badge';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
 import { CheckCircle, Clock, MapPin, Phone, Users } from 'lucide-react';
 
 export default function MyGymPage() {
@@ -15,7 +15,7 @@ export default function MyGymPage() {
         </p>
       </div>
 
-      <Card className="p-6 border-0 shadow-lg bg-gradient-to-r from-primary/10 to-accent/10">
+      <Card className="p-6 border-0 shadow-lg bg-linear-to-r from-primary/10 to-accent/10">
         <div className="flex items-start justify-between mb-6">
           <div>
             <Badge className="bg-green-500 mb-3">Active Member</Badge>
@@ -29,7 +29,7 @@ export default function MyGymPage() {
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground mb-1">Premium Member</p>
-            <p className="text-2xl font-bold text-primary">$89.99/mo</p>
+            <p className="text-2xl font-bold text-primary">GH₵89.99/mo</p>
           </div>
         </div>
 

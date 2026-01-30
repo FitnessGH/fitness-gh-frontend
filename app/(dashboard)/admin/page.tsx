@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card';
+import { Card } from '@ui/card';
 import { AlertCircle, Building2, TrendingUp, Users } from 'lucide-react';
 
 export default function AdminDashboard() {

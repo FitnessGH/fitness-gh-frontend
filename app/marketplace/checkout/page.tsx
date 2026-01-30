@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@ui/button';
+import { Card } from '@ui/card';
+import { Input } from '@ui/input';
+import { Label } from '@ui/label';
 import { CheckCircle, Lock } from 'lucide-react';
 import { useState } from 'react';
 
@@ -26,7 +26,7 @@ export default function CheckoutPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/10 p-6">
+    <div className="min-h-screen bg-linear-to-br from-background to-secondary/10 p-6">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
           {['shipping', 'payment', 'confirmation'].map((step, i) => (

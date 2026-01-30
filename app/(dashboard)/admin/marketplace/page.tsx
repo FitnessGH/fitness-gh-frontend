@@ -1,13 +1,8 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import {
-  AlertTriangle,
-  DollarSign,
-  ShoppingCart,
-  TrendingUp,
-} from 'lucide-react';
+import { Badge } from '@ui/badge';
+import { Card } from '@ui/card';
+import { AlertTriangle, Coins, ShoppingCart, TrendingUp } from 'lucide-react';
 
 export default function AdminMarketplacePage() {
   return (
@@ -25,7 +20,7 @@ export default function AdminMarketplacePage() {
         {[
           { label: 'Active Vendors', value: '28', icon: ShoppingCart },
           { label: 'Total Transactions', value: '1,245', icon: TrendingUp },
-          { label: 'Monthly Revenue', value: '$45,230', icon: DollarSign },
+          { label: 'Monthly Revenue', value: 'GH₵45,230', icon: Coins },
           { label: 'Open Disputes', value: '3', icon: AlertTriangle },
         ].map((stat, i) => {
           const Icon = stat.icon;
@@ -110,9 +105,9 @@ export default function AdminMarketplacePage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { name: 'Elite Supplements', sales: '$12,450', orders: 234 },
-            { name: 'Fit Gear Co', sales: '$8,920', orders: 156 },
-            { name: 'HydroMax', sales: '$7,340', orders: 128 },
+            { name: 'Elite Supplements', sales: 'GH₵12,450', orders: 234 },
+            { name: 'Fit Gear Co', sales: 'GH₵8,920', orders: 156 },
+            { name: 'HydroMax', sales: 'GH₵7,340', orders: 128 },
           ].map((vendor, i) => (
             <div
               key={i}

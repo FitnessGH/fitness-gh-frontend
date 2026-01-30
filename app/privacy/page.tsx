@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
 import { BebasFont, SpaceFont } from '@/constant';
+import { Button } from '@ui/button';
 
 import Link from 'next/link';
 

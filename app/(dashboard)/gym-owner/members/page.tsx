@@ -1,23 +1,5 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Column, DataTable } from '@/components/ui/data-table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import {
   Member,
@@ -27,8 +9,21 @@ import {
   getMembers,
   updateMember,
 } from '@/lib/members-data';
+import { Avatar, AvatarFallback, AvatarImage } from '@ui/avatar';
+import { Button } from '@ui/button';
+import { Column, DataTable } from '@ui/data-table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@ui/dialog';
 import {
-  DollarSign,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@ui/dropdown-menu';
+import { Input } from '@ui/input';
+import {
+  Coins,
   Eye,
   MoreHorizontal,
   Pencil,
@@ -135,7 +130,7 @@ export default function MembersPage() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => handleOpenPaymentModal(member)}>
-                <DollarSign className="mr-2 h-4 w-4" />
+                <Coins className="mr-2 h-4 w-4" />
                 <span>Receive Payment</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleViewDetails(member)}>
@@ -237,12 +232,12 @@ export default function MembersPage() {
         expireDate: new Date(
           Date.now() + 30 * 24 * 60 * 60 * 1000,
         ).toLocaleDateString(),
-        paid: '$0',
+        paid: 'GH₵0',
         due: formData.package.includes('Gold')
-          ? '$450'
+          ? 'GH₵450'
           : formData.package.includes('Platinum')
-            ? '$600'
-            : '$300',
+            ? 'GH₵600'
+            : 'GH₵300',
         status: formData.status,
         transactions: [],
       };
@@ -291,8 +286,8 @@ export default function MembersPage() {
 
     const updatedMember: Member = {
       ...payingMember,
-      paid: `$${newPaid}`,
-      due: `$${newDue}`,
+      paid: `GH₵${newPaid}`,
+      due: `GH₵${newDue}`,
       status: newStatus as 'Paid' | 'Not paid',
       transactions: [...(payingMember.transactions || []), newTransaction],
     };
@@ -302,7 +297,7 @@ export default function MembersPage() {
 
     toast({
       title: 'Payment Recorded',
-      description: `Successfully recorded payment of $${paymentAmount} for ${payingMember.name}.`,
+      description: `Successfully recorded payment of GH₵${paymentAmount} for ${payingMember.name}.`,
     });
 
     setIsPaymentModalOpen(false);
@@ -476,7 +471,9 @@ export default function MembersPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Amount to Pay ($)</label>
+                <label className="text-sm font-medium">
+                  Amount to Pay (GH₵)
+                </label>
                 <Input
                   type="number"
                   placeholder="0.00"
