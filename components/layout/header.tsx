@@ -1,9 +1,9 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import type { AuthUser } from '@/lib/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@ui/avatar';
+import { Button } from '@ui/button';
+import { Input } from '@ui/input';
 import { Bell, ChevronDown, Menu, Search, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
