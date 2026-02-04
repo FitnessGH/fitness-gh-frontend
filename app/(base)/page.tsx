@@ -1,3 +1,4 @@
+import { FindGymSection } from '@/components/home/find-gym-section';
 import { BebasFont } from '@/constant';
 import { Button } from '@ui/button';
 import {
@@ -101,7 +102,7 @@ export default function HomePage() {
                     preload="metadata"
                   >
                     <source
-                      src="/videos/gym.mp4"
+                      src="/videos/gym-new.mp4"
                       type="video/mp4"
                     />
                   </video>
@@ -133,6 +134,8 @@ export default function HomePage() {
           </div>
         </section>
       </div>
+
+      <FindGymSection />
 
       <section className="px-6 py-16 border-y border-border bg-secondary/10">
         <div className="max-w-7xl mx-auto">
