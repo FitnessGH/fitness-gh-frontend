@@ -1,0 +1,23 @@
+
+    <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <rect width="64" height="64" rx="12.8" fill="#031a1b"/>
+      <g transform="translate(9.6, 9.6)">
+        <!-- Dumbbell icon -->
+        <g transform="translate(22.4, 22.4)">
+          <!-- Center bar -->
+          <rect x="-13.44" y="-2.6879999999999997" width="26.88" height="5.3759999999999994" rx="1.3439999999999999" fill="#32b0b0"/>
+
+          <!-- Left weight -->
+          <rect x="-17.919999999999998" y="-8.959999999999999" width="5.3759999999999994" height="17.919999999999998" rx="1.3439999999999999" fill="#32b0b0"/>
+          <rect x="-20.16" y="-6.72" width="3.5839999999999996" height="13.44" rx="0.8959999999999999" fill="#32b0b0"/>
+
+          <!-- Right weight -->
+          <rect x="12.544" y="-8.959999999999999" width="5.3759999999999994" height="17.919999999999998" rx="1.3439999999999999" fill="#32b0b0"/>
+          <rect x="16.576" y="-6.72" width="3.5839999999999996" height="13.44" rx="0.8959999999999999" fill="#32b0b0"/>
+        </g>
+
+        <!-- FG text below -->
+        <text x="22.4" y="38.08" font-family="Arial Black, sans-serif" font-size="8.064" font-weight="900" fill="#32b0b0" text-anchor="middle">FG</text>
+      </g>
+    </svg>
+  

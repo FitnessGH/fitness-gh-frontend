@@ -1,3 +1,17 @@
+import withPWAInit from '@ducanh2912/next-pwa';
+
+const withPWA = withPWAInit({
+  dest: 'public',
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  swcMinify: true,
+  disable: process.env.NODE_ENV === 'development',
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
@@ -6,6 +20,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+  // Required for Next.js 16 with webpack-based plugins
+  turbopack: {},
+};
 
-export default nextConfig
+export default withPWA(nextConfig);
