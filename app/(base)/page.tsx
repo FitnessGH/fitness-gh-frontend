@@ -102,7 +102,7 @@ export default function HomePage() {
                     preload="metadata"
                   >
                     <source
-                      src="/videos/gym.mp4"
+                      src="/videos/gym-new.mp4"
                       type="video/mp4"
                     />
                   </video>
