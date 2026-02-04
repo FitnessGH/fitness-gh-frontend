@@ -1,6 +1,6 @@
 import { AuthProvider } from '@/components/auth-context';
 import { SpaceFont } from '@/constant';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 import type React from 'react';
 
@@ -10,6 +10,17 @@ export const metadata: Metadata = {
   title: 'FitnessGH - Gym Management & Community Platform',
   description: 'Modern gym management, membership, and community platform',
   generator: 'next.js',
+  manifest: '/manifest.json',
+  keywords: [
+    'fitness',
+    'gym',
+    'workout',
+    'health',
+    'membership',
+    'Ghana',
+    'Accra',
+  ],
+  authors: [{ name: 'FitnessGH' }],
   icons: {
     icon: [
       {
@@ -27,6 +38,37 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'FitnessGH',
+  },
+  formatDetection: {
+    telephone: true,
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'FitnessGH',
+    title: 'FitnessGH - Gym Management & Community Platform',
+    description: 'Modern gym management, membership, and community platform',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FitnessGH - Gym Management & Community Platform',
+    description: 'Modern gym management, membership, and community platform',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#32b0b0' },
+    { media: '(prefers-color-scheme: dark)', color: '#031a1b' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -36,6 +78,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="manifest"
+          href="/manifest.json"
+        />
+        <meta
+          name="mobile-web-app-capable"
+          content="yes"
+        />
+        <meta
+          name="apple-mobile-web-app-capable"
+          content="yes"
+        />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta
+          name="apple-mobile-web-app-title"
+          content="FitnessGH"
+        />
+        <link
+          rel="apple-touch-icon"
+          href="/apple-icon.png"
+        />
+        <link
+          rel="apple-touch-startup-image"
+          href="/icons/icon-512x512.png"
+        />
+      </head>
       <body className={`${SpaceFont.className} font-sans antialiased`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
