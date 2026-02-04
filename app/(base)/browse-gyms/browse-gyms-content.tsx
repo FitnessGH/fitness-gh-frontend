@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@ui/badge';
 import { Button } from '@ui/button';
 import {
+  ArrowLeft,
   ChevronRight,
   Clock,
   Dumbbell,
@@ -25,6 +26,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 interface Gym {
@@ -356,6 +358,14 @@ export function BrowseGymsContent() {
         <div className="absolute top-12 right-12 w-24 h-24 border border-primary/10 rotate-45 opacity-30" />
 
         <div className="relative px-6 py-10 max-w-7xl mx-auto">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            Back to Home
+          </Link>
+
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-8">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
@@ -380,7 +390,6 @@ export function BrowseGymsContent() {
               </p>
             </div>
 
-            {/* Stats Pills */}
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-card/80 border border-border/50 backdrop-blur-sm">
                 <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -424,7 +433,6 @@ export function BrowseGymsContent() {
             </div>
           </div>
 
-          {/* Search Bar */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -467,11 +475,9 @@ export function BrowseGymsContent() {
         </div>
       </div>
 
-      {/* Filters & Controls */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b border-border/40">
         <div className="px-6 py-4 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            {/* Amenity Filters */}
             <div className="flex-1 overflow-x-auto scrollbar-hide">
               <div className="flex items-center gap-2">
                 {AMENITY_FILTERS.map((filter) => {
@@ -496,9 +502,7 @@ export function BrowseGymsContent() {
               </div>
             </div>
 
-            {/* Right Controls */}
             <div className="flex items-center gap-3">
-              {/* Sort Dropdown */}
               <div className="relative">
                 <select
                   value={sortBy}
@@ -517,7 +521,6 @@ export function BrowseGymsContent() {
                 <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground rotate-90 pointer-events-none" />
               </div>
 
-              {/* View Toggle */}
               <div className="flex items-center rounded-xl bg-card/80 border border-border/50 p-1">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -543,7 +546,6 @@ export function BrowseGymsContent() {
                 </button>
               </div>
 
-              {/* Filter Button */}
               <Button
                 variant="outline"
                 size="sm"
@@ -556,7 +558,6 @@ export function BrowseGymsContent() {
             </div>
           </div>
 
-          {/* Results Count */}
           <div className="mt-4 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing{' '}
@@ -683,6 +684,33 @@ export function BrowseGymsContent() {
             </Button>
           </div>
         )}
+
+        <div className="mt-16 text-center">
+          <div className="inline-flex flex-col items-center p-8 rounded-3xl bg-linear-to-br from-primary/10 to-primary/5 border border-primary/20">
+            <h3 className={cn(BebasFont.className, 'text-3xl mb-2')}>
+              Ready to Start Your Fitness Journey?
+            </h3>
+            <p className="text-muted-foreground mb-6 max-w-md">
+              Sign up today and get access to exclusive gym deals and
+              personalized recommendations.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/signup/customer">
+                <Button className="h-12 px-8 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+                  Create Account
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  className="h-12 px-8 rounded-xl border-primary/30 text-foreground hover:bg-primary/10"
+                >
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -811,10 +839,12 @@ function FeaturedGymCard({
           )}
         </div>
 
-        <Button className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 group/btn">
-          View Gym Details
-          <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-        </Button>
+        <Link href={`/gyms/${gym.id}`}>
+          <Button className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 group/btn">
+            View Gym Details
+            <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+          </Button>
+        </Link>
       </div>
     </div>
   );
@@ -925,13 +955,15 @@ function GymCard({
           )}
         </div>
 
-        <Button
-          variant="outline"
-          className="w-full h-10 rounded-xl border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all gap-1.5 group/btn"
-        >
-          View Details
-          <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5" />
-        </Button>
+        <Link href={`/gyms/${gym.id}`}>
+          <Button
+            variant="outline"
+            className="w-full h-10 rounded-xl border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all gap-1.5 group/btn"
+          >
+            View Details
+            <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5" />
+          </Button>
+        </Link>
       </div>
     </div>
   );
@@ -1030,10 +1062,12 @@ function GymListItem({
             GH₵{gym.price}
             <span className="text-sm text-muted-foreground font-sans">/mo</span>
           </div>
-          <Button className="h-9 px-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium gap-1.5 group/btn">
-            View Details
-            <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5" />
-          </Button>
+          <Link href={`/gyms/${gym.id}`}>
+            <Button className="h-9 px-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium gap-1.5 group/btn">
+              View Details
+              <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
