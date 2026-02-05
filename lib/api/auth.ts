@@ -37,6 +37,11 @@ export interface AuthResponse {
   };
 }
 
+export interface OTPResponse {
+  success: boolean;
+  message: string;
+}
+
 // Registration data types for different user types
 export interface BaseRegistrationData {
   email: string;
@@ -120,6 +125,38 @@ export class AuthAPI {
     return {
       'Content-Type': 'application/json',
     };
+  }
+
+  static async sendOTP(email: string): Promise<OTPResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to send OTP');
+    }
+
+    const result = await response.json();
+    return result.data;
+  }
+
+  static async verifyOTP(email: string, otp: string): Promise<OTPResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ email, otp }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to verify OTP');
+    }
+
+    const result = await response.json();
+    return result.data;
   }
 
   static async register(data: RegistrationData): Promise<AuthResponse> {
