@@ -1,24 +1,25 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
+import { BebasFont } from '@/constant';
 import { Button } from '@ui/button';
-import { Card } from '@ui/card';
 import { Progress } from '@ui/progress';
 import {
   ArrowRight,
   CheckCircle2,
-  Clock,
   Dumbbell,
   MapPin,
+  Rocket,
   Settings,
+  Sparkles,
   Users,
 } from 'lucide-react';
-
 import Link from 'next/link';
 
 interface OnboardingItem {
   id: string;
   label: string;
+  description: string;
   icon: React.ReactNode;
   path: string;
   completed: boolean;
@@ -31,28 +32,32 @@ export function OnboardingProgress() {
     {
       id: 'gym-info',
       label: 'Gym Details',
-      icon: <MapPin className="w-4 h-4" />,
+      description: 'Add location, hours & contact info',
+      icon: <MapPin className="w-5 h-5" />,
       path: '/gym-owner/settings',
       completed: !!user?.gymDetails?.location,
     },
     {
       id: 'amenities',
       label: 'Amenities',
-      icon: <Dumbbell className="w-4 h-4" />,
+      description: 'List equipment & facilities',
+      icon: <Dumbbell className="w-5 h-5" />,
       path: '/gym-owner/settings',
       completed: !!user?.gymDetails?.amenities?.length,
     },
     {
       id: 'plans',
       label: 'Membership Plans',
-      icon: <Settings className="w-4 h-4" />,
+      description: 'Set up pricing & packages',
+      icon: <Settings className="w-5 h-5" />,
       path: '/gym-owner/settings',
       completed: !!user?.gymDetails?.plans?.length,
     },
     {
       id: 'employees',
       label: 'Team Members',
-      icon: <Users className="w-4 h-4" />,
+      description: 'Invite trainers & staff',
+      icon: <Users className="w-5 h-5" />,
       path: '/gym-owner/employees',
       completed: !!user?.gymDetails?.employees?.length,
     },
@@ -60,98 +65,101 @@ export function OnboardingProgress() {
 
   const completedCount = items.filter((item) => item.completed).length;
   const progressPercentage = (completedCount / items.length) * 100;
+  const isComplete = completedCount === items.length;
+
+  if (isComplete) {
+    return null;
+  }
 
   return (
-    <Card className="p-6 bg-linear-to-br from-primary/5 to-primary/10 border-primary/20 rounded-2xl">
-      <div className="space-y-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Setup Progress</h3>
+    <div className="rounded-3xl border border-primary/30 bg-linear-to-br from-primary/10 via-card to-card p-6 mb-6">
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20">
+            <Rocket className="h-6 w-6 text-primary" />
           </div>
-          <p className="text-sm text-muted-foreground">
-            {completedCount} of {items.length} steps completed
+          <div>
+            <h3 className={`${BebasFont.className} text-2xl text-foreground`}>
+              Complete Your Setup
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {completedCount} of {items.length} steps done
+            </p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className={`${BebasFont.className} text-3xl text-primary`}>
+            {Math.round(progressPercentage)}%
           </p>
         </div>
+      </div>
 
-        <div className="space-y-2">
-          <Progress
-            value={progressPercentage}
-            className="h-2"
-          />
-          <p className="text-xs text-muted-foreground text-right">
-            {Math.round(progressPercentage)}% Complete
-          </p>
-        </div>
+      <div className="mb-6">
+        <Progress
+          value={progressPercentage}
+          className="h-2 bg-muted"
+        />
+      </div>
 
-        <div className="space-y-3">
-          {items.map((item) => (
+      <div className="grid gap-3 sm:grid-cols-2">
+        {items.map((item, index) => (
+          <Link
+            key={item.id}
+            href={item.path}
+            className={`group relative flex items-center gap-4 rounded-2xl border p-4 transition-all ${
+              item.completed
+                ? 'border-green-500/30 bg-green-500/5'
+                : 'border-border bg-background/50 hover:border-primary/50 hover:bg-primary/5'
+            }`}
+          >
             <div
-              key={item.id}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                 item.completed
-                  ? 'bg-green-500/10 border border-green-500/20'
-                  : 'bg-background/40 border border-border/50'
+                  ? 'bg-green-500 text-white'
+                  : 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'
               }`}
             >
-              <div
-                className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+              {item.completed ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : (
+                item.icon
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <p
+                className={`font-medium ${
                   item.completed
-                    ? 'bg-green-500 text-white'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {item.completed ? (
-                  <CheckCircle2 className="w-3 h-3" />
-                ) : (
-                  item.icon
-                )}
-              </div>
-              <span
-                className={`text-sm flex-1 ${
-                  item.completed
-                    ? 'text-foreground font-medium line-through opacity-60'
+                    ? 'text-green-600 line-through'
                     : 'text-foreground'
                 }`}
               >
                 {item.label}
-              </span>
-              {!item.completed && (
-                <Link href={item.path}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 gap-1 px-2"
-                  >
-                    <span className="text-xs">Complete</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </Button>
-                </Link>
-              )}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {item.description}
+              </p>
             </div>
-          ))}
-        </div>
 
-        {completedCount === items.length && (
-          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-center">
-            <p className="text-sm font-semibold text-green-600">
-              🎉 Setup Complete! Your gym is all set up.
-            </p>
-          </div>
-        )}
-
-        {completedCount < items.length && (
-          <Link
-            href="/gym-owner/settings"
-            className="block"
-          >
-            <Button className="w-full bg-primary hover:bg-primary/90 gap-2">
-              <span>Continue Setup</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            {!item.completed && (
+              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            )}
           </Link>
-        )}
+        ))}
       </div>
-    </Card>
+
+      <div className="mt-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <span>Complete setup to unlock all features</span>
+        </div>
+        <Link href="/gym-owner/settings">
+          <Button className="bg-primary hover:bg-primary/90 gap-2">
+            Continue Setup
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 }

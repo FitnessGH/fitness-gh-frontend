@@ -20,46 +20,75 @@ export const metadata: Metadata = {
 
 const plans = [
   {
-    name: 'Launch',
-    price: 'GH₵89',
-    description: 'For single-location studios getting organized fast.',
+    name: 'Free Trial',
+    price: 'GH₵0',
+    period: '1 month',
+    description:
+      'Try the platform risk-free. Run real classes, not just demos.',
     highlight: false,
     cta: 'Start Free Trial',
+    badge: null,
     features: [
-      'Up to 350 active members',
+      'Up to 50 active members',
+      'Scheduling + class waitlists',
+      '1 free trial per gym',
+      'Full platform access',
+      '30 days only',
+    ],
+    note: 'No billing features • Auto-expires after 30 days',
+  },
+  {
+    name: 'Basic',
+    price: 'GH₵100',
+    period: '/month',
+    description:
+      'For small gyms and single-location studios getting organized.',
+    highlight: false,
+    cta: 'Get Started',
+    badge: null,
+    features: [
+      'Up to 100 active members',
       'Scheduling + class waitlists',
       'Branded member app',
       'Automated billing + receipts',
       'Marketplace storefront',
     ],
+    note: 'Single location • Single admin/coach role',
   },
   {
-    name: 'Momentum',
-    price: 'GH₵169',
-    description: 'For growing gyms scaling ops and revenue together.',
+    name: 'Premium',
+    price: 'GH₵250',
+    period: '/month',
+    description: 'For growing gyms focused on revenue and retention.',
     highlight: true,
-    cta: 'Book a Demo',
+    cta: 'Upgrade to Premium',
+    badge: 'Most Popular',
     features: [
-      'Up to 1,200 active members',
+      'Up to 500 active members',
+      'Everything in Basic, plus:',
       'Multi-coach permissions',
       'Advanced analytics suite',
-      'Retention and churn alerts',
+      'Retention & churn alerts',
       'Priority support',
     ],
+    note: 'Single location',
   },
   {
     name: 'Enterprise',
-    price: "Let's talk",
-    description: 'Multi-location and franchise management.',
+    price: 'Custom',
+    period: '',
+    description: 'For chains, franchises, and fitness brands.',
     highlight: false,
     cta: 'Talk to Sales',
+    badge: null,
     features: [
-      'Unlimited locations',
+      'Multiple gym locations',
       'Custom roles + SSO',
       'Revenue forecasting',
       'Dedicated success lead',
       'Custom data exports',
     ],
+    note: 'Contract-based pricing',
   },
 ];
 
@@ -88,6 +117,11 @@ const highlights = [
 
 const faqs = [
   {
+    question: 'How does the free trial work?',
+    answer:
+      'You get 1 month free with up to 50 active members. Run real classes, not just demos. One trial per gym, auto-expires after 30 days.',
+  },
+  {
     question: 'Do you charge per class or per member?',
     answer:
       'Pricing is based on active members in your database. You can run unlimited classes.',
@@ -98,14 +132,9 @@ const faqs = [
       'Yes. Upgrade or downgrade at any time. Changes take effect on your next billing cycle.',
   },
   {
-    question: 'Is there a setup fee?',
+    question: 'Why is it so affordable?',
     answer:
-      'No. We include white-glove import and onboarding for every new gym.',
-  },
-  {
-    question: 'Do you offer annual discounts?',
-    answer:
-      'Yes. Annual plans include two months free. Contact sales for multi-site pricing.',
+      'Our Basic plan costs less than what you charge 1 member per month. Easy to justify, impossible to outgrow.',
   },
 ];
 
@@ -156,24 +185,24 @@ export default function PricingPage() {
               <div className="mt-6 space-y-5">
                 <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5">
                   <p className="text-xs uppercase tracking-[0.2em] text-primary">
-                    Momentum
+                    Basic
                   </p>
                   <div className="flex items-end gap-2 mt-3">
-                    <p className={`${BebasFont.className} text-4xl`}>GH₵169</p>
+                    <p className={`${BebasFont.className} text-4xl`}>GH₵100</p>
                     <span className="text-sm text-muted-foreground">
                       / month
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Best for 200-1000 active members.
+                    For gyms with up to 100 active members.
                   </p>
                 </div>
                 <div className="grid gap-3 text-sm text-muted-foreground">
                   {[
-                    'Unlimited classes & check-ins',
-                    'Automated payment retries',
-                    'Community events + challenges',
-                    'Retention insights dashboard',
+                    'Scheduling + class waitlists',
+                    'Branded member app',
+                    'Automated billing + receipts',
+                    'Marketplace storefront',
                   ].map((item) => (
                     <div
                       key={item}
@@ -184,8 +213,11 @@ export default function PricingPage() {
                     </div>
                   ))}
                 </div>
+                <p className="text-xs text-muted-foreground border-t border-border/50 pt-3">
+                  Costs less than 1 member/month
+                </p>
                 <Button className="w-full bg-primary hover:bg-primary/90">
-                  See Momentum Features
+                  Start Free Trial
                 </Button>
               </div>
             </div>
@@ -198,7 +230,7 @@ export default function PricingPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-10">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-primary">
-                What’s included
+                What's included
               </p>
               <h2 className={`${BebasFont.className} text-4xl`}>
                 Built-in ops support
@@ -240,24 +272,25 @@ export default function PricingPage() {
               Straightforward pricing. No surprises.
             </h2>
             <p className="text-muted-foreground">
-              All plans include member apps, class scheduling, billing, and
-              community tools. Add-ons are optional, not required.
+              Start with a free 1-month trial. All paid plans include member
+              apps, class scheduling, and community tools. Costs less than 1
+              member/month.
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative h-full rounded-3xl border p-8 transition ${
+                className={`relative h-full rounded-3xl border p-6 transition ${
                   plan.highlight
                     ? 'border-primary/70 bg-primary/10 shadow-2xl shadow-primary/10'
                     : 'border-border bg-card/70'
                 }`}
               >
-                {plan.highlight && (
-                  <Badge className="absolute -top-4 left-8 bg-primary text-primary-foreground">
-                    Most Popular
+                {plan.badge && (
+                  <Badge className="absolute -top-4 left-6 bg-primary text-primary-foreground">
+                    {plan.badge}
                   </Badge>
                 )}
                 <div className="space-y-4">
@@ -265,13 +298,13 @@ export default function PricingPage() {
                     <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
                       {plan.name}
                     </p>
-                    <div className="flex items-end gap-2 mt-3">
-                      <p className={`${BebasFont.className} text-4xl`}>
+                    <div className="flex items-end gap-1 mt-3">
+                      <p className={`${BebasFont.className} text-3xl`}>
                         {plan.price}
                       </p>
-                      {plan.price !== 'Let’s talk' && (
+                      {plan.period && (
                         <span className="text-sm text-muted-foreground">
-                          / month
+                          {plan.period}
                         </span>
                       )}
                     </div>
@@ -279,20 +312,25 @@ export default function PricingPage() {
                       {plan.description}
                     </p>
                   </div>
-                  <div className="space-y-3 text-sm text-muted-foreground">
+                  <div className="space-y-2 text-sm text-muted-foreground">
                     {plan.features.map((feature) => (
                       <div
                         key={feature}
-                        className="flex items-center gap-2"
+                        className="flex items-start gap-2"
                       >
-                        <Check className="h-4 w-4 text-primary" />
+                        <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </div>
                     ))}
                   </div>
+                  {plan.note && (
+                    <p className="text-xs text-muted-foreground/70 border-t border-border pt-3 mt-3">
+                      {plan.note}
+                    </p>
+                  )}
                 </div>
                 <Button
-                  className={`mt-8 w-full ${
+                  className={`mt-6 w-full ${
                     plan.highlight
                       ? 'bg-primary hover:bg-primary/90'
                       : 'bg-secondary/50 hover:bg-secondary/70 text-foreground'
