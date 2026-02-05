@@ -44,48 +44,48 @@ export default function VendorSignupPage() {
   const { signup } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
-  if (!value || value.trim() === '') {
-    return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
-  }
-  
-  switch (field) {
-    case 'email':
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) {
-        return 'Please enter a valid email address';
-      }
-      break;
-    case 'password':
-      const passwordValidation = {
-        length: value.length >= 8,
-        hasUpper: /[A-Z]/.test(value),
-        hasLower: /[a-z]/.test(value),
-        hasNumber: /\d/.test(value),
-      };
-      
-      if (value.length < 8) {
-        return 'Password must be at least 8 characters';
-      }
-      if (!passwordValidation.hasUpper) {
-        return 'Password must contain at least one uppercase letter';
-      }
-      if (!passwordValidation.hasLower) {
-        return 'Password must contain at least one lowercase letter';
-      }
-      if (!passwordValidation.hasNumber) {
-        return 'Password must contain at least one number';
-      }
-      break;
-    case 'name':
-    case 'businessName':
-      if (value.trim().length < 2) {
-        return `${field === 'name' ? 'Name' : 'Business name'} must be at least 2 characters`;
-      }
-      break;
-  }
-  
-  return '';
-};
+    if (!value || value.trim() === '') {
+      return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+    }
+
+    switch (field) {
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          return 'Please enter a valid email address';
+        }
+        break;
+      case 'password':
+        const passwordValidation = {
+          length: value.length >= 8,
+          hasUpper: /[A-Z]/.test(value),
+          hasLower: /[a-z]/.test(value),
+          hasNumber: /\d/.test(value),
+        };
+
+        if (value.length < 8) {
+          return 'Password must be at least 8 characters';
+        }
+        if (!passwordValidation.hasUpper) {
+          return 'Password must contain at least one uppercase letter';
+        }
+        if (!passwordValidation.hasLower) {
+          return 'Password must contain at least one lowercase letter';
+        }
+        if (!passwordValidation.hasNumber) {
+          return 'Password must contain at least one number';
+        }
+        break;
+      case 'name':
+      case 'businessName':
+        if (value.trim().length < 2) {
+          return `${field === 'name' ? 'Name' : 'Business name'} must be at least 2 characters`;
+        }
+        break;
+    }
+
+    return '';
+  };
 
   const handleChange = (field: keyof SignupData, value: string) => {
     setSignupData((prev) => ({ ...prev, [field]: value }));
@@ -214,7 +214,11 @@ export default function VendorSignupPage() {
                 value={signupData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.name ? 'border-red-500' : ''}
               />
+              {validationErrors.name && (
+                <p className="text-xs text-red-500">{validationErrors.name}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -226,7 +230,11 @@ export default function VendorSignupPage() {
                 value={signupData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.email ? 'border-red-500' : ''}
               />
+              {validationErrors.email && (
+                <p className="text-xs text-red-500">{validationErrors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -237,21 +245,44 @@ export default function VendorSignupPage() {
                 value={signupData.businessName}
                 onChange={(e) => handleChange('businessName', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.businessName ? 'border-red-500' : ''}
               />
+              {validationErrors.businessName && (
+                <p className="text-xs text-red-500">{validationErrors.businessName}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={signupData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={signupData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  disabled={isLoading}
+                  className={`pr-10 ${validationErrors.password ? 'border-red-500' : ''}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={isLoading}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              {validationErrors.password && (
+                <p className="text-xs text-red-500">{validationErrors.password}</p>
+              )}
               <p className="text-xs text-muted-foreground">
-                At least 6 characters
+                At least 8 characters with uppercase, lowercase, and number
               </p>
             </div>
 
