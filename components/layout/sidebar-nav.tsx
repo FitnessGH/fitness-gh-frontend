@@ -164,7 +164,7 @@ interface SidebarNavProps {
 
 export function SidebarNav({ role, onLogout, onNavigate }: SidebarNavProps) {
   const pathname = usePathname();
-  const items = navItems[role];
+  const items = navItems[role] ?? navItems.customer;
 
   return (
     <div className="flex flex-col h-full">

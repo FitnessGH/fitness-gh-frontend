@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 // Base URL for API - should be in environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 // API response types
 export interface AuthResponse {
@@ -127,6 +128,11 @@ export class AuthAPI {
     };
   }
 
+  private static async parseResponse<T>(response: Response): Promise<T> {
+    const result = await response.json();
+    return (result?.data ?? result) as T;
+  }
+
   static async sendOTP(email: string): Promise<OTPResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
       method: 'POST',
@@ -139,8 +145,7 @@ export class AuthAPI {
       throw new Error(error.message || 'Failed to send OTP');
     }
 
-    const result = await response.json();
-    return result.data;
+    return this.parseResponse<OTPResponse>(response);
   }
 
   static async verifyOTP(email: string, otp: string): Promise<OTPResponse> {
@@ -155,8 +160,7 @@ export class AuthAPI {
       throw new Error(error.message || 'Failed to verify OTP');
     }
 
-    const result = await response.json();
-    return result.data;
+    return this.parseResponse<OTPResponse>(response);
   }
 
   static async register(data: RegistrationData): Promise<AuthResponse> {
@@ -171,7 +175,7 @@ export class AuthAPI {
       throw new Error(error.message || 'Registration failed');
     }
 
-    return response.json();
+    return this.parseResponse<AuthResponse>(response);
   }
 
   static async login(email: string, password: string): Promise<AuthResponse> {
@@ -186,7 +190,7 @@ export class AuthAPI {
       throw new Error(error.message || 'Login failed');
     }
 
-    return response.json();
+    return this.parseResponse<AuthResponse>(response);
   }
 
   static async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
@@ -201,7 +205,7 @@ export class AuthAPI {
       throw new Error(error.message || 'Token refresh failed');
     }
 
-    return response.json();
+    return this.parseResponse<{ accessToken: string; refreshToken: string }>(response);
   }
 
   static async logout(refreshToken: string): Promise<void> {
@@ -231,7 +235,7 @@ export class AuthAPI {
       throw new Error(error.message || 'Failed to get user profile');
     }
 
-    return response.json();
+    return this.parseResponse<AuthResponse>(response);
   }
 
   static async changePassword(

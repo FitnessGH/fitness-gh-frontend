@@ -116,7 +116,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Call real API
         const authResponse = await AuthAPI.register(registrationData);
-        
+
+        if (!authResponse?.account) {
+          console.error('Signup response missing account:', authResponse);
+          throw new Error('Signup failed: missing account data');
+        }
+
         // Transform response to match frontend AuthUser format
         const authUser: AuthUser = {
           id: authResponse.account.id,
