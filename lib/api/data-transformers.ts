@@ -1,4 +1,5 @@
-import type { RegistrationData } from './auth';
+import type { RegistrationData, FrontendUserType } from './auth';
+import { mapUserType } from './auth';
 
 // Transform frontend data to backend format
 export class DataTransformer {

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { getDashboardPath } from '@/lib/auth';
-import { Package, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { Package, ShieldCheck, ShoppingBag, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
@@ -21,9 +21,18 @@ interface SignupData {
   businessName: string;
 }
 
+interface ValidationErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  businessName?: string;
+}
+
 export default function VendorSignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
     email: '',
@@ -34,36 +43,98 @@ export default function VendorSignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
 
+  const validateField = (field: keyof SignupData, value: string): string => {
+  if (!value || value.trim() === '') {
+    return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+  }
+  
+  switch (field) {
+    case 'email':
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        return 'Please enter a valid email address';
+      }
+      break;
+    case 'password':
+      const passwordValidation = {
+        length: value.length >= 8,
+        hasUpper: /[A-Z]/.test(value),
+        hasLower: /[a-z]/.test(value),
+        hasNumber: /\d/.test(value),
+      };
+      
+      if (value.length < 8) {
+        return 'Password must be at least 8 characters';
+      }
+      if (!passwordValidation.hasUpper) {
+        return 'Password must contain at least one uppercase letter';
+      }
+      if (!passwordValidation.hasLower) {
+        return 'Password must contain at least one lowercase letter';
+      }
+      if (!passwordValidation.hasNumber) {
+        return 'Password must contain at least one number';
+      }
+      break;
+    case 'name':
+    case 'businessName':
+      if (value.trim().length < 2) {
+        return `${field === 'name' ? 'Name' : 'Business name'} must be at least 2 characters`;
+      }
+      break;
+  }
+  
+  return '';
+};
+
   const handleChange = (field: keyof SignupData, value: string) => {
     setSignupData((prev) => ({ ...prev, [field]: value }));
+    
+    // Validate field in real-time
+    const errorMessage = validateField(field, value);
+    setValidationErrors((prev) => ({
+      ...prev,
+      [field]: errorMessage || undefined,
+    }));
+    
+    // Clear general error when user starts typing
+    if (error) {
+      setError('');
+    }
   };
 
   const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate all fields
+    const errors: ValidationErrors = {};
+    Object.keys(signupData).forEach((field) => {
+      const errorMessage = validateField(field as keyof SignupData, signupData[field as keyof SignupData]);
+      if (errorMessage) {
+        errors[field as keyof ValidationErrors] = errorMessage;
+      }
+    });
+    
+    setValidationErrors(errors);
+    
+    // Check if there are any validation errors
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
-      if (
-        !signupData.name ||
-        !signupData.email ||
-        !signupData.password ||
-        !signupData.businessName
-      ) {
-        throw new Error('Please fill in all fields');
-      }
-
-      if (signupData.password.length < 6) {
-        throw new Error('Password must be at least 6 characters');
-      }
-
-      const user = await signup({
+      await signup({
         name: signupData.name,
         email: signupData.email,
-        role: 'vendor',
+        password: signupData.password,
+        userType: 'vendor',
+        businessName: signupData.businessName,
       });
 
-      router.push(getDashboardPath(user.role));
+      router.push('/vendor');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {

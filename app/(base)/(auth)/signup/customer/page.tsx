@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { getDashboardPath } from '@/lib/auth';
-import { Dumbbell, Sparkles, Users } from 'lucide-react';
+import { Dumbbell, Eye, EyeOff, Sparkles, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
@@ -20,9 +20,17 @@ interface SignupData {
   password: string;
 }
 
-export default function CustomerSignupPage() {
+interface ValidationErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+}
+
+export default function AthleteSignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
     email: '',
@@ -32,31 +40,96 @@ export default function CustomerSignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
 
+  const validateField = (field: keyof SignupData, value: string): string => {
+    if (!value || value.trim() === '') {
+      return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+    }
+    
+    switch (field) {
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          return 'Please enter a valid email address';
+        }
+        break;
+      case 'password':
+        const passwordValidation = {
+          length: value.length >= 8,
+          hasUpper: /[A-Z]/.test(value),
+          hasLower: /[a-z]/.test(value),
+          hasNumber: /\d/.test(value),
+        };
+        
+        if (value.length < 8) {
+          return 'Password must be at least 8 characters';
+        }
+        if (!passwordValidation.hasUpper) {
+          return 'Password must contain at least one uppercase letter';
+        }
+        if (!passwordValidation.hasLower) {
+          return 'Password must contain at least one lowercase letter';
+        }
+        if (!passwordValidation.hasNumber) {
+          return 'Password must contain at least one number';
+        }
+        break;
+      case 'name':
+        if (value.trim().length < 2) {
+          return 'Name must be at least 2 characters';
+        }
+        break;
+    }
+    
+    return '';
+  };
+
   const handleChange = (field: keyof SignupData, value: string) => {
     setSignupData((prev) => ({ ...prev, [field]: value }));
+    
+    // Validate field in real-time
+    const errorMessage = validateField(field, value);
+    setValidationErrors((prev) => ({
+      ...prev,
+      [field]: errorMessage || undefined,
+    }));
+    
+    // Clear general error when user starts typing
+    if (error) {
+      setError('');
+    }
   };
 
   const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate all fields
+    const errors: ValidationErrors = {};
+    Object.keys(signupData).forEach((field) => {
+      const errorMessage = validateField(field as keyof SignupData, signupData[field as keyof SignupData]);
+      if (errorMessage) {
+        errors[field as keyof ValidationErrors] = errorMessage;
+      }
+    });
+    
+    setValidationErrors(errors);
+    
+    // Check if there are any validation errors
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
-      if (!signupData.name || !signupData.email || !signupData.password) {
-        throw new Error('Please fill in all fields');
-      }
-
-      if (signupData.password.length < 6) {
-        throw new Error('Password must be at least 6 characters');
-      }
-
-      const user = await signup({
+      await signup({
         name: signupData.name,
         email: signupData.email,
-        role: 'customer',
+        password: signupData.password,
+        userType: 'athlete',
       });
 
-      router.push(getDashboardPath(user.role));
+      router.push('/customer');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {
@@ -136,7 +209,11 @@ export default function CustomerSignupPage() {
                 value={signupData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.name ? 'border-red-500' : ''}
               />
+              {validationErrors.name && (
+                <p className="text-xs text-red-500">{validationErrors.name}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -148,28 +225,50 @@ export default function CustomerSignupPage() {
                 value={signupData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.email ? 'border-red-500' : ''}
               />
+              {validationErrors.email && (
+                <p className="text-xs text-red-500">{validationErrors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={signupData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={signupData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  disabled={isLoading}
+                  className={`pr-10 ${validationErrors.password ? 'border-red-500' : ''}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              {validationErrors.password && (
+                <p className="text-xs text-red-500">{validationErrors.password}</p>
+              )}
               <p className="text-xs text-muted-foreground">
-                At least 6 characters
+                At least 8 characters with uppercase, lowercase, and number
               </p>
             </div>
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
+              className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 cursor-pointer"
             >
               {isLoading ? 'Creating Account...' : 'Create Member Account'}
             </Button>

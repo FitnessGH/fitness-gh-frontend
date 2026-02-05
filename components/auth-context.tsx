@@ -18,7 +18,7 @@ interface AuthContextType {
     name: string;
     email: string;
     password: string;
-    userType: 'gym_owner' | 'customer' | 'vendor';
+    userType: 'athlete' | 'vendor' | 'owner';
     gymName?: string;
     businessName?: string;
   }) => Promise<AuthUser>;
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       name: string;
       email: string;
       password: string;
-      userType: 'gym_owner' | 'customer' | 'vendor';
+      userType: 'athlete' | 'vendor' | 'owner';
       gymName?: string;
       businessName?: string;
     }) => {
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Transform data based on user type
         let registrationData;
         switch (data.userType) {
-          case 'gym_owner':
+          case 'owner':
             registrationData = DataTransformer.transformGymOwnerData({
               name: data.name,
               email: data.email,
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               gymName: data.gymName || '',
             });
             break;
-          case 'customer':
+          case 'athlete':
             registrationData = DataTransformer.transformCustomerData({
               name: data.name,
               email: data.email,

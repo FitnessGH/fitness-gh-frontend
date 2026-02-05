@@ -66,6 +66,23 @@ export type RegistrationData =
   | CustomerRegistrationData 
   | VendorRegistrationData;
 
+// Frontend user types mapping
+export type FrontendUserType = 'athlete' | 'vendor' | 'owner';
+
+// Helper function to map frontend user types to backend user types
+export const mapUserType = (frontendType: FrontendUserType): 'GYM_OWNER' | 'MEMBER' | 'EMPLOYEE' => {
+  switch (frontendType) {
+    case 'owner':
+      return 'GYM_OWNER';
+    case 'athlete':
+      return 'MEMBER';
+    case 'vendor':
+      return 'EMPLOYEE';
+    default:
+      throw new Error(`Unknown user type: ${frontendType}`);
+  }
+};
+
 // Validation schemas
 export const baseRegistrationSchema = z.object({
   email: z.string().email('Invalid email address'),

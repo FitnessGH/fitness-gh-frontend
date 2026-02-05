@@ -132,7 +132,7 @@ export default function ApplyPage() {
         name: signupData.name,
         email: signupData.email,
         password: signupData.password,
-        userType: 'gym_owner',
+        userType: 'owner',
         gymName: signupData.gymName,
       });
 
