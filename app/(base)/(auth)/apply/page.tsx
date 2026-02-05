@@ -19,10 +19,18 @@ interface SignupData {
   gymName: string;
 }
 
+interface ValidationErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  gymName?: string;
+}
+
 export default function ApplyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
     email: '',
@@ -33,29 +41,77 @@ export default function ApplyPage() {
   const router = useRouter();
   const { signup } = useAuth();
 
+  const validateField = (field: keyof SignupData, value: string): string => {
+    if (!value || value.trim() === '') {
+      return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+    }
+    
+    switch (field) {
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          return 'Please enter a valid email address';
+        }
+        break;
+      case 'password':
+        if (value.length < 6) {
+          return 'Password must be at least 6 characters';
+        }
+        break;
+      case 'name':
+        if (value.trim().length < 2) {
+          return 'Name must be at least 2 characters';
+        }
+        break;
+      case 'gymName':
+        if (value.trim().length < 2) {
+          return 'Gym name must be at least 2 characters';
+        }
+        break;
+    }
+    
+    return '';
+  };
+
   const handleChange = (field: keyof SignupData, value: string) => {
     setSignupData((prev) => ({ ...prev, [field]: value }));
+    
+    // Validate field in real-time
+    const errorMessage = validateField(field, value);
+    setValidationErrors((prev) => ({
+      ...prev,
+      [field]: errorMessage || undefined,
+    }));
+    
+    // Clear general error when user starts typing
+    if (error) {
+      setError('');
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate all fields
+    const errors: ValidationErrors = {};
+    Object.keys(signupData).forEach((field) => {
+      const errorMessage = validateField(field as keyof SignupData, signupData[field as keyof SignupData]);
+      if (errorMessage) {
+        errors[field as keyof ValidationErrors] = errorMessage;
+      }
+    });
+    
+    setValidationErrors(errors);
+    
+    // Check if there are any validation errors
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
-      if (
-        !signupData.name ||
-        !signupData.email ||
-        !signupData.password ||
-        !signupData.gymName
-      ) {
-        throw new Error('Please fill in all fields');
-      }
-
-      if (signupData.password.length < 6) {
-        throw new Error('Password must be at least 6 characters');
-      }
-
       await signup({
         name: signupData.name,
         email: signupData.email,
@@ -162,7 +218,11 @@ export default function ApplyPage() {
                 value={signupData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.name ? 'border-red-500' : ''}
               />
+              {validationErrors.name && (
+                <p className="text-xs text-red-500">{validationErrors.name}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -174,7 +234,11 @@ export default function ApplyPage() {
                 value={signupData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.email ? 'border-red-500' : ''}
               />
+              {validationErrors.email && (
+                <p className="text-xs text-red-500">{validationErrors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -185,7 +249,11 @@ export default function ApplyPage() {
                 value={signupData.gymName}
                 onChange={(e) => handleChange('gymName', e.target.value)}
                 disabled={isLoading}
+                className={validationErrors.gymName ? 'border-red-500' : ''}
               />
+              {validationErrors.gymName && (
+                <p className="text-xs text-red-500">{validationErrors.gymName}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -198,7 +266,7 @@ export default function ApplyPage() {
                   value={signupData.password}
                   onChange={(e) => handleChange('password', e.target.value)}
                   disabled={isLoading}
-                  className="pr-10"
+                  className={`pr-10 ${validationErrors.password ? 'border-red-500' : ''}`}
                 />
                 <button
                   type="button"
@@ -213,6 +281,9 @@ export default function ApplyPage() {
                   )}
                 </button>
               </div>
+              {validationErrors.password && (
+                <p className="text-xs text-red-500">{validationErrors.password}</p>
+              )}
               <p className="text-xs text-muted-foreground">
                 At least 6 characters
               </p>
@@ -221,7 +292,7 @@ export default function ApplyPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
+              className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 cursor-pointer"
             >
               {isLoading ? 'Creating Account...' : 'Create Owner Account'}
             </Button>
