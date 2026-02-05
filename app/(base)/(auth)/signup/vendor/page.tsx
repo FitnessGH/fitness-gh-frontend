@@ -1,12 +1,13 @@
 'use client';
 
+import OTPVerification from '@/components/auth/otp-verification';
 import { useAuth } from '@/components/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
-import { getDashboardPath } from '@/lib/auth';
+import { AuthAPI } from '@/lib/api/auth';
 import { Package, ShieldCheck, ShoppingBag, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
@@ -32,6 +33,8 @@ export default function VendorSignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
@@ -133,13 +136,19 @@ export default function VendorSignupPage() {
         userType: 'vendor',
         businessName: signupData.businessName,
       });
-
-      router.push('/vendor');
+      await AuthAPI.sendOTP(signupData.email);
+      setPendingEmail(signupData.email);
+      setShowOTP(true);
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOTPVerified = () => {
+    setShowOTP(false);
+    router.push('/vendor');
   };
 
   return (
@@ -183,7 +192,14 @@ export default function VendorSignupPage() {
           </div>
         </div>
 
-        <Card className="p-8 border-border bg-card/70 backdrop-blur-sm shadow-2xl shadow-primary/10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
+        {showOTP ? (
+          <OTPVerification
+            email={pendingEmail || signupData.email}
+            onVerified={handleOTPVerified}
+            onBack={() => setShowOTP(false)}
+          />
+        ) : (
+          <Card className="p-8 border-border bg-card/70 backdrop-blur-sm shadow-2xl shadow-primary/10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
           <div className="text-center mb-8 space-y-2">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary">
               <ShoppingBag className="w-6 h-6" />
@@ -315,7 +331,8 @@ export default function VendorSignupPage() {
               Payouts are verified after your first order.
             </div>
           </div>
-        </Card>
+          </Card>
+        )}
       </div>
     </div>
   );

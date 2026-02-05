@@ -35,7 +35,7 @@ export interface AuthResponse {
   tokens: {
     accessToken: string;
     refreshToken: string;
-  };
+  } | null;
 }
 
 export interface OTPResponse {

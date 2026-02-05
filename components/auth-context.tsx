@@ -132,8 +132,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           approvalStatus: authResponse.account.userType === 'GYM_OWNER' ? 'approved' : undefined,
         };
 
-        // Store tokens
-        if (typeof window !== 'undefined') {
+        // Store tokens only if issued (email verified)
+        if (typeof window !== 'undefined' && authResponse.tokens) {
           localStorage.setItem('accessToken', authResponse.tokens.accessToken);
           localStorage.setItem('refreshToken', authResponse.tokens.refreshToken);
         }
