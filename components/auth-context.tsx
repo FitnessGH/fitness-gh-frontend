@@ -1,5 +1,7 @@
 'use client';
 
+import { AuthAPI, type AuthResponse } from '@/lib/api/auth';
+import { DataTransformer } from '@/lib/api/data-transformers';
 import type { AuthUser, UserRole } from '@/lib/auth';
 import { registerUser, validateCredentials } from '@/lib/auth';
 import React, { createContext, useCallback, useContext, useState } from 'react';
@@ -15,7 +17,10 @@ interface AuthContextType {
   signup: (data: {
     name: string;
     email: string;
-    role: UserRole;
+    password: string;
+    userType: 'gym_owner' | 'customer' | 'vendor';
+    gymName?: string;
+    businessName?: string;
   }) => Promise<AuthUser>;
 }
 
@@ -69,14 +74,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signup = useCallback(
-    async (data: { name: string; email: string; role: UserRole }) => {
+    async (data: {
+      name: string;
+      email: string;
+      password: string;
+      userType: 'gym_owner' | 'customer' | 'vendor';
+      gymName?: string;
+      businessName?: string;
+    }) => {
       setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        const newUser = await registerUser(data);
-        setUser(newUser);
-        sessionStorage.setItem('user', JSON.stringify(newUser));
-        return newUser;
+        // Transform data based on user type
+        let registrationData;
+        switch (data.userType) {
+          case 'gym_owner':
+            registrationData = DataTransformer.transformGymOwnerData({
+              name: data.name,
+              email: data.email,
+              password: data.password,
+              gymName: data.gymName || '',
+            });
+            break;
+          case 'customer':
+            registrationData = DataTransformer.transformCustomerData({
+              name: data.name,
+              email: data.email,
+              password: data.password,
+            });
+            break;
+          case 'vendor':
+            registrationData = DataTransformer.transformVendorData({
+              name: data.name,
+              email: data.email,
+              password: data.password,
+              businessName: data.businessName || '',
+            });
+            break;
+          default:
+            throw new Error('Invalid user type');
+        }
+
+        // Call real API
+        const authResponse = await AuthAPI.register(registrationData);
+        
+        // Transform response to match frontend AuthUser format
+        const authUser: AuthUser = {
+          id: authResponse.account.id,
+          email: authResponse.account.email,
+          name: `${authResponse.profile?.firstName || ''} ${authResponse.profile?.lastName || ''}`.trim(),
+          role: authResponse.account.userType.toLowerCase() as UserRole,
+          avatar: authResponse.profile?.firstName?.slice(0, 2).toUpperCase() || 'U',
+          approvalStatus: authResponse.account.userType === 'GYM_OWNER' ? 'approved' : undefined,
+        };
+
+        // Store tokens
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('accessToken', authResponse.tokens.accessToken);
+          localStorage.setItem('refreshToken', authResponse.tokens.refreshToken);
+        }
+
+        setUser(authUser);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('user', JSON.stringify(authUser));
+        }
+        
+        return authUser;
+      } catch (error) {
+        console.error('Signup error:', error);
+        throw error;
       } finally {
         setIsLoading(false);
       }

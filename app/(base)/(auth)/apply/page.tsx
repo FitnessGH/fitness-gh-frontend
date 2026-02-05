@@ -54,8 +54,24 @@ export default function ApplyPage() {
         }
         break;
       case 'password':
-        if (value.length < 6) {
-          return 'Password must be at least 6 characters';
+        const passwordValidation = {
+          length: value.length >= 8,
+          hasUpper: /[A-Z]/.test(value),
+          hasLower: /[a-z]/.test(value),
+          hasNumber: /\d/.test(value),
+        };
+        
+        if (value.length < 8) {
+          return 'Password must be at least 8 characters';
+        }
+        if (!passwordValidation.hasUpper) {
+          return 'Password must contain at least one uppercase letter';
+        }
+        if (!passwordValidation.hasLower) {
+          return 'Password must contain at least one lowercase letter';
+        }
+        if (!passwordValidation.hasNumber) {
+          return 'Password must contain at least one number';
         }
         break;
       case 'name':
@@ -115,7 +131,9 @@ export default function ApplyPage() {
       await signup({
         name: signupData.name,
         email: signupData.email,
-        role: 'gym_owner',
+        password: signupData.password,
+        userType: 'gym_owner',
+        gymName: signupData.gymName,
       });
 
       router.push('/gym-owner');
@@ -285,7 +303,7 @@ export default function ApplyPage() {
                 <p className="text-xs text-red-500">{validationErrors.password}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                At least 6 characters
+                At least 8 characters with uppercase, lowercase, and number
               </p>
             </div>
 
