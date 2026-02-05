@@ -4,13 +4,19 @@ import { BebasFont } from '@/constant';
 import { cn } from '@/lib/utils';
 import { Button } from '@ui/button';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@ui/dropdown-menu';
+import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from '@ui/sheet';
-import { Dumbbell, Menu } from 'lucide-react';
+import { ChevronDown, Dumbbell, Menu, ShoppingBag, Users } from 'lucide-react';
 import { useState } from 'react';
 
 import Link from 'next/link';
@@ -19,10 +25,30 @@ const navLinks = [
   { href: '/browse-gyms', label: 'Browse Gyms' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/marketplace', label: 'Marketplace' },
-  { href: '/apply', label: 'Apply as Owner' },
 ];
 
-export function PublicHeader() {
+const signupOptions = [
+  {
+    href: '/signup/customer',
+    label: 'Join as Athlete',
+    description: 'Find gyms, track progress, join classes',
+    icon: Users,
+  },
+  {
+    href: '/signup/vendor',
+    label: 'Join as Vendor',
+    description: 'Sell products to gyms and members',
+    icon: ShoppingBag,
+  },
+  {
+    href: '/apply',
+    label: 'Apply as Owner',
+    description: 'List and manage your gym on FitnessGH',
+    icon: Dumbbell,
+  },
+];
+
+export const PublicHeader = () => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -56,6 +82,48 @@ export function PublicHeader() {
               {link.label}
             </Link>
           ))}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="border-primary/50 hover:bg-primary/10"
+              >
+                Get Started
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-64 border-border bg-card p-2"
+            >
+              {signupOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.href}
+                  asChild
+                  className="p-0 focus:bg-transparent data-highlighted:bg-transparent"
+                >
+                  <Link
+                    href={option.href}
+                    className="flex w-full cursor-pointer items-start gap-3 rounded-lg p-3 hover:bg-primary/10 focus:bg-primary/10"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                      <option.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {option.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {option.description}
+                      </p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button
             asChild
             className="bg-primary hover:bg-primary/90"
@@ -83,7 +151,7 @@ export function PublicHeader() {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-70 border-border bg-background p-0"
+            className="w-75 border-border bg-background p-0"
           >
             <SheetHeader className="border-b border-border px-6 py-4">
               <SheetTitle className="flex items-center gap-2">
@@ -97,18 +165,51 @@ export function PublicHeader() {
                 </span>
               </SheetTitle>
             </SheetHeader>
-            <nav className="flex flex-col p-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="border-b border-border/50 py-4 text-base font-medium text-foreground transition-colors hover:text-primary"
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="mt-6 flex flex-col gap-3">
+
+            <div className="flex flex-col">
+              <nav className="border-b border-border p-4">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-3 text-base font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="border-b border-border p-4">
+                <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Get Started
+                </p>
+                {signupOptions.map((option) => (
+                  <Link
+                    key={option.href}
+                    href={option.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-primary/10"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                      <option.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {option.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {option.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="p-4">
+                <p className="mb-3 px-3 text-xs text-muted-foreground">
+                  Already have an account?
+                </p>
                 <Button
                   asChild
                   className="w-full bg-primary hover:bg-primary/90"
@@ -120,23 +221,11 @@ export function PublicHeader() {
                     Sign In
                   </Link>
                 </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full border-primary/50 hover:bg-primary/10"
-                >
-                  <Link
-                    href="/register"
-                    onClick={() => setOpen(false)}
-                  >
-                    Create Account
-                  </Link>
-                </Button>
               </div>
-            </nav>
+            </div>
           </SheetContent>
         </Sheet>
       </div>
     </header>
   );
-}
+};
