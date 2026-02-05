@@ -6,7 +6,7 @@ import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { BadgeCheck, Dumbbell, Sparkles } from 'lucide-react';
+import { BadgeCheck, Dumbbell, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -22,6 +22,7 @@ interface SignupData {
 export default function ApplyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
     email: '',
@@ -189,14 +190,29 @@ export default function ApplyPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={signupData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={signupData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  disabled={isLoading}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
               <p className="text-xs text-muted-foreground">
                 At least 6 characters
               </p>
