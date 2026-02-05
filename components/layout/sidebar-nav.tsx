@@ -159,19 +159,21 @@ const navItems: Record<UserRole, NavItem[]> = {
 interface SidebarNavProps {
   role: UserRole;
   onLogout: () => void;
+  onNavigate?: () => void;
 }
 
-export function SidebarNav({ role, onLogout }: SidebarNavProps) {
+export function SidebarNav({ role, onLogout, onNavigate }: SidebarNavProps) {
   const pathname = usePathname();
   const items = navItems[role];
 
   return (
     <div className="flex flex-col h-full">
-      <nav className="flex-1 space-y-6 p-4">
+      <nav className="flex-1 space-y-2 p-4">
         {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}
+            onClick={onNavigate}
           >
             <Button
               variant="ghost"

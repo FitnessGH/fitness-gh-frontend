@@ -11,6 +11,7 @@ import {
   Zap,
 } from 'lucide-react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'FitnessGH - Gym Management & Community Platform',
@@ -21,9 +22,9 @@ export default function HomePage() {
   return (
     <div className={`min-h-screen bg-background text-foreground`}>
       <div className="relative overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute top-20 right-10 h-72 w-72 rounded-full bg-secondary/30 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(50,176,176,0.18),transparent_55%)]" />
+        <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-10 h-72 w-72 rounded-full bg-secondary/30 blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(50,176,176,0.18),transparent_55%)] pointer-events-none" />
 
         <section className="pt-32 px-6 pb-16">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
@@ -42,20 +43,24 @@ export default function HomePage() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-4">
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-base px-8 py-6"
-                >
-                  Start Free Trial
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-primary/40 text-foreground hover:bg-primary/10 px-8 py-6"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Watch Demo
-                </Button>
+                <Link href="/apply">
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-primary/90 text-base px-8 py-6"
+                  >
+                    Start Free Trial
+                  </Button>
+                </Link>
+                <Link href="#demo">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="border-primary/40 text-foreground hover:bg-primary/10 px-8 py-6"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Watch Demo
+                  </Button>
+                </Link>
               </div>
               <div className="grid grid-cols-3 gap-6 pt-4 text-sm text-muted-foreground">
                 <div>
@@ -85,7 +90,10 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="relative animate-in fade-in slide-in-from-bottom-10 duration-700 delay-150">
+            <div
+              id="demo"
+              className="relative animate-in fade-in slide-in-from-bottom-10 duration-700 delay-150"
+            >
               <div className="absolute -inset-6 rounded-4xl border border-primary/30 bg-primary/10 blur-2xl" />
               <div className="relative rounded-[28px] border border-border bg-card/80 p-6 backdrop-blur">
                 <div className="flex items-center justify-between mb-4 text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -278,9 +286,11 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Book a Platform Tour
-              </Button>
+              <Link href="/apply">
+                <Button className="w-full bg-primary hover:bg-primary/90">
+                  Book a Platform Tour
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -304,19 +314,23 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90"
-              >
-                Start Your Free Trial
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-primary/40 hover:bg-primary/10"
-              >
-                Compare Plans
-              </Button>
+              <Link href="/apply">
+                <Button
+                  size="lg"
+                  className="w-full bg-primary hover:bg-primary/90"
+                >
+                  Start Your Free Trial
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full border-primary/40 hover:bg-primary/10"
+                >
+                  Compare Plans
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
