@@ -33,6 +33,11 @@ export default function DashboardLayout({
       return;
     }
 
+    if (user?.emailVerified === false) {
+      router.replace('/login');
+      return;
+    }
+
     if (user?.role !== 'gym_owner') {
       router.replace('/');
       return;

@@ -30,6 +30,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const buildAuthUser = useCallback((authResponse: AuthResponse): AuthUser => {
+    return {
+      id: authResponse.account.id,
+      email: authResponse.account.email,
+      name: `${authResponse.profile?.firstName || ''} ${authResponse.profile?.lastName || ''}`.trim() || authResponse.account.email,
+      role: mapBackendUserTypeToRole(authResponse.account.userType),
+      avatar: authResponse.profile?.firstName?.slice(0, 2).toUpperCase() || 'U',
+      approvalStatus: authResponse.account.userType === 'GYM_OWNER' ? 'approved' : undefined,
+      emailVerified: authResponse.account.emailVerified ?? true,
+    };
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -38,15 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!authResponse?.account) {
         throw new Error('Login failed: missing account data');
       }
+      if (authResponse.account.emailVerified === false) {
+        await AuthAPI.sendOTP(authResponse.account.email);
+        const error = new Error('EMAIL_NOT_VERIFIED');
+        (error as Error & { code?: string; email?: string }).code = 'EMAIL_NOT_VERIFIED';
+        (error as Error & { code?: string; email?: string }).email = authResponse.account.email;
+        throw error;
+      }
 
-      const authUser: AuthUser = {
-        id: authResponse.account.id,
-        email: authResponse.account.email,
-        name: `${authResponse.profile?.firstName || ''} ${authResponse.profile?.lastName || ''}`.trim() || authResponse.account.email,
-        role: mapBackendUserTypeToRole(authResponse.account.userType),
-        avatar: authResponse.profile?.firstName?.slice(0, 2).toUpperCase() || 'U',
-        approvalStatus: authResponse.account.userType === 'GYM_OWNER' ? 'approved' : undefined,
-      };
+      const authUser = buildAuthUser(authResponse);
 
       if (typeof window !== 'undefined' && authResponse.tokens) {
         localStorage.setItem('accessToken', authResponse.tokens.accessToken);
@@ -58,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [buildAuthUser]);
 
   const logout = useCallback(() => {
     setUser(null);
@@ -140,14 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Transform response to match frontend AuthUser format
-        const authUser: AuthUser = {
-          id: authResponse.account.id,
-          email: authResponse.account.email,
-          name: `${authResponse.profile?.firstName || ''} ${authResponse.profile?.lastName || ''}`.trim(),
-          role: mapBackendUserTypeToRole(authResponse.account.userType),
-          avatar: authResponse.profile?.firstName?.slice(0, 2).toUpperCase() || 'U',
-          approvalStatus: authResponse.account.userType === 'GYM_OWNER' ? 'approved' : undefined,
-        };
+        const authUser = buildAuthUser(authResponse);
 
         // Store tokens only if issued (email verified)
         if (typeof window !== 'undefined' && authResponse.tokens) {
@@ -168,20 +173,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     },
-    [setUser],
+    [buildAuthUser, setUser],
   );
 
   React.useEffect(() => {
-    const stored = sessionStorage.getItem('user');
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch (e) {
-        sessionStorage.removeItem('user');
+    const hydrateUser = async () => {
+      if (typeof window === 'undefined') {
+        setIsLoading(false);
+        return;
       }
-    }
-    setIsLoading(false);
-  }, []);
+
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        try {
+          const authResponse = await AuthAPI.getMe(accessToken);
+          const authUser = buildAuthUser(authResponse);
+          setUser(authUser);
+          sessionStorage.setItem('user', JSON.stringify(authUser));
+          setIsLoading(false);
+          return;
+        } catch (error) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
+      }
+
+      const stored = sessionStorage.getItem('user');
+      if (stored) {
+        try {
+          setUser(JSON.parse(stored));
+        } catch (e) {
+          sessionStorage.removeItem('user');
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    void hydrateUser();
+  }, [buildAuthUser]);
 
   return (
     <AuthContext.Provider

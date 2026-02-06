@@ -155,7 +155,7 @@ export default function VendorSignupPage() {
   };
 
   useEffect(() => {
-    if (!authLoading && user && !showOTP) {
+    if (!authLoading && user && user.emailVerified !== false && !showOTP) {
       router.replace(getDashboardPath(user.role));
     }
   }, [authLoading, user, showOTP, router]);

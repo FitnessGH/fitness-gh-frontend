@@ -11,6 +11,7 @@ export interface AuthResponse {
     email: string;
     phone?: string;
     userType: string;
+    emailVerified?: boolean;
     isActive: boolean;
     lastLoginAt?: string;
     createdAt: string;

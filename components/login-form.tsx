@@ -1,5 +1,6 @@
 'use client';
 
+import OTPVerification from '@/components/auth/otp-verification';
 import { BebasFont } from '@/constant';
 import { getDashboardPath } from '@/lib/auth';
 import { Button } from '@ui/button';
@@ -17,6 +18,9 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingPassword, setPendingPassword] = useState('');
   const [validationErrors, setValidationErrors] = useState<{
     email?: string;
     password?: string;
@@ -26,7 +30,7 @@ export function LoginForm() {
   const { login, isLoading, user } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && user && user.emailVerified !== false) {
       router.replace(getDashboardPath(user.role));
     }
   }, [isLoading, user, router]);
@@ -77,8 +81,34 @@ export function LoginForm() {
     try {
       await login(email, password);
     } catch (err) {
+      if (err && typeof err === 'object' && (err as { code?: string }).code === 'EMAIL_NOT_VERIFIED') {
+        setPendingEmail(email);
+        setPendingPassword(password);
+        setShowOTP(true);
+        setError('');
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Login failed');
     }
+  };
+
+  const handleOTPVerified = async () => {
+    setShowOTP(false);
+    if (!pendingEmail || !pendingPassword) {
+      setError('Please log in again to continue');
+      return;
+    }
+    try {
+      await login(pendingEmail, pendingPassword);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setPendingPassword('');
+    }
+  };
+
+  const handleBackToLogin = () => {
+    setShowOTP(false);
   };
 
   return (
@@ -98,10 +128,17 @@ export function LoginForm() {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4"
-      >
+      {showOTP ? (
+        <OTPVerification
+          email={pendingEmail || email}
+          onVerified={handleOTPVerified}
+          onBack={handleBackToLogin}
+        />
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -173,7 +210,8 @@ export function LoginForm() {
         >
           {isLoading ? 'Signing in...' : 'Sign In'}
         </Button>
-      </form>
+        </form>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>New here?</span>

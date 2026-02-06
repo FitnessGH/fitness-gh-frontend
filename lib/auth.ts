@@ -8,6 +8,7 @@ export interface AuthUser {
   avatar?: string;
   approvalStatus?: 'pending' | 'approved' | 'rejected';
   gymDetails?: GymDetails;
+  emailVerified?: boolean;
 }
 
 export interface GymDetails {

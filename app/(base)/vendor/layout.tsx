@@ -20,8 +20,13 @@ export default function VendorLayout({
 
     if (!isAuthenticated) {
       router.replace('/');
+      return;
     }
-  }, [isAuthenticated, router, isLoading]);
+
+    if (user?.emailVerified === false) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router, isLoading, user]);
 
   if (!user) {
     return null;
