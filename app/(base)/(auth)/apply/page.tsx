@@ -10,7 +10,7 @@ import { Input } from '@ui/input';
 import { Label } from '@ui/label';
 import { BadgeCheck, Dumbbell, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -42,7 +42,7 @@ export default function ApplyPage() {
   });
 
   const router = useRouter();
-  const { signup } = useAuth();
+  const { signup, user, isLoading: authLoading } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
     if (!value || value.trim() === '') {
@@ -169,6 +169,12 @@ export default function ApplyPage() {
     setShowOTP(false);
     setError('');
   };
+
+  useEffect(() => {
+    if (!authLoading && user && !showOTP) {
+      router.replace(getDashboardPath(user.role));
+    }
+  }, [authLoading, user, showOTP, router]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">

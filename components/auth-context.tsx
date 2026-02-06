@@ -3,7 +3,7 @@
 import { AuthAPI, type AuthResponse } from '@/lib/api/auth';
 import { DataTransformer } from '@/lib/api/data-transformers';
 import type { AuthUser, UserRole } from '@/lib/auth';
-import { mapBackendUserTypeToRole, registerUser, validateCredentials } from '@/lib/auth';
+import { mapBackendUserTypeToRole } from '@/lib/auth';
 import React, { createContext, useCallback, useContext, useState } from 'react';
 
 interface AuthContextType {
@@ -33,11 +33,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const authResponse = await AuthAPI.login(email, password);
 
-      const authUser = validateCredentials(email, password);
-      if (!authUser) {
-        throw new Error('Invalid credentials');
+      if (!authResponse?.account) {
+        throw new Error('Login failed: missing account data');
+      }
+
+      const authUser: AuthUser = {
+        id: authResponse.account.id,
+        email: authResponse.account.email,
+        name: `${authResponse.profile?.firstName || ''} ${authResponse.profile?.lastName || ''}`.trim() || authResponse.account.email,
+        role: mapBackendUserTypeToRole(authResponse.account.userType),
+        avatar: authResponse.profile?.firstName?.slice(0, 2).toUpperCase() || 'U',
+        approvalStatus: authResponse.account.userType === 'GYM_OWNER' ? 'approved' : undefined,
+      };
+
+      if (typeof window !== 'undefined' && authResponse.tokens) {
+        localStorage.setItem('accessToken', authResponse.tokens.accessToken);
+        localStorage.setItem('refreshToken', authResponse.tokens.refreshToken);
       }
 
       setUser(authUser);
@@ -50,6 +63,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     setUser(null);
     sessionStorage.removeItem('user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
   }, []);
 
   const switchRole = useCallback(

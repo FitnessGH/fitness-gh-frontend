@@ -12,7 +12,7 @@ import { getDashboardPath, type UserRole } from '@/lib/auth';
 import { Dumbbell, Eye, EyeOff, Sparkles, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -43,7 +43,7 @@ export default function AthleteSignupPage() {
   });
 
   const router = useRouter();
-  const { signup } = useAuth();
+  const { signup, user, isLoading: authLoading } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
     if (!value || value.trim() === '') {
@@ -148,6 +148,12 @@ export default function AthleteSignupPage() {
     setShowOTP(false);
     router.push(getDashboardPath(pendingRole));
   };
+
+  useEffect(() => {
+    if (!authLoading && user && !showOTP) {
+      router.replace(getDashboardPath(user.role));
+    }
+  }, [authLoading, user, showOTP, router]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">

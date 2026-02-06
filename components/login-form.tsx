@@ -76,9 +76,6 @@ export function LoginForm() {
 
     try {
       await login(email, password);
-      const stored = sessionStorage.getItem('user');
-      const user = stored ? JSON.parse(stored) : null;
-      router.push(getDashboardPath(user?.role || 'customer'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     }
