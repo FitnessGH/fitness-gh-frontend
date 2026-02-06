@@ -7,7 +7,7 @@ import { Input } from '@ui/input';
 import { Label } from '@ui/label';
 import { AlertCircle, Dumbbell, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from './auth-context';
 
 import Link from 'next/link';
@@ -23,7 +23,13 @@ export function LoginForm() {
   }>({});
 
   const router = useRouter();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace(getDashboardPath(user.role));
+    }
+  }, [isLoading, user, router]);
 
   const validateField = (field: 'email' | 'password', value: string): string => {
     if (!value || value.trim() === '') {
