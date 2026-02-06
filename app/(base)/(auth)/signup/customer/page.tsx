@@ -43,7 +43,7 @@ export default function AthleteSignupPage() {
   });
 
   const router = useRouter();
-  const { signup, user, isLoading: authLoading } = useAuth();
+  const { signup, login, user, isLoading: authLoading } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
     if (!value || value.trim() === '') {
@@ -144,9 +144,17 @@ export default function AthleteSignupPage() {
     }
   };
 
-  const handleOTPVerified = () => {
+  const handleOTPVerified = async () => {
     setShowOTP(false);
-    router.push(getDashboardPath(pendingRole));
+    setIsLoading(true);
+    try {
+      await login(pendingEmail || signupData.email, signupData.password);
+      router.push(getDashboardPath(pendingRole));
+    } catch (err: any) {
+      setError(err.message || 'Failed to log in after verification');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {

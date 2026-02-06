@@ -42,7 +42,7 @@ export default function ApplyPage() {
   });
 
   const router = useRouter();
-  const { signup, user, isLoading: authLoading } = useAuth();
+  const { signup, login, user, isLoading: authLoading } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
     if (!value || value.trim() === '') {
@@ -156,6 +156,7 @@ export default function ApplyPage() {
         userType: 'owner',
         gymName: signupData.gymName,
       });
+      await login(signupData.email, signupData.password);
       router.push(getDashboardPath(authUser.role));
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
