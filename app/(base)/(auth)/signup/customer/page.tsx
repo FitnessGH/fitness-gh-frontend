@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { AuthAPI } from '@/lib/api/auth';
+import { getDashboardPath, type UserRole } from '@/lib/auth';
 import { Dumbbell, Eye, EyeOff, Sparkles, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
@@ -33,6 +34,7 @@ export default function AthleteSignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingRole, setPendingRole] = useState<UserRole>('customer');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
@@ -125,12 +127,13 @@ export default function AthleteSignupPage() {
     setIsLoading(true);
 
     try {
-      await signup({
+      const authUser = await signup({
         name: signupData.name,
         email: signupData.email,
         password: signupData.password,
         userType: 'athlete',
       });
+      setPendingRole(authUser.role);
       await AuthAPI.sendOTP(signupData.email);
       setPendingEmail(signupData.email);
       setShowOTP(true);
@@ -143,7 +146,7 @@ export default function AthleteSignupPage() {
 
   const handleOTPVerified = () => {
     setShowOTP(false);
-    router.push('/customer');
+    router.push(getDashboardPath(pendingRole));
   };
 
   return (

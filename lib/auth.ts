@@ -85,6 +85,21 @@ export function getDashboardPath(role: UserRole): string {
   return paths[role];
 }
 
+export function mapBackendUserTypeToRole(userType: string): UserRole {
+  switch (userType) {
+    case 'GYM_OWNER':
+      return 'gym_owner';
+    case 'MEMBER':
+      return 'customer';
+    case 'EMPLOYEE':
+      return 'vendor';
+    case 'ADMIN':
+      return 'admin';
+    default:
+      return 'customer';
+  }
+}
+
 export function getRoleDisplay(role: UserRole): string {
   const names: Record<UserRole, string> = {
     gym_owner: 'Gym Owner',

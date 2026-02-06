@@ -3,6 +3,7 @@
 import { useAuth } from '@/components/auth-context';
 import OTPVerification from '@/components/auth/otp-verification';
 import { BebasFont } from '@/constant';
+import { getDashboardPath } from '@/lib/auth';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
@@ -148,15 +149,14 @@ export default function ApplyPage() {
     setError('');
 
     try {
-      await signup({
+      const authUser = await signup({
         name: signupData.name,
         email: signupData.email,
         password: signupData.password,
         userType: 'owner',
         gymName: signupData.gymName,
       });
-
-      router.push('/gym-owner');
+      router.push(getDashboardPath(authUser.role));
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
       setShowOTP(false); // Go back to signup on error

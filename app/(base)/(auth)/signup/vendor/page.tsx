@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { AuthAPI } from '@/lib/api/auth';
+import { getDashboardPath, type UserRole } from '@/lib/auth';
 import { Package, ShieldCheck, ShoppingBag, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
@@ -35,6 +36,7 @@ export default function VendorSignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingRole, setPendingRole] = useState<UserRole>('vendor');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
@@ -129,13 +131,14 @@ export default function VendorSignupPage() {
     setIsLoading(true);
 
     try {
-      await signup({
+      const authUser = await signup({
         name: signupData.name,
         email: signupData.email,
         password: signupData.password,
         userType: 'vendor',
         businessName: signupData.businessName,
       });
+      setPendingRole(authUser.role);
       await AuthAPI.sendOTP(signupData.email);
       setPendingEmail(signupData.email);
       setShowOTP(true);
@@ -148,7 +151,7 @@ export default function VendorSignupPage() {
 
   const handleOTPVerified = () => {
     setShowOTP(false);
-    router.push('/vendor');
+    router.push(getDashboardPath(pendingRole));
   };
 
   return (

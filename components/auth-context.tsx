@@ -3,7 +3,7 @@
 import { AuthAPI, type AuthResponse } from '@/lib/api/auth';
 import { DataTransformer } from '@/lib/api/data-transformers';
 import type { AuthUser, UserRole } from '@/lib/auth';
-import { registerUser, validateCredentials } from '@/lib/auth';
+import { mapBackendUserTypeToRole, registerUser, validateCredentials } from '@/lib/auth';
 import React, { createContext, useCallback, useContext, useState } from 'react';
 
 interface AuthContextType {
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: authResponse.account.id,
           email: authResponse.account.email,
           name: `${authResponse.profile?.firstName || ''} ${authResponse.profile?.lastName || ''}`.trim(),
-          role: authResponse.account.userType.toLowerCase() as UserRole,
+          role: mapBackendUserTypeToRole(authResponse.account.userType),
           avatar: authResponse.profile?.firstName?.slice(0, 2).toUpperCase() || 'U',
           approvalStatus: authResponse.account.userType === 'GYM_OWNER' ? 'approved' : undefined,
         };
