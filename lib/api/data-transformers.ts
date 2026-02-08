@@ -1,5 +1,4 @@
-import type { RegistrationData, FrontendUserType } from './auth';
-import { mapUserType } from './auth';
+import type { RegistrationData } from './auth';
 
 // Transform frontend data to backend format
 export class DataTransformer {
@@ -83,69 +82,4 @@ export class DataTransformer {
     };
   }
 
-  // Generate a unique username
-  static generateUsername(firstName: string, email: string): string {
-    const baseUsername = firstName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const emailPrefix = email.split('@')[0];
-    const timestamp = Date.now();
-    return `${baseUsername}_${emailPrefix}_${timestamp}`.slice(0, 50);
-  }
-
-  // Validate password complexity
-  static validatePassword(password: string): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-    
-    if (password.length < 8) {
-      errors.push('Password must be at least 8 characters');
-    }
-    
-    if (password.length > 100) {
-      errors.push('Password must not exceed 100 characters');
-    }
-    
-    if (!/(?=.*[a-z])/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-    
-    if (!/(?=.*[A-Z])/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-    
-    if (!/(?=.*\d)/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-    
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  }
-
-  // Validate email format
-  static validateEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  // Validate username format
-  static validateUsername(username: string): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-    
-    if (username.length < 3) {
-      errors.push('Username must be at least 3 characters');
-    }
-    
-    if (username.length > 50) {
-      errors.push('Username must not exceed 50 characters');
-    }
-    
-    if (!/^\w+$/.test(username)) {
-      errors.push('Username can only contain letters, numbers, and underscores');
-    }
-    
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  }
 }

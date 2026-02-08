@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import { AuthAPI, type AuthResponse } from '@/lib/api/auth';
 import UsersAPI, { type UpdateProfileData } from '@/lib/api/users';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
@@ -11,10 +10,9 @@ import { Bell, Lock, User, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function CustomerSettingsPage() {
-  const { user, setUserFromAuthResponse } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { user, userData, refreshUserData, isLoading } = useAuth();
   const [saving, setSaving] = useState(false);
-  const [userData, setUserData] = useState<AuthResponse | null>(null);
+  const [loadingData, setLoadingData] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -24,38 +22,48 @@ export default function CustomerSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Fetch user data if not available
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!user) return;
+      if (userData || isLoading) return;
 
       const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-      if (!accessToken) {
-        setLoading(false);
-        return;
-      }
+      if (!accessToken || !user) return;
 
       try {
-        setLoading(true);
-        const authData = await AuthAPI.getMe(accessToken);
-        setUserData(authData);
-        
-        // Populate form with real data
-        setProfileData({
-          firstName: authData.profile?.firstName || '',
-          lastName: authData.profile?.lastName || '',
-          email: authData.account.email || '',
-          phone: authData.account.phone || '',
-        });
+        setLoadingData(true);
+        await refreshUserData();
       } catch (error: any) {
         console.error('Failed to fetch user data:', error);
-        setError(error.message || 'Failed to load profile data');
+        setError('Failed to load profile data');
       } finally {
-        setLoading(false);
+        setLoadingData(false);
       }
     };
 
     fetchUserData();
-  }, [user]);
+  }, [user, userData, isLoading, refreshUserData]);
+
+  // Populate form with data from auth context
+  useEffect(() => {
+    if (userData) {
+      setProfileData({
+        firstName: userData.profile?.firstName || '',
+        lastName: userData.profile?.lastName || '',
+        email: userData.account.email || '',
+        phone: userData.account.phone || '',
+      });
+    } else if (user) {
+      // Fallback to user data if userData is not available
+      const nameParts = user.name.split(' ');
+      setProfileData({
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        email: user.email || '',
+        phone: '',
+      });
+    }
+  }, [userData, user]);
 
   const handleSave = async () => {
     if (!userData || !userData.profile) return;
@@ -78,20 +86,8 @@ export default function CustomerSettingsPage() {
 
       await UsersAPI.updateProfile(userData.profile.id, updateData, accessToken);
       
-      // Refresh user data
-      const updatedAuthData = await AuthAPI.getMe(accessToken);
-      setUserData(updatedAuthData);
-      
-      // Update auth context to reflect changes immediately
-      setUserFromAuthResponse(updatedAuthData);
-      
-      // Update form data
-      setProfileData({
-        firstName: updatedAuthData.profile?.firstName || '',
-        lastName: updatedAuthData.profile?.lastName || '',
-        email: updatedAuthData.account.email || '',
-        phone: updatedAuthData.account.phone || '',
-      });
+      // Refresh user data in auth context (this will update userData automatically)
+      await refreshUserData();
       
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -103,10 +99,20 @@ export default function CustomerSettingsPage() {
     }
   };
 
-  if (loading) {
+  // Show loading only if auth is still loading or we're fetching user data
+  if (isLoading || loadingData) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If no user, redirect should happen in layout, but show error just in case
+  if (!user) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <p className="text-muted-foreground">Please log in to access settings</p>
       </div>
     );
   }

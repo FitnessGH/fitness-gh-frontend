@@ -2,7 +2,6 @@
 
 import { useAuth } from '@/components/auth-context';
 import { getDashboardPath } from '@/lib/auth';
-import { AuthAPI, type AuthResponse } from '@/lib/api/auth';
 import SubscriptionsAPI, { type Membership } from '@/lib/api/subscriptions';
 import { Card } from '@ui/card';
 import { Calendar, ShoppingBag, Target, Users, Loader2 } from 'lucide-react';
@@ -10,13 +9,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function CustomerDashboard() {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, userData, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [membershipsLoading, setMembershipsLoading] = useState(true);
   const [membershipsError, setMembershipsError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<AuthResponse | null>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
 
   useEffect(() => {
     if (isLoading) return;
@@ -38,31 +35,18 @@ export default function CustomerDashboard() {
     }
   }, [user, isLoading, isAuthenticated, router]);
 
-  // Fetch user data and memberships
+  // Fetch memberships (user data is already in auth context)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMemberships = async () => {
       if (!user || user.role !== 'customer') return;
 
       const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
       if (!accessToken) {
         setMembershipsLoading(false);
-        setUserDataLoading(false);
         return;
       }
 
       try {
-        // Fetch user data
-        setUserDataLoading(true);
-        const authData = await AuthAPI.getMe(accessToken);
-        setUserData(authData);
-      } catch (error: any) {
-        console.error('Failed to fetch user data:', error);
-      } finally {
-        setUserDataLoading(false);
-      }
-
-      try {
-        // Fetch memberships
         setMembershipsLoading(true);
         const membershipData = await SubscriptionsAPI.getMyMemberships(accessToken);
         setMemberships(membershipData);
@@ -75,7 +59,7 @@ export default function CustomerDashboard() {
     };
 
     if (user && user.role === 'customer') {
-      fetchData();
+      fetchMemberships();
     }
   }, [user]);
 
@@ -165,7 +149,7 @@ export default function CustomerDashboard() {
           },
           {
             label: 'Member Since',
-            value: userDataLoading ? (
+            value: isLoading ? (
               <Loader2 className="h-5 w-5 animate-spin inline" />
             ) : (
               accountCreated

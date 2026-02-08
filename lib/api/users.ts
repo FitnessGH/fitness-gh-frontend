@@ -48,23 +48,6 @@ class UsersAPI {
   }
 
   /**
-   * Get user profile by ID
-   */
-  static async getProfileById(profileId: string, accessToken: string): Promise<UserProfile> {
-    const response = await fetch(`${API_BASE_URL}/users/${profileId}`, {
-      method: 'GET',
-      headers: this.getAuthHeaders(accessToken),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to get profile');
-    }
-
-    return this.parseResponse<UserProfile>(response);
-  }
-
-  /**
    * Update user profile
    */
   static async updateProfile(

@@ -8,6 +8,7 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 
 interface AuthContextType {
   user: AuthUser | null;
+  userData: AuthResponse | null; // Full auth response with account, profile, tokens
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -23,12 +24,14 @@ interface AuthContextType {
     businessName?: string;
   }) => Promise<AuthUser>;
   setUserFromAuthResponse: (authResponse: AuthResponse) => void;
+  refreshUserData: () => Promise<void>; // Refresh user data from API
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [userData, setUserData] = useState<AuthResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const buildAuthUser = useCallback((authResponse: AuthResponse): AuthUser => {
@@ -67,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setUser(authUser);
+      setUserData(authResponse);
       sessionStorage.setItem('user', JSON.stringify(authUser));
     } finally {
       setIsLoading(false);
@@ -75,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     setUser(null);
+    setUserData(null);
     sessionStorage.removeItem('user');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
@@ -162,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         setUser(authUser);
+        setUserData(authResponse);
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('user', JSON.stringify(authUser));
         }
@@ -192,8 +198,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setUser(authUser);
+    setUserData(authResponse);
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('user', JSON.stringify(authUser));
+    }
+  }, [buildAuthUser]);
+
+  const refreshUserData = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) return;
+
+    try {
+      const authResponse = await AuthAPI.getMe(accessToken);
+      const authUser = buildAuthUser(authResponse);
+      setUser(authUser);
+      setUserData(authResponse);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('user', JSON.stringify(authUser));
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      // Don't clear tokens on refresh failure, might be temporary
     }
   }, [buildAuthUser]);
 
@@ -210,6 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const authResponse = await AuthAPI.getMe(accessToken);
           const authUser = buildAuthUser(authResponse);
           setUser(authUser);
+          setUserData(authResponse);
           sessionStorage.setItem('user', JSON.stringify(authUser));
           setIsLoading(false);
           return;
@@ -238,6 +266,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        userData,
         isLoading,
         isAuthenticated: !!user,
         login,
@@ -246,6 +275,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateUser,
         signup,
         setUserFromAuthResponse,
+        refreshUserData,
       }}
     >
       {children}
