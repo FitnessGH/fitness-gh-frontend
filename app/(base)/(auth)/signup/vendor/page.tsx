@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { AuthAPI } from '@/lib/api/auth';
 import { getDashboardPath, mapBackendUserTypeToRole, type UserRole } from '@/lib/auth';
-import { Package, ShieldCheck, ShoppingBag, Eye, EyeOff } from 'lucide-react';
+import { Package, ShieldCheck, ShoppingBag, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
@@ -333,7 +333,14 @@ export default function VendorSignupPage() {
               disabled={isLoading}
               className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
             >
-              {isLoading ? 'Creating Account...' : 'Create Vendor Account'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                'Create Vendor Account'
+              )}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">

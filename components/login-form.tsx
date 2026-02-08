@@ -6,7 +6,7 @@ import { getDashboardPath } from '@/lib/auth';
 import { Button } from '@ui/button';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { AlertCircle, Dumbbell, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Dumbbell, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from './auth-context';
@@ -208,7 +208,14 @@ export function LoginForm() {
           className="w-full bg-primary hover:bg-primary/90"
           disabled={isLoading}
         >
-          {isLoading ? 'Signing in...' : 'Sign In'}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            'Sign In'
+          )}
         </Button>
         </form>
       )}

@@ -1,12 +1,108 @@
+'use client';
+
+import { useAuth } from '@/components/auth-context';
+import { getDashboardPath } from '@/lib/auth';
+import { AuthAPI, type AuthResponse } from '@/lib/api/auth';
+import SubscriptionsAPI, { type Membership } from '@/lib/api/subscriptions';
 import { Card } from '@ui/card';
-import { Calendar, ShoppingBag, Target, Users } from 'lucide-react';
+import { Calendar, ShoppingBag, Target, Users, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function CustomerDashboard() {
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [membershipsLoading, setMembershipsLoading] = useState(true);
+  const [membershipsError, setMembershipsError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<AuthResponse | null>(null);
+  const [userDataLoading, setUserDataLoading] = useState(true);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!isAuthenticated || !user) {
+      router.replace('/');
+      return;
+    }
+
+    if (user.emailVerified === false) {
+      router.replace('/login');
+      return;
+    }
+
+    // Redirect to correct dashboard if user is not a customer
+    if (user.role !== 'customer') {
+      router.replace(getDashboardPath(user.role));
+      return;
+    }
+  }, [user, isLoading, isAuthenticated, router]);
+
+  // Fetch user data and memberships
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user || user.role !== 'customer') return;
+
+      const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      if (!accessToken) {
+        setMembershipsLoading(false);
+        setUserDataLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch user data
+        setUserDataLoading(true);
+        const authData = await AuthAPI.getMe(accessToken);
+        setUserData(authData);
+      } catch (error: any) {
+        console.error('Failed to fetch user data:', error);
+      } finally {
+        setUserDataLoading(false);
+      }
+
+      try {
+        // Fetch memberships
+        setMembershipsLoading(true);
+        const membershipData = await SubscriptionsAPI.getMyMemberships(accessToken);
+        setMemberships(membershipData);
+      } catch (error: any) {
+        console.error('Failed to fetch memberships:', error);
+        setMembershipsError(error.message || 'Failed to load memberships');
+      } finally {
+        setMembershipsLoading(false);
+      }
+    };
+
+    if (user && user.role === 'customer') {
+      fetchData();
+    }
+  }, [user]);
+
+  if (isLoading || !user || user.role !== 'customer') {
+    return null;
+  }
+
+  // Get active membership
+  const activeMembership = memberships.find(m => m.status === 'ACTIVE');
+  const membershipStatus = activeMembership ? 'Active' : 'No Active Membership';
+  const membershipExpiry = activeMembership?.endDate 
+    ? new Date(activeMembership.endDate)
+    : null;
+  const daysUntilExpiry = membershipExpiry
+    ? Math.ceil((membershipExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  // Format account creation date
+  const accountCreated = userData?.account?.createdAt
+    ? new Date(userData.account.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : 'N/A';
+  
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-foreground">
-          My Fitness Dashboard
+          Welcome back, {user.name || 'Member'}!
         </h1>
         <p className="text-muted-foreground">
           Track your progress and stay connected
@@ -17,10 +113,29 @@ export default function CustomerDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Membership Status</p>
-            <p className="text-2xl font-bold text-primary mt-2">Active</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Expires in 45 days
-            </p>
+            <p className="text-2xl font-bold text-primary mt-2">{membershipStatus}</p>
+            {activeMembership && (
+              <>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {activeMembership.plan.name}
+                </p>
+                {daysUntilExpiry !== null && daysUntilExpiry > 0 && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {daysUntilExpiry === 1 ? 'Expires tomorrow' : `Expires in ${daysUntilExpiry} days`}
+                  </p>
+                )}
+                {daysUntilExpiry !== null && daysUntilExpiry <= 0 && (
+                  <p className="text-sm text-red-500 mt-1">
+                    Expired
+                  </p>
+                )}
+              </>
+            )}
+            {!activeMembership && !membershipsLoading && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Join a gym to get started
+              </p>
+            )}
           </div>
           <div className="text-5xl text-primary/20">🏋️</div>
         </div>
@@ -29,26 +144,38 @@ export default function CustomerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
-            label: 'Workouts This Week',
-            value: '5',
+            label: 'Active Memberships',
+            value: membershipsLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin inline" />
+            ) : (
+              memberships.filter(m => m.status === 'ACTIVE').length.toString()
+            ),
             icon: Calendar,
             color: 'bg-blue-100 text-blue-600',
           },
           {
-            label: 'Current Goal',
-            value: 'Strength',
+            label: 'Total Memberships',
+            value: membershipsLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin inline" />
+            ) : (
+              memberships.length.toString()
+            ),
             icon: Target,
             color: 'bg-orange-100 text-orange-600',
           },
           {
-            label: 'Marketplace Items',
-            value: '3',
+            label: 'Member Since',
+            value: userDataLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin inline" />
+            ) : (
+              accountCreated
+            ),
             icon: ShoppingBag,
             color: 'bg-green-100 text-green-600',
           },
           {
-            label: 'Community Groups',
-            value: '2',
+            label: 'Email Status',
+            value: user.emailVerified !== false ? 'Verified' : 'Unverified',
             icon: Users,
             color: 'bg-purple-100 text-purple-600',
           },
@@ -74,6 +201,56 @@ export default function CustomerDashboard() {
           );
         })}
       </div>
+
+      {activeMembership && (
+        <Card className="p-6 border-border/50">
+          <h2 className="text-lg font-semibold mb-4 text-foreground">
+            Current Membership Details
+          </h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Plan:</span>
+              <span className="font-medium">{activeMembership.plan.name}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Price:</span>
+              <span className="font-medium">
+                {activeMembership.plan.currency || 'GHS'} {activeMembership.plan.price}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Duration:</span>
+              <span className="font-medium">
+                {activeMembership.plan.duration} {activeMembership.plan.durationUnit.toLowerCase()}
+              </span>
+            </div>
+            {activeMembership.plan.maxVisits && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Visits Used:</span>
+                <span className="font-medium">
+                  {activeMembership.visitsUsed} / {activeMembership.plan.maxVisits}
+                </span>
+              </div>
+            )}
+            {activeMembership.startDate && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Start Date:</span>
+                <span className="font-medium">
+                  {new Date(activeMembership.startDate).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+            {activeMembership.endDate && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">End Date:</span>
+                <span className="font-medium">
+                  {new Date(activeMembership.endDate).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-6 border-border/50">

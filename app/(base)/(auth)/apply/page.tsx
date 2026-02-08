@@ -8,7 +8,7 @@ import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { BadgeCheck, Dumbbell, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { BadgeCheck, Dumbbell, Eye, EyeOff, Sparkles, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -364,7 +364,14 @@ export default function ApplyPage() {
                   disabled={isLoading}
                   className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 cursor-pointer"
                 >
-                  {isLoading ? 'Sending Code...' : 'Send Verification Code'}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending Code...
+                    </>
+                  ) : (
+                    'Send Verification Code'
+                  )}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">

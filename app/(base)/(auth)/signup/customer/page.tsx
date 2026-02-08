@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { AuthAPI } from '@/lib/api/auth';
 import { getDashboardPath, mapBackendUserTypeToRole, type UserRole } from '@/lib/auth';
-import { Dumbbell, Eye, EyeOff, Sparkles, Users } from 'lucide-react';
+import { Dumbbell, Eye, EyeOff, Sparkles, Users, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
@@ -167,10 +167,16 @@ export default function AthleteSignupPage() {
 
   useEffect(() => {
     // Only redirect if user is verified and not in OTP flow
+    // Skip redirect if we're already on a dashboard or auth page
     if (!authLoading && user && user.emailVerified !== false && !showOTP) {
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
       const dashboardPath = getDashboardPath(user.role);
-      if (window.location.pathname !== dashboardPath) {
-        router.replace(dashboardPath);
+      
+      // Only redirect if we're on a signup/login page, not if already on dashboard
+      if (currentPath.startsWith('/signup') || currentPath === '/login') {
+        if (currentPath !== dashboardPath) {
+          router.replace(dashboardPath);
+        }
       }
     }
   }, [authLoading, user, showOTP, router]);
@@ -315,7 +321,14 @@ export default function AthleteSignupPage() {
               disabled={isLoading}
               className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 cursor-pointer"
             >
-              {isLoading ? 'Creating Account...' : 'Create Member Account'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                'Create Member Account'
+              )}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">

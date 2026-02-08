@@ -38,10 +38,8 @@ export default function DashboardLayout({
       return;
     }
 
-    if (user?.role !== 'gym_owner') {
-      router.replace('/');
-      return;
-    }
+    // Allow all authenticated and verified users to access their dashboards
+    // Role-based routing is handled by individual dashboard pages if needed
   }, [isAuthenticated, user, router, isLoading]);
 
   if (!user) {
@@ -107,6 +105,7 @@ export default function DashboardLayout({
               setSidebarOpen(!sidebarOpen);
             }
           }}
+          onLogout={handleLogout}
         />
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
