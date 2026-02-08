@@ -27,7 +27,10 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import GymsAPI from '@/lib/api/gyms';
+import { useGymStore } from '@/store';
 import { useCallback, useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface Gym {
   id: number;
@@ -267,22 +270,64 @@ export function BrowseGymsContent() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortBy, setSortBy] = useState('distance');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const { favorites, toggleFavorite } = useGymStore();
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [gyms, setGyms] = useState<Gym[]>(MOCK_GYMS);
+  const [gyms, setGyms] = useState<Gym[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch gyms from API
+  useEffect(() => {
+    const fetchGyms = async () => {
+      try {
+        setLoading(true);
+        const gymsData = await GymsAPI.getAllGyms();
+        
+        // Transform backend gym data to frontend format
+        const transformedGyms: Gym[] = gymsData.map((gym, index) => ({
+          id: parseInt(gym.id.slice(-4), 16) || index + 1, // Convert ID to number for compatibility
+          name: gym.name,
+          location: gym.address,
+          area: `${gym.city}, ${gym.region}`,
+          price: 0, // Price not in backend, will need to get from plans
+          rating: 4.5, // Default rating, can be calculated from reviews later
+          reviews: 0, // Can be added later
+          members: 0, // Can be calculated from memberships count later
+          distance: 0, // Will be calculated based on location
+          amenities: [], // Can be parsed from settings JSON if available
+          image: gym.coverUrl || gym.logoUrl || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=600&fit=crop',
+          featured: index < 3, // First 3 are featured for now
+          openNow: true, // Can be calculated from operatingHours later
+          lat: gym.latitude || 5.556, // Default to Accra coordinates
+          lng: gym.longitude || -0.182,
+        }));
+        
+        setGyms(transformedGyms);
+      } catch (err: any) {
+        console.error('Failed to fetch gyms:', err);
+        setError(err.message || 'Failed to load gyms');
+        // Fallback to mock data on error
+        setGyms(MOCK_GYMS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGyms();
+  }, []);
 
   const sortGymsByDistance = useCallback((userLat: number, userLng: number) => {
-    const sorted = [...MOCK_GYMS].map((gym) => ({
+    const sorted = gyms.map((gym) => ({
       ...gym,
       distance: calculateDistance(userLat, userLng, gym.lat, gym.lng),
     }));
     setGyms(sorted);
-  }, []);
+  }, [gyms]);
 
   const getUserLocation = useCallback(() => {
     if (!navigator.geolocation) return;
@@ -304,13 +349,7 @@ export function BrowseGymsContent() {
     getUserLocation();
   }, [getUserLocation]);
 
-  const toggleFavorite = (gymId: number) => {
-    setFavorites((prev) =>
-      prev.includes(gymId)
-        ? prev.filter((id) => id !== gymId)
-        : [...prev, gymId],
-    );
-  };
+  // toggleFavorite is now from Zustand store
 
   const filteredGyms = gyms
     .filter((gym) => {
@@ -346,6 +385,28 @@ export function BrowseGymsContent() {
 
   const featuredGyms = filteredGyms.filter((g) => g.featured);
   const regularGyms = filteredGyms.filter((g) => !g.featured);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading gyms...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && gyms.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-destructive">{error}</p>
+          <p className="text-muted-foreground">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

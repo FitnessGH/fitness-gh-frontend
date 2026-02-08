@@ -95,8 +95,10 @@ export function mapBackendUserTypeToRole(userType: string): UserRole {
     case 'EMPLOYEE':
       return 'vendor';
     case 'ADMIN':
+    case 'SUPER_ADMIN':
       return 'admin';
     default:
+      console.warn(`Unknown userType: ${userType}, defaulting to customer`);
       return 'customer';
   }
 }

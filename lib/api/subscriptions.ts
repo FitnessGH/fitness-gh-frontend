@@ -35,6 +35,13 @@ export interface Membership {
   createdAt: string;
   updatedAt: string;
   plan: SubscriptionPlan;
+  profile?: {
+    id: string;
+    username: string;
+    firstName: string | null;
+    lastName: string | null;
+    avatarUrl: string | null;
+  };
 }
 
 class SubscriptionsAPI {
@@ -68,6 +75,26 @@ class SubscriptionsAPI {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to get memberships');
+    }
+
+    return this.parseResponse<Membership[]>(response);
+  }
+
+  /**
+   * Get gym memberships (for gym owners/managers)
+   */
+  static async getGymMemberships(
+    gymId: string,
+    accessToken: string,
+  ): Promise<Membership[]> {
+    const response = await fetch(`${API_BASE_URL}/subscriptions/gyms/${gymId}/memberships`, {
+      method: 'GET',
+      headers: this.getAuthHeaders(accessToken),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to get gym memberships');
     }
 
     return this.parseResponse<Membership[]>(response);
