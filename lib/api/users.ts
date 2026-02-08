@@ -48,6 +48,23 @@ class UsersAPI {
   }
 
   /**
+   * Get all users with account information (for admin)
+   */
+  static async getAllUsers(accessToken: string): Promise<UserWithAccount[]> {
+    const response = await fetch(`${API_BASE_URL}/users?withAccounts=true`, {
+      method: 'GET',
+      headers: this.getAuthHeaders(accessToken),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to get users');
+    }
+
+    return this.parseResponse<UserWithAccount[]>(response);
+  }
+
+  /**
    * Update user profile
    */
   static async updateProfile(
@@ -68,6 +85,27 @@ class UsersAPI {
 
     return this.parseResponse<UserProfile>(response);
   }
+}
+
+export interface UserWithAccount {
+  id: string;
+  email: string;
+  phone: string | null;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  userType: 'SUPER_ADMIN' | 'GYM_OWNER' | 'EMPLOYEE' | 'MEMBER';
+  isActive: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  profile: {
+    id: string;
+    username: string;
+    firstName: string | null;
+    lastName: string | null;
+    avatarUrl: string | null;
+    createdAt: string;
+  } | null;
 }
 
 export default UsersAPI;

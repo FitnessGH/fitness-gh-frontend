@@ -1,13 +1,13 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/auth-context';
+import GymsAPI from '@/lib/api/gyms';
+import SubscriptionsAPI from '@/lib/api/subscriptions';
+import type { Membership } from '@/lib/api/subscriptions';
 import {
   Member,
   Transaction,
-  addMember,
-  deleteMember,
-  getMembers,
-  updateMember,
 } from '@/lib/members-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@ui/avatar';
 import { Button } from '@ui/button';
@@ -25,6 +25,7 @@ import { Input } from '@ui/input';
 import {
   Coins,
   Eye,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -32,10 +33,71 @@ import {
   Trash,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+// Transform Membership to Member format
+function transformMembershipToMember(membership: Membership, index: number): Member {
+  console.log('Transforming membership:', membership);
+  
+  const profile = membership.profile;
+  const name = profile
+    ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.username
+    : 'Unknown Member';
+  
+  // Handle date conversion - dates come as strings from JSON
+  let startDate = 'N/A';
+  let endDate = 'N/A';
+  
+  if (membership.startDate) {
+    try {
+      startDate = new Date(membership.startDate as any).toLocaleDateString();
+    } catch (e) {
+      console.error('Error parsing startDate:', membership.startDate, e);
+    }
+  }
+  
+  if (membership.endDate) {
+    try {
+      endDate = new Date(membership.endDate as any).toLocaleDateString();
+    } catch (e) {
+      console.error('Error parsing endDate:', membership.endDate, e);
+    }
+  }
+
+  // Calculate payment status based on membership status
+  const status = membership.status === 'ACTIVE' ? 'Paid' : 'Not paid';
+  
+  // Get plan price
+  const planPrice = membership.plan?.price || 0;
+  const paid = status === 'Paid' ? `GH₵${planPrice}` : 'GH₵0';
+  const due = status === 'Not paid' ? `GH₵${planPrice}` : 'GH₵0';
+
+  const member: Member = {
+    id: membership.id,
+    memberId: membership.profileId?.slice(-8).toUpperCase() || `MEM${index}`,
+    name,
+    email: profile?.username || '',
+    phone: '',
+    photo: profile?.avatarUrl || undefined,
+    package: membership.plan?.name || 'Unknown Plan',
+    joinDate: startDate,
+    expireDate: endDate,
+    paid,
+    due,
+    status,
+    transactions: [],
+  };
+  
+  console.log('Transformed to member:', member);
+  return member;
+}
 
 export default function MembersPage() {
-  const [members, setMembers] = useState<Member[]>(getMembers());
+  const { userData } = useAuth();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedGymId, setSelectedGymId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -43,6 +105,59 @@ export default function MembersPage() {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [payingMember, setPayingMember] = useState<Member | null>(null);
   const [deleteMemberId, setDeleteMemberId] = useState<string | null>(null);
+
+  // Fetch gyms and memberships
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userData?.tokens?.accessToken) {
+        setError('Not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get user's gyms
+        const gymsData = await GymsAPI.getMyGyms(userData.tokens.accessToken);
+        const allGyms = [...gymsData.owned, ...gymsData.employed];
+
+        if (allGyms.length === 0) {
+          setError('No gyms found. Please create a gym first.');
+          setLoading(false);
+          return;
+        }
+
+        // Use first gym by default
+        const gymId = allGyms[0].id;
+        setSelectedGymId(gymId);
+
+        // Fetch memberships for the gym
+        const memberships = await SubscriptionsAPI.getGymMemberships(
+          gymId,
+          userData.tokens.accessToken,
+        );
+
+        console.log('Fetched memberships:', memberships);
+
+        // Transform memberships to members
+        const transformedMembers = memberships.map((m, idx) =>
+          transformMembershipToMember(m, idx),
+        );
+
+        console.log('Transformed members:', transformedMembers);
+        setMembers(transformedMembers);
+      } catch (err: any) {
+        console.error('Failed to fetch members:', err);
+        setError(err.message || 'Failed to load members');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userData]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -163,6 +278,10 @@ export default function MembersPage() {
       member.package.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  // Debug: Log current state
+  console.log('Current members state:', members);
+  console.log('Filtered members:', filteredMembers);
+
   const handleOpenAddModal = () => {
     setEditingMember(null);
     setFormData({
@@ -208,54 +327,16 @@ export default function MembersPage() {
   };
 
   const handleSubmitMember = () => {
-    if (editingMember) {
-      const updatedMember: Member = {
-        ...editingMember,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        package: formData.package,
-        status: formData.status,
-      };
-
-      updateMember(updatedMember);
-      setMembers(getMembers());
-    } else {
-      const newMember: Member = {
-        id: (members.length + 1).toString(),
-        memberId: Math.floor(1000 + Math.random() * 9000).toString(),
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        package: formData.package,
-        joinDate: new Date().toLocaleDateString(),
-        expireDate: new Date(
-          Date.now() + 30 * 24 * 60 * 60 * 1000,
-        ).toLocaleDateString(),
-        paid: 'GH₵0',
-        due: formData.package.includes('Gold')
-          ? 'GH₵450'
-          : formData.package.includes('Platinum')
-            ? 'GH₵600'
-            : 'GH₵300',
-        status: formData.status,
-        transactions: [],
-      };
-
-      addMember(newMember);
-      setMembers(getMembers());
-    }
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      package: 'Standard Membership',
-      status: 'Not paid',
+    // TODO: Implement member creation/update via API
+    toast({
+      title: 'Feature Coming Soon',
+      description: 'Member management will be available soon.',
     });
     setIsModalOpen(false);
   };
 
   const handlePaymentSubmit = () => {
+    // TODO: Implement payment recording via API
     if (!payingMember || !paymentData.amount) return;
 
     const paymentAmount = parseFloat(paymentData.amount);
@@ -268,36 +349,9 @@ export default function MembersPage() {
       return;
     }
 
-    const currentPaid =
-      parseFloat(payingMember.paid.replace(/[^0-9.]/g, '')) || 0;
-    const currentDue =
-      parseFloat(payingMember.due.replace(/[^0-9.]/g, '')) || 0;
-
-    const newPaid = currentPaid + paymentAmount;
-    const newDue = Math.max(0, currentDue - paymentAmount);
-    const newStatus = newDue <= 0 ? 'Paid' : 'Not paid';
-
-    const newTransaction: Transaction = {
-      id: Math.random().toString(36).substr(2, 9),
-      amount: paymentAmount,
-      date: paymentData.date,
-      method: paymentData.method,
-    };
-
-    const updatedMember: Member = {
-      ...payingMember,
-      paid: `GH₵${newPaid}`,
-      due: `GH₵${newDue}`,
-      status: newStatus as 'Paid' | 'Not paid',
-      transactions: [...(payingMember.transactions || []), newTransaction],
-    };
-
-    updateMember(updatedMember);
-    setMembers(getMembers());
-
     toast({
-      title: 'Payment Recorded',
-      description: `Successfully recorded payment of GH₵${paymentAmount} for ${payingMember.name}.`,
+      title: 'Feature Coming Soon',
+      description: 'Payment recording will be available soon.',
     });
 
     setIsPaymentModalOpen(false);
@@ -305,14 +359,38 @@ export default function MembersPage() {
   };
 
   const handleDeleteMember = () => {
+    // TODO: Implement member deletion via API
     if (deleteMemberId) {
-      deleteMember(deleteMemberId);
-      setMembers(getMembers());
-
+      toast({
+        title: 'Feature Coming Soon',
+        description: 'Member deletion will be available soon.',
+      });
       setIsDeleteModalOpen(false);
       setDeleteMemberId(null);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading members...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -349,12 +427,22 @@ export default function MembersPage() {
         </Button>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredMembers}
-        pageSize={10}
-        className="bg-card p-4 rounded-lg"
-      />
+      {filteredMembers.length === 0 ? (
+        <div className="bg-card p-8 rounded-lg text-center">
+          <p className="text-muted-foreground">
+            {members.length === 0
+              ? 'No members found. Members will appear here once they subscribe to your gym.'
+              : 'No members match your search criteria.'}
+          </p>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filteredMembers}
+          pageSize={10}
+          className="bg-card p-4 rounded-lg"
+        />
+      )}
 
       <Dialog
         open={isModalOpen}

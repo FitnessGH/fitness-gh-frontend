@@ -1,5 +1,8 @@
 'use client';
 
+import { useAuth } from '@/components/auth-context';
+import GymsAPI from '@/lib/api/gyms';
+import EmployeesAPI, { type Employee as APIEmployee } from '@/lib/api/employees';
 import { Button } from '@ui/button';
 import { Column, DataTable } from '@ui/data-table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@ui/dialog';
@@ -15,6 +18,7 @@ import {
   Briefcase,
   Coins,
   Eye,
+  Loader2,
   Mail,
   MoreVertical,
   Pencil,
@@ -23,7 +27,7 @@ import {
   Search,
   Trash,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -37,6 +41,26 @@ interface Employee {
   salary: number;
   status: 'Active' | 'On Leave' | 'Inactive';
   permissions: string[];
+}
+
+// Transform API employee to frontend format
+function transformEmployee(apiEmployee: APIEmployee): Employee {
+  const profile = apiEmployee.profile;
+  const name = profile
+    ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.username
+    : 'Unknown Employee';
+
+  return {
+    id: apiEmployee.id,
+    name,
+    email: profile?.username || '',
+    phone: '',
+    role: apiEmployee.role,
+    hireDate: new Date(apiEmployee.startDate).toLocaleDateString(),
+    salary: 0, // Not in backend
+    status: apiEmployee.isActive ? 'Active' : 'Inactive',
+    permissions: [], // Not in backend
+  };
 }
 
 const AVAILABLE_PERMISSIONS = [
@@ -72,7 +96,8 @@ const AVAILABLE_PERMISSIONS = [
   },
 ];
 
-const mockEmployees: Employee[] = [
+// Removed mockEmployees - now using real API data
+const _mockEmployees: Employee[] = [
   {
     id: 'E001',
     name: 'John Smith',
@@ -127,7 +152,11 @@ const mockEmployees: Employee[] = [
 ];
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
+  const { userData } = useAuth();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedGymId, setSelectedGymId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -144,6 +173,53 @@ export default function EmployeesPage() {
     salary: '',
     status: 'Active' as 'Active' | 'On Leave' | 'Inactive',
   });
+
+  // Fetch gyms and employees
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userData?.tokens?.accessToken) {
+        setError('Not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get user's gyms
+        const gymsData = await GymsAPI.getMyGyms(userData.tokens.accessToken);
+        const allGyms = [...gymsData.owned, ...gymsData.employed];
+
+        if (allGyms.length === 0) {
+          setError('No gyms found. Please create a gym first.');
+          setLoading(false);
+          return;
+        }
+
+        // Use first gym by default
+        const gymId = allGyms[0].id;
+        setSelectedGymId(gymId);
+
+        // Fetch employees for the gym
+        const apiEmployees = await EmployeesAPI.getGymEmployees(
+          gymId,
+          userData.tokens.accessToken,
+        );
+
+        // Transform employees
+        const transformedEmployees = apiEmployees.map(transformEmployee);
+        setEmployees(transformedEmployees);
+      } catch (err: any) {
+        console.error('Failed to fetch employees:', err);
+        setError(err.message || 'Failed to load employees');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userData]);
 
   const columns: Column<Employee>[] = [
     {
@@ -377,6 +453,28 @@ export default function EmployeesPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading employees...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -426,12 +524,22 @@ export default function EmployeesPage() {
         </Button>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredEmployees}
-        pageSize={10}
-        className="bg-card p-4 rounded-lg"
-      />
+      {filteredEmployees.length === 0 ? (
+        <div className="bg-card p-8 rounded-lg text-center">
+          <p className="text-muted-foreground">
+            {employees.length === 0
+              ? 'No employees found. Add employees to manage your gym staff.'
+              : 'No employees match your search criteria.'}
+          </p>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filteredEmployees}
+          pageSize={10}
+          className="bg-card p-4 rounded-lg"
+        />
+      )}
 
       <Dialog
         open={isModalOpen}

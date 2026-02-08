@@ -28,12 +28,12 @@ export interface Membership {
   gymId: string;
   planId: string;
   status: MembershipStatus;
-  startDate: string | null;
-  endDate: string | null;
+  startDate: string | Date | null;
+  endDate: string | Date | null;
   autoRenew: boolean;
   visitsUsed: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   plan: SubscriptionPlan;
   profile?: {
     id: string;

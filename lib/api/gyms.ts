@@ -88,8 +88,9 @@ class GymsAPI {
 
   /**
    * Get my gyms (authenticated)
+   * Returns both owned and employed gyms
    */
-  static async getMyGyms(accessToken: string): Promise<Gym[]> {
+  static async getMyGyms(accessToken: string): Promise<{ owned: Gym[]; employed: Gym[] }> {
     const response = await fetch(`${API_BASE_URL}/gyms/my/all`, {
       method: 'GET',
       headers: this.getAuthHeaders(accessToken),
@@ -100,7 +101,7 @@ class GymsAPI {
       throw new Error(error.message || 'Failed to get my gyms');
     }
 
-    return this.parseResponse<Gym[]>(response);
+    return this.parseResponse<{ owned: Gym[]; employed: Gym[] }>(response);
   }
 }
 

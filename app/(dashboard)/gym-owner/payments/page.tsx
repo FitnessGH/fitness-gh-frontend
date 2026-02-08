@@ -1,11 +1,14 @@
 'use client';
 
+import { useAuth } from '@/components/auth-context';
+import GymsAPI from '@/lib/api/gyms';
+import PaymentsAPI, { type Payment as APIPayment } from '@/lib/api/payments';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Column, DataTable } from '@ui/data-table';
 import { Input } from '@ui/input';
-import { Coins, Download, Eye, Search } from 'lucide-react';
-import { useState } from 'react';
+import { Coins, Download, Eye, Loader2, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Payment {
   id: string;
@@ -17,49 +20,91 @@ interface Payment {
   receiptId: string;
 }
 
-const mockPayments: Payment[] = [
-  {
-    id: 'P001',
-    memberName: 'Alex Chen',
-    amount: 99.99,
-    plan: 'Premium',
-    date: '2025-01-15',
-    status: 'Completed',
-    receiptId: 'RCP-2025-001',
-  },
-  {
-    id: 'P002',
-    memberName: 'Maria Garcia',
-    amount: 59.99,
-    plan: 'Standard',
-    date: '2025-01-14',
-    status: 'Completed',
-    receiptId: 'RCP-2025-002',
-  },
-  {
-    id: 'P003',
-    memberName: 'James Wilson',
-    amount: 29.99,
-    plan: 'Basic',
-    date: '2025-01-14',
-    status: 'Pending',
-    receiptId: 'RCP-2025-003',
-  },
-  {
-    id: 'P004',
-    memberName: 'Sarah Lee',
-    amount: 99.99,
-    plan: 'Premium',
-    date: '2025-01-13',
-    status: 'Completed',
-    receiptId: 'RCP-2025-004',
-  },
-];
+// Transform API payment to frontend format
+function transformPayment(apiPayment: APIPayment): Payment {
+  const profile = apiPayment.profile;
+  const memberName = profile
+    ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.username
+    : 'Unknown Member';
+
+  const planName = apiPayment.membership?.plan?.name || 'Unknown Plan';
+  const date = apiPayment.paidAt
+    ? new Date(apiPayment.paidAt).toISOString().split('T')[0]
+    : new Date(apiPayment.createdAt).toISOString().split('T')[0];
+
+  const status =
+    apiPayment.status === 'COMPLETED'
+      ? 'Completed'
+      : apiPayment.status === 'PENDING'
+        ? 'Pending'
+        : 'Failed';
+
+  return {
+    id: apiPayment.id,
+    memberName,
+    amount: apiPayment.amount,
+    plan: planName,
+    date,
+    status,
+    receiptId: apiPayment.reference,
+  };
+}
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<Payment[]>(mockPayments);
+  const { userData } = useAuth();
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedGymId, setSelectedGymId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('All');
+
+  // Fetch gyms and payments
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userData?.tokens?.accessToken) {
+        setError('Not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get user's gyms
+        const gymsData = await GymsAPI.getMyGyms(userData.tokens.accessToken);
+        const allGyms = [...gymsData.owned, ...gymsData.employed];
+
+        if (allGyms.length === 0) {
+          setError('No gyms found. Please create a gym first.');
+          setLoading(false);
+          return;
+        }
+
+        // Use first gym by default
+        const gymId = allGyms[0].id;
+        setSelectedGymId(gymId);
+
+        // Fetch payments for the gym
+        const apiPayments = await PaymentsAPI.getGymPayments(
+          gymId,
+          userData.tokens.accessToken,
+        );
+
+        // Transform payments
+        const transformedPayments = apiPayments.map(transformPayment);
+        setPayments(transformedPayments);
+      } catch (err: any) {
+        console.error('Failed to fetch payments:', err);
+        setError(err.message || 'Failed to load payments');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userData]);
 
   const columns: Column<Payment>[] = [
     {
@@ -139,6 +184,28 @@ export default function PaymentsPage() {
   const pendingAmount = payments
     .filter((p) => p.status === 'Pending')
     .reduce((sum, p) => sum + p.amount, 0);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading payments...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -230,12 +297,22 @@ export default function PaymentsPage() {
         </Button>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredPayments}
-        pageSize={10}
-        className="bg-card p-4 rounded-lg"
-      />
+      {filteredPayments.length === 0 ? (
+        <div className="bg-card p-8 rounded-lg text-center">
+          <p className="text-muted-foreground">
+            {payments.length === 0
+              ? 'No payments found. Payment history will appear here once members make payments.'
+              : 'No payments match your search criteria.'}
+          </p>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filteredPayments}
+          pageSize={10}
+          className="bg-card p-4 rounded-lg"
+        />
+      )}
     </div>
   );
 }
