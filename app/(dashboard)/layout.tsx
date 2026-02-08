@@ -9,18 +9,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useUIStore } from '@/store';
 import { BebasFont } from '@/constant';
 import { Dumbbell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const {
+    sidebarOpen,
+    mobileMenuOpen,
+    setSidebarOpen,
+    setMobileMenuOpen,
+  } = useUIStore();
 
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -49,6 +54,14 @@ export default function DashboardLayout({
   const handleLogout = () => {
     setMobileMenuOpen(false);
     logout();
+  };
+
+  const handleMenuClick = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setMobileMenuOpen(true);
+    } else {
+      setSidebarOpen(!sidebarOpen);
+    }
   };
 
   return (
@@ -98,13 +111,7 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header
           user={user}
-          onMenuClick={() => {
-            if (window.innerWidth < 768) {
-              setMobileMenuOpen(true);
-            } else {
-              setSidebarOpen(!sidebarOpen);
-            }
-          }}
+          onMenuClick={handleMenuClick}
           onLogout={handleLogout}
         />
         <main className="flex-1 overflow-auto">{children}</main>

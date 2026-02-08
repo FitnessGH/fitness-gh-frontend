@@ -42,40 +42,45 @@ export default function CustomerDashboard() {
     }
   }, [user, isLoading, isAuthenticated, router]);
 
-  // Fetch memberships (user data is already in auth context)
+  // Fetch memberships using Zustand store
   useEffect(() => {
     const fetchMemberships = async () => {
       if (!user || user.role !== 'customer') return;
 
       const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
       if (!accessToken) {
-        setMembershipsLoading(false);
+        setLoading(false);
+        return;
+      }
+
+      // Only fetch if we don't have memberships already
+      if (memberships.length > 0) {
         return;
       }
 
       try {
-        setMembershipsLoading(true);
+        setLoading(true);
+        setError(null);
         const membershipData = await SubscriptionsAPI.getMyMemberships(accessToken);
         setMemberships(membershipData);
       } catch (error: any) {
         console.error('Failed to fetch memberships:', error);
-        setMembershipsError(error.message || 'Failed to load memberships');
+        setError(error.message || 'Failed to load memberships');
       } finally {
-        setMembershipsLoading(false);
+        setLoading(false);
       }
     };
 
     if (user && user.role === 'customer') {
       fetchMemberships();
     }
-  }, [user]);
+  }, [user, memberships.length, setMemberships, setLoading, setError]);
 
   if (isLoading || !user || user.role !== 'customer') {
     return null;
   }
 
-  // Get active membership
-  const activeMembership = memberships.find(m => m.status === 'ACTIVE');
+  // Calculate membership status and expiry (activeMembership comes from store)
   const membershipStatus = activeMembership ? 'Active' : 'No Active Membership';
   const membershipExpiry = activeMembership?.endDate 
     ? new Date(activeMembership.endDate)
