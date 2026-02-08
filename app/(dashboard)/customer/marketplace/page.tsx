@@ -1,10 +1,11 @@
 'use client';
 
+import MarketplaceAPI, { type Product as ApiProduct, ProductCategory } from '@/lib/api/marketplace';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
-import { AlertCircle, Search, ShoppingCart, Star } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2, Search, ShoppingCart, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Product {
   id: string;
@@ -17,85 +18,64 @@ interface Product {
   category: string;
 }
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Whey Protein Powder',
-    vendor: 'Elite Supplements',
-    price: 29.99,
-    rating: 4.8,
-    reviews: 234,
-    image:
-      'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
-    category: 'Supplements',
-  },
-  {
-    id: '2',
-    name: 'Yoga Mat',
-    vendor: 'Fit Gear Co',
-    price: 34.99,
-    rating: 4.6,
-    reviews: 156,
-    image:
-      'https://images.unsplash.com/photo-1603985529862-9d9f6f82f80a?w=600&h=450&fit=crop',
-    category: 'Equipment',
-  },
-  {
-    id: '3',
-    name: 'Sports Water Bottle',
-    vendor: 'HydroMax',
-    price: 24.99,
-    rating: 4.7,
-    reviews: 289,
-    image:
-      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=450&fit=crop',
-    category: 'Accessories',
-  },
-  {
-    id: '4',
-    name: 'Resistance Bands Set',
-    vendor: 'Fit Gear Co',
-    price: 44.99,
-    rating: 4.9,
-    reviews: 178,
-    image:
-      'https://images.unsplash.com/photo-1599058918144-1ffabb6ab9a0?w=600&h=450&fit=crop',
-    category: 'Equipment',
-  },
-  {
-    id: '5',
-    name: 'BCAA Energy Drink',
-    vendor: 'Elite Supplements',
-    price: 19.99,
-    rating: 4.5,
-    reviews: 112,
-    image:
-      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=450&fit=crop',
-    category: 'Supplements',
-  },
-  {
-    id: '6',
-    name: 'Gym Towel Set',
-    vendor: 'ProFit Gear',
-    price: 39.99,
-    rating: 4.4,
-    reviews: 98,
-    image:
-      'https://images.unsplash.com/photo-1600180758895-55efb1f89c27?w=600&h=450&fit=crop',
-    category: 'Accessories',
-  },
-];
+// Transform API product to frontend format
+function transformProduct(apiProduct: ApiProduct): Product {
+  const vendorName = apiProduct.vendor
+    ? `${apiProduct.vendor.firstName || ''} ${apiProduct.vendor.lastName || ''}`.trim() || apiProduct.vendor.username
+    : 'Unknown Vendor';
+
+  return {
+    id: apiProduct.id,
+    name: apiProduct.name,
+    vendor: vendorName,
+    price: apiProduct.price,
+    rating: apiProduct.rating || 0,
+    reviews: apiProduct.reviewCount || 0,
+    image: apiProduct.imageUrl || 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
+    category: apiProduct.category,
+  };
+}
 
 export default function CustomerMarketplacePage() {
-  // TODO: Replace with real API data when marketplace/products API is implemented
-  // Marketplace/Products API endpoint needs to be created in the backend
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState<string[]>([]);
 
-  const categories = ['All', 'Supplements', 'Equipment', 'Accessories'];
+  const categories = ['All', 'SUPPLEMENTS', 'EQUIPMENT', 'ACCESSORIES', 'APPAREL', 'OTHER'];
 
-  const filteredProducts = mockProducts.filter((product) => {
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const filters: any = {};
+        if (selectedCategory !== 'All') {
+          filters.category = selectedCategory as ProductCategory;
+        }
+        if (searchTerm) {
+          filters.search = searchTerm;
+        }
+
+        const apiProducts = await MarketplaceAPI.getAllProducts(filters);
+        const transformedProducts = apiProducts.map(transformProduct);
+        setProducts(transformedProducts);
+      } catch (err: any) {
+        console.error('Failed to fetch products:', err);
+        setError(err.message || 'Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [selectedCategory, searchTerm]);
+
+  const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -127,30 +107,18 @@ export default function CustomerMarketplacePage() {
         </div>
       </div>
 
-      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-          <div>
-            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
-              Marketplace/Products API Not Yet Implemented
-            </p>
-            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
-              This page is currently using mock data. The marketplace/products API endpoint needs to be created in the backend to enable real product browsing and purchasing.
-            </p>
-          </div>
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
-      </Card>
+      )}
 
-      <div className="flex items-center justify-end">
-        <div className="relative">
-          <ShoppingCart className="w-5 h-5 text-primary absolute right-3 top-3" />
-          {cart.length > 0 && (
-            <div className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-              {cart.length}
-            </div>
-          )}
-        </div>
-      </div>
+      {error && (
+        <Card className="p-4 border-destructive/20 bg-destructive/10">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </Card>
+      )}
 
       <Card className="p-4 border-border/50">
         <div className="space-y-4">
@@ -175,15 +143,20 @@ export default function CustomerMarketplacePage() {
                     : 'bg-muted text-foreground hover:bg-muted/80'
                 }`}
               >
-                {category}
+                {category === 'SUPPLEMENTS' ? 'Supplements' :
+                 category === 'EQUIPMENT' ? 'Equipment' :
+                 category === 'ACCESSORIES' ? 'Accessories' :
+                 category === 'APPAREL' ? 'Apparel' :
+                 category === 'OTHER' ? 'Other' : category}
               </button>
             ))}
           </div>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredProducts.map((product) => (
+      {!loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredProducts.map((product) => (
           <Card
             key={product.id}
             className="border-border/50 overflow-hidden hover:border-primary/50 transition-colors"
@@ -240,8 +213,19 @@ export default function CustomerMarketplacePage() {
               </div>
             </div>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && filteredProducts.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            {products.length === 0
+              ? 'No products available at the moment.'
+              : 'No products found matching your criteria.'}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,11 +1,14 @@
 'use client';
 
+import { useAuth } from '@/components/auth-context';
+import MarketplaceAPI, { type Product as ApiProduct, ProductStatus } from '@/lib/api/marketplace';
+import { tokenStorage } from '@/lib/utils/token-storage';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { AlertCircle, Edit2, Eye, EyeOff, Plus, Search, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Edit2, Eye, EyeOff, Loader2, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Product {
   id: string;
@@ -13,57 +16,57 @@ interface Product {
   category: string;
   price: number;
   stock: number;
-  sales: number;
+  sales: number; // Not available in API yet
   status: 'Active' | 'Draft';
 }
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Whey Protein Powder',
-    category: 'Supplements',
-    price: 29.99,
-    stock: 145,
-    sales: 456,
-    status: 'Active',
-  },
-  {
-    id: '2',
-    name: 'Creatine Monohydrate',
-    category: 'Supplements',
-    price: 19.99,
-    stock: 89,
-    sales: 234,
-    status: 'Active',
-  },
-  {
-    id: '3',
-    name: 'BCAA Energy Drink',
-    category: 'Supplements',
-    price: 14.99,
-    stock: 0,
-    sales: 178,
-    status: 'Active',
-  },
-  {
-    id: '4',
-    name: 'Fat Burner Capsules',
-    category: 'Supplements',
-    price: 24.99,
-    stock: 56,
-    sales: 89,
-    status: 'Draft',
-  },
-];
+// Transform API product to frontend format
+function transformProduct(apiProduct: ApiProduct): Product {
+  return {
+    id: apiProduct.id,
+    name: apiProduct.name,
+    category: apiProduct.category,
+    price: apiProduct.price,
+    stock: apiProduct.stock,
+    sales: 0, // TODO: Calculate from orders when available
+    status: apiProduct.status === 'ACTIVE' ? 'Active' : 'Draft',
+  };
+}
 
 export default function VendorProductsPage() {
-  // TODO: Replace with real API data when marketplace/products API is implemented
-  // Marketplace/Products API endpoint needs to be created in the backend
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const { isLoading: authLoading } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Active' | 'Draft'>(
     'All',
   );
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (authLoading) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const apiProducts = await MarketplaceAPI.getMyProducts();
+        const transformedProducts = apiProducts.map(transformProduct);
+        setProducts(transformedProducts);
+      } catch (err: any) {
+        console.error('Failed to fetch products:', err);
+        setError(err.message || 'Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [authLoading]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -74,25 +77,63 @@ export default function VendorProductsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id));
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) {
+      return;
+    }
+
+    try {
+      await MarketplaceAPI.deleteProduct(id);
+      setProducts(products.filter((p) => p.id !== id));
+    } catch (err: any) {
+      console.error('Failed to delete product:', err);
+      alert(err.message || 'Failed to delete product');
+    }
   };
+
+  const handleToggleStatus = async (product: Product) => {
+    try {
+      const newStatus = product.status === 'Active' ? 'DRAFT' : 'ACTIVE';
+      await MarketplaceAPI.updateProduct(product.id, {
+        status: newStatus as ProductStatus,
+      });
+      
+      // Refresh products
+      const apiProducts = await MarketplaceAPI.getMyProducts();
+      const transformedProducts = apiProducts.map(transformProduct);
+      setProducts(transformedProducts);
+    } catch (err: any) {
+      console.error('Failed to update product status:', err);
+      alert(err.message || 'Failed to update product status');
+    }
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">
+            {authLoading ? 'Loading...' : 'Loading products...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
-      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-          <div>
-            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
-              Marketplace/Products API Not Yet Implemented
-            </p>
-            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
-              This page is currently using mock data. The marketplace/products API endpoint needs to be created in the backend to enable real product management.
-            </p>
-          </div>
-        </div>
-      </Card>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Products</h1>
@@ -219,6 +260,7 @@ export default function VendorProductsPage() {
                     <button
                       className="p-1 hover:bg-muted rounded"
                       title="Toggle visibility"
+                      onClick={() => handleToggleStatus(product)}
                     >
                       {product.status === 'Active' ? (
                         <Eye className="w-4 h-4 text-muted-foreground hover:text-primary" />
@@ -239,6 +281,15 @@ export default function VendorProductsPage() {
             ))}
           </tbody>
         </table>
+        {filteredProducts.length === 0 && (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              {products.length === 0
+                ? 'No products found. Click "Add Product" to create your first product.'
+                : 'No products match your search criteria.'}
+            </p>
+          </div>
+        )}
       </Card>
     </div>
   );

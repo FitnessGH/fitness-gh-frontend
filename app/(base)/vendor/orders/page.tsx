@@ -1,12 +1,14 @@
 'use client';
 
+import { useAuth } from '@/components/auth-context';
+import MarketplaceAPI, { type Order as ApiOrder, OrderStatus } from '@/lib/api/marketplace';
 import { Badge } from '@ui/badge';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { AlertCircle, Calendar, MapPin, Package, Search } from 'lucide-react';
-import { useState } from 'react';
+import { Calendar, Loader2, MapPin, Package, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Order {
   id: string;
@@ -18,64 +20,96 @@ interface Order {
   orderDate: string;
   dueDate: string;
   destination: string;
+  orderItems?: Array<{
+    productName: string;
+    quantity: number;
+    price: number;
+  }>;
 }
 
-const mockOrders: Order[] = [
-  {
-    id: '1',
-    orderNumber: 'ORD-2025-001',
-    customer: 'FitClub Downtown',
-    items: 3,
-    total: 245.98,
-    status: 'Pending',
-    orderDate: '2025-01-14',
-    dueDate: '2025-01-21',
-    destination: '123 Main St, Downtown',
-  },
-  {
-    id: '2',
-    orderNumber: 'ORD-2025-002',
-    customer: 'Elite Gym Center',
-    items: 2,
-    total: 129.99,
-    status: 'Processing',
-    orderDate: '2025-01-13',
-    dueDate: '2025-01-20',
-    destination: '456 Park Ave, Uptown',
-  },
-  {
-    id: '3',
-    orderNumber: 'ORD-2025-003',
-    customer: 'Sarah Johnson',
-    items: 1,
-    total: 29.99,
-    status: 'Shipped',
-    orderDate: '2025-01-12',
-    dueDate: '2025-01-18',
-    destination: '789 Oak Rd, Suburb',
-  },
-  {
-    id: '4',
-    orderNumber: 'ORD-2025-004',
-    customer: 'Premium Fitness',
-    items: 5,
-    total: 459.95,
-    status: 'Delivered',
-    orderDate: '2025-01-10',
-    dueDate: '2025-01-17',
-    destination: '321 Market St, Downtown',
-  },
-];
+// Transform API order to frontend format
+function transformOrder(apiOrder: ApiOrder): Order {
+  const customerName = apiOrder.customer
+    ? `${apiOrder.customer.firstName || ''} ${apiOrder.customer.lastName || ''}`.trim() || apiOrder.customer.username
+    : 'Unknown Customer';
+
+  const shippingAddress = apiOrder.shippingAddress as any;
+  const destination = shippingAddress
+    ? `${shippingAddress.street || ''}, ${shippingAddress.city || ''}, ${shippingAddress.region || ''}`.trim()
+    : 'Address not provided';
+
+  // Map backend status to frontend status
+  const statusMap: Record<OrderStatus, 'Pending' | 'Processing' | 'Shipped' | 'Delivered'> = {
+    PENDING: 'Pending',
+    PROCESSING: 'Processing',
+    SHIPPED: 'Shipped',
+    DELIVERED: 'Delivered',
+    CANCELLED: 'Pending', // Fallback
+    REFUNDED: 'Pending', // Fallback
+  };
+
+  const orderDate = apiOrder.createdAt
+    ? new Date(apiOrder.createdAt).toISOString().split('T')[0]
+    : new Date().toISOString().split('T')[0];
+
+  // Calculate due date (7 days from order date)
+  const dueDate = new Date(apiOrder.createdAt);
+  dueDate.setDate(dueDate.getDate() + 7);
+  const dueDateStr = dueDate.toISOString().split('T')[0];
+
+  return {
+    id: apiOrder.id,
+    orderNumber: apiOrder.orderNumber,
+    customer: customerName,
+    items: apiOrder.items.length,
+    total: apiOrder.total,
+    status: statusMap[apiOrder.status],
+    orderDate,
+    dueDate: dueDateStr,
+    destination,
+    orderItems: apiOrder.items.map((item) => ({
+      productName: item.product.name,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+  };
+}
 
 export default function VendorOrdersPage() {
-  // TODO: Replace with real API data when marketplace/orders API is implemented
-  // Marketplace/Orders API endpoint needs to be created in the backend
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const { isLoading: authLoading } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<
     'All' | 'Pending' | 'Processing' | 'Shipped' | 'Delivered'
   >('All');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (authLoading) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const apiOrders = await MarketplaceAPI.getVendorOrders();
+        const transformedOrders = apiOrders.map(transformOrder);
+        setOrders(transformedOrders);
+      } catch (err: any) {
+        console.error('Failed to fetch orders:', err);
+        setError(err.message || 'Failed to load orders');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [authLoading]);
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
@@ -86,12 +120,26 @@ export default function VendorOrdersPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleStatusChange = (orderId: string, newStatus: Order['status']) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order,
-      ),
-    );
+  const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+    try {
+      // Map frontend status to backend status
+      const statusMap: Record<'Pending' | 'Processing' | 'Shipped' | 'Delivered', OrderStatus> = {
+        Pending: 'PENDING',
+        Processing: 'PROCESSING',
+        Shipped: 'SHIPPED',
+        Delivered: 'DELIVERED',
+      };
+
+      await MarketplaceAPI.updateOrderStatus(orderId, statusMap[newStatus]);
+      
+      // Refresh orders
+      const apiOrders = await MarketplaceAPI.getVendorOrders();
+      const transformedOrders = apiOrders.map(transformOrder);
+      setOrders(transformedOrders);
+    } catch (err: any) {
+      console.error('Failed to update order status:', err);
+      alert(err.message || 'Failed to update order status');
+    }
   };
 
   const statusColors: Record<Order['status'], string> = {
@@ -101,26 +149,36 @@ export default function VendorOrdersPage() {
     Delivered: 'bg-green-100 text-green-700',
   };
 
+  if (authLoading || loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">
+            {authLoading ? 'Loading...' : 'Loading orders...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Orders</h1>
         <p className="text-muted-foreground">Track and manage your orders</p>
       </div>
-
-      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-          <div>
-            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
-              Marketplace/Orders API Not Yet Implemented
-            </p>
-            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
-              This page is currently using mock data. The marketplace/orders API endpoint needs to be created in the backend to enable real order management.
-            </p>
-          </div>
-        </div>
-      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
@@ -251,9 +309,17 @@ export default function VendorOrdersPage() {
                       <p className="text-xs text-muted-foreground">
                         Order Items
                       </p>
-                      <p className="font-semibold text-foreground">
-                        {order.items} products
-                      </p>
+                      <div className="space-y-1">
+                        {order.orderItems?.map((item, idx) => (
+                          <p key={idx} className="text-sm text-foreground">
+                            {item.productName} × {item.quantity} - GH₵{item.price.toFixed(2)}
+                          </p>
+                        )) || (
+                          <p className="font-semibold text-foreground">
+                            {order.items} products
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -310,6 +376,15 @@ export default function VendorOrdersPage() {
             )}
           </Card>
         ))}
+        {filteredOrders.length === 0 && (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              {orders.length === 0
+                ? 'No orders found.'
+                : 'No orders match your search criteria.'}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

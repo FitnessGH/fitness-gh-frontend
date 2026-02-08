@@ -1,11 +1,12 @@
 'use client';
 
+import MarketplaceAPI, { type Product as ApiProduct, ProductCategory } from '@/lib/api/marketplace';
 import { ProductCard } from '@/components/marketplace/product-card';
 import { ShoppingCart as ShoppingCartSheet } from '@/components/marketplace/shopping-cart';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
-import { Search, ShoppingCart } from 'lucide-react';
-import { Suspense, useState } from 'react';
+import { Loader2, Search, ShoppingCart } from 'lucide-react';
+import { Suspense, useEffect, useState } from 'react';
 
 interface CartItem {
   id: string;
@@ -25,106 +26,65 @@ interface Product {
   category: string;
 }
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Whey Protein Powder',
-    vendor: 'Elite Supplements',
-    price: 29.99,
-    rating: 4.8,
-    reviews: 234,
-    image:
-      'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
-    category: 'Supplements',
-  },
-  {
-    id: '2',
-    name: 'Yoga Mat',
-    vendor: 'Fit Gear Co',
-    price: 34.99,
-    rating: 4.6,
-    reviews: 156,
-    image:
-      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=450&fit=crop',
-    category: 'Equipment',
-  },
-  {
-    id: '3',
-    name: 'Sports Water Bottle',
-    vendor: 'HydroMax',
-    price: 24.99,
-    rating: 4.7,
-    reviews: 289,
-    image:
-      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=450&fit=crop',
-    category: 'Accessories',
-  },
-  {
-    id: '4',
-    name: 'Resistance Bands Set',
-    vendor: 'Fit Gear Co',
-    price: 44.99,
-    rating: 4.9,
-    reviews: 178,
-    image:
-      'https://images.unsplash.com/photo-1599058918144-1ffabb6ab9a0?w=600&h=450&fit=crop',
-    category: 'Equipment',
-  },
-  {
-    id: '5',
-    name: 'BCAA Energy Drink',
-    vendor: 'Elite Supplements',
-    price: 19.99,
-    rating: 4.5,
-    reviews: 112,
-    image:
-      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=450&fit=crop',
-    category: 'Supplements',
-  },
-  {
-    id: '6',
-    name: 'Gym Towel Set',
-    vendor: 'ProFit Gear',
-    price: 39.99,
-    rating: 4.4,
-    reviews: 98,
-    image:
-      'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=600&h=450&fit=crop',
-    category: 'Accessories',
-  },
-  {
-    id: '7',
-    name: 'Dumbbell Set',
-    vendor: 'Iron Works',
-    price: 89.99,
-    rating: 4.7,
-    reviews: 201,
-    image:
-      'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=450&fit=crop',
-    category: 'Equipment',
-  },
-  {
-    id: '8',
-    name: 'Pre-Workout Mix',
-    vendor: 'Elite Supplements',
-    price: 34.99,
-    rating: 4.6,
-    reviews: 145,
-    image:
-      'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=600&h=450&fit=crop',
-    category: 'Supplements',
-  },
-];
+// Transform API product to frontend format
+function transformProduct(apiProduct: ApiProduct): Product {
+  const vendorName = apiProduct.vendor
+    ? `${apiProduct.vendor.firstName || ''} ${apiProduct.vendor.lastName || ''}`.trim() || apiProduct.vendor.username
+    : 'Unknown Vendor';
+
+  return {
+    id: apiProduct.id,
+    name: apiProduct.name,
+    vendor: vendorName,
+    price: apiProduct.price,
+    rating: apiProduct.rating || 0,
+    reviews: apiProduct.reviewCount || 0,
+    image: apiProduct.imageUrl || 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
+    category: apiProduct.category,
+  };
+}
 
 function MarketplaceContent() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const categories = ['All', 'Supplements', 'Equipment', 'Accessories'];
+  const categories = ['All', 'SUPPLEMENTS', 'EQUIPMENT', 'ACCESSORIES', 'APPAREL', 'OTHER'];
 
-  const filteredProducts = mockProducts.filter((product) => {
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const filters: any = {};
+        if (selectedCategory !== 'All') {
+          filters.category = selectedCategory as ProductCategory;
+        }
+        if (searchTerm) {
+          filters.search = searchTerm;
+        }
+
+        const apiProducts = await MarketplaceAPI.getAllProducts(filters);
+        const transformedProducts = apiProducts.map(transformProduct);
+        setProducts(transformedProducts);
+      } catch (err: any) {
+        console.error('Failed to fetch products:', err);
+        setError(err.message || 'Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [selectedCategory, searchTerm]);
+
+  const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -134,7 +94,7 @@ function MarketplaceContent() {
   });
 
   const handleAddToCart = (productId: string) => {
-    const product = mockProducts.find((p) => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     if (product) {
       setCartItems((prev) => {
         const existing = prev.find((item) => item.id === productId);
@@ -188,6 +148,19 @@ function MarketplaceContent() {
             </button>
           </div>
 
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          )}
+
+          {error && (
+            <Card className="p-4 border-destructive/20 bg-destructive/10">
+              <p className="text-destructive font-medium">Error</p>
+              <p className="text-sm text-muted-foreground mt-1">{error}</p>
+            </Card>
+          )}
+
           <Card className="p-4 border-border/50 shadow-md">
             <div className="space-y-4">
               <div className="relative">
@@ -211,29 +184,39 @@ function MarketplaceContent() {
                         : 'bg-muted text-foreground hover:bg-muted/80'
                     }`}
                   >
-                    {category}
+                    {category === 'SUPPLEMENTS' ? 'Supplements' :
+                     category === 'EQUIPMENT' ? 'Equipment' :
+                     category === 'ACCESSORIES' ? 'Accessories' :
+                     category === 'APPAREL' ? 'Apparel' :
+                     category === 'OTHER' ? 'Other' : category}
                   </button>
                 ))}
               </div>
             </div>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                {...product}
-                onAddToCart={handleAddToCart}
-              />
-            ))}
-          </div>
+          {!loading && !error && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    {...product}
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
+              </div>
 
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                No products found matching your criteria.
-              </p>
-            </div>
+              {filteredProducts.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">
+                    {products.length === 0
+                      ? 'No products available at the moment.'
+                      : 'No products found matching your criteria.'}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
