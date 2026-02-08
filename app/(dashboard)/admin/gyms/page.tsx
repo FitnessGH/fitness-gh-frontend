@@ -1,5 +1,7 @@
 'use client';
 
+import { useAuth } from '@/components/auth-context';
+import GymsAPI, { type Gym as ApiGym } from '@/lib/api/gyms';
 import { Badge } from '@ui/badge';
 import { Card } from '@ui/card';
 import {
@@ -10,8 +12,8 @@ import {
 } from '@ui/dropdown-menu';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { MapPin, MoreVertical, Search, Users } from 'lucide-react';
-import { useState } from 'react';
+import { AlertCircle, Loader2, MapPin, MoreVertical, Search, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Gym {
   id: string;
@@ -23,51 +25,74 @@ interface Gym {
   joinDate: string;
 }
 
-const mockGyms: Gym[] = [
-  {
-    id: '1',
-    name: 'FitClub Downtown',
-    location: '123 Main St, Downtown',
-    owner: 'John Fitness',
-    members: 234,
-    status: 'Active',
-    joinDate: '2023-06-15',
-  },
-  {
-    id: '2',
-    name: 'Elite Gym Center',
-    location: '456 Park Ave, Uptown',
-    owner: 'Sarah Strong',
-    members: 189,
-    status: 'Active',
-    joinDate: '2023-08-22',
-  },
-  {
-    id: '3',
-    name: 'Premium Fitness',
-    location: '789 Oak Rd, Suburb',
-    owner: 'Mike Trainer',
-    members: 156,
-    status: 'Suspended',
-    joinDate: '2024-01-10',
-  },
-  {
-    id: '4',
-    name: 'CrossFit Champions',
-    location: '321 Forest Ln, East Side',
-    owner: 'Alex Power',
-    members: 98,
-    status: 'Pending',
-    joinDate: '2025-01-05',
-  },
-];
+// Transform API gym to frontend format
+function transformGym(apiGym: ApiGym): Gym {
+  // Build location string from address components
+  const locationParts = [
+    apiGym.address,
+    apiGym.city,
+    apiGym.region,
+    apiGym.country,
+  ].filter(Boolean);
+  const location = locationParts.join(', ') || 'Location not specified';
+
+  // Map isActive to status
+  // Note: We don't have "Pending" status in the API, so we'll use isActive
+  const status: 'Active' | 'Suspended' | 'Pending' = apiGym.isActive
+    ? 'Active'
+    : 'Suspended';
+
+  // Format join date
+  const joinDate = apiGym.createdAt
+    ? new Date(apiGym.createdAt).toISOString().split('T')[0]
+    : new Date().toISOString().split('T')[0];
+
+  return {
+    id: apiGym.id,
+    name: apiGym.name,
+    location,
+    owner: 'Owner info not available', // TODO: Fetch owner info separately
+    members: 0, // TODO: Fetch member count separately
+    status,
+    joinDate,
+  };
+}
 
 export default function AdminGymsPage() {
-  const [gyms, setGyms] = useState<Gym[]>(mockGyms);
+  const { isLoading: authLoading } = useAuth();
+  const [gyms, setGyms] = useState<Gym[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<
     'All' | 'Active' | 'Suspended' | 'Pending'
   >('All');
+
+  // Fetch gyms from API
+  useEffect(() => {
+    const fetchGyms = async () => {
+      // Wait for auth context to finish loading
+      if (authLoading) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const apiGyms = await GymsAPI.getAllGyms();
+        const transformedGyms = apiGyms.map(transformGym);
+        setGyms(transformedGyms);
+      } catch (err: any) {
+        console.error('Failed to fetch gyms:', err);
+        setError(err.message || 'Failed to load gyms');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGyms();
+  }, [authLoading]);
 
   const filteredGyms = gyms.filter((gym) => {
     const matchesSearch =
@@ -77,7 +102,9 @@ export default function AdminGymsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleSuspendGym = (id: string) => {
+  const handleSuspendGym = async (id: string) => {
+    // TODO: Implement suspend/activate via API
+    // For now, just update local state
     setGyms(
       gyms.map((g) =>
         g.id === id
@@ -85,7 +112,7 @@ export default function AdminGymsPage() {
           : g,
       ),
     );
-    console.log('[v0] Gym status updated:', id);
+    console.log('Gym status updated:', id);
   };
 
   const statusBadgeColor: Record<Gym['status'], string> = {
@@ -93,6 +120,30 @@ export default function AdminGymsPage() {
     Suspended: 'bg-red-100 text-red-700',
     Pending: 'bg-yellow-100 text-yellow-700',
   };
+
+  if (authLoading || loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">
+            {authLoading ? 'Loading...' : 'Loading gyms...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -253,6 +304,15 @@ export default function AdminGymsPage() {
             ))}
           </tbody>
         </table>
+        {filteredGyms.length === 0 && (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              {gyms.length === 0
+                ? 'No gyms found.'
+                : 'No gyms match your search criteria.'}
+            </p>
+          </div>
+        )}
       </Card>
     </div>
   );
