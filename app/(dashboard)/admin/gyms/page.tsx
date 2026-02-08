@@ -1,7 +1,9 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import GymsAPI, { type Gym as ApiGym } from '@/lib/api/gyms';
+import GymsAPI, { type GymWithOwner as ApiGymWithOwner } from '@/lib/api/gyms';
+import SubscriptionsAPI from '@/lib/api/subscriptions';
+import { tokenStorage } from '@/lib/utils/token-storage';
 import { Badge } from '@ui/badge';
 import { Card } from '@ui/card';
 import {
@@ -12,7 +14,7 @@ import {
 } from '@ui/dropdown-menu';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { AlertCircle, Loader2, MapPin, MoreVertical, Search, Users } from 'lucide-react';
+import { Loader2, MapPin, MoreVertical, Search, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Gym {
@@ -26,7 +28,7 @@ interface Gym {
 }
 
 // Transform API gym to frontend format
-function transformGym(apiGym: ApiGym): Gym {
+function transformGym(apiGym: ApiGymWithOwner, memberCount: number = 0): Gym {
   // Build location string from address components
   const locationParts = [
     apiGym.address,
@@ -47,12 +49,23 @@ function transformGym(apiGym: ApiGym): Gym {
     ? new Date(apiGym.createdAt).toISOString().split('T')[0]
     : new Date().toISOString().split('T')[0];
 
+  // Build owner name from owner info
+  let ownerName = 'Unknown Owner';
+  if (apiGym.owner) {
+    const { firstName, lastName, username } = apiGym.owner;
+    if (firstName || lastName) {
+      ownerName = `${firstName || ''} ${lastName || ''}`.trim();
+    } else if (username) {
+      ownerName = username;
+    }
+  }
+
   return {
     id: apiGym.id,
     name: apiGym.name,
     location,
-    owner: 'Owner info not available', // TODO: Fetch owner info separately
-    members: 0, // TODO: Fetch member count separately
+    owner: ownerName,
+    members: memberCount,
     status,
     joinDate,
   };
@@ -68,7 +81,7 @@ export default function AdminGymsPage() {
     'All' | 'Active' | 'Suspended' | 'Pending'
   >('All');
 
-  // Fetch gyms from API
+  // Fetch gyms from API with owner info and member counts
   useEffect(() => {
     const fetchGyms = async () => {
       // Wait for auth context to finish loading
@@ -80,8 +93,39 @@ export default function AdminGymsPage() {
         setLoading(true);
         setError(null);
 
-        const apiGyms = await GymsAPI.getAllGyms();
-        const transformedGyms = apiGyms.map(transformGym);
+        const token = tokenStorage.getAccessToken();
+        if (!token) {
+          setError('Not authenticated');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch gyms with owner info
+        const apiGyms = (await GymsAPI.getAllGyms(true)) as ApiGymWithOwner[];
+
+        // Fetch member counts for each gym
+        const gymsWithMembers = await Promise.all(
+          apiGyms.map(async (gym) => {
+            try {
+              const memberships = await SubscriptionsAPI.getGymMemberships(
+                gym.id,
+                token,
+              );
+              // Count active memberships
+              const activeMembers = memberships.filter(
+                (m) => m.status === 'ACTIVE',
+              ).length;
+              return { gym, memberCount: activeMembers };
+            } catch (err) {
+              console.error(`Failed to fetch members for gym ${gym.id}:`, err);
+              return { gym, memberCount: 0 };
+            }
+          }),
+        );
+
+        const transformedGyms = gymsWithMembers.map(({ gym, memberCount }) =>
+          transformGym(gym, memberCount),
+        );
         setGyms(transformedGyms);
       } catch (err: any) {
         console.error('Failed to fetch gyms:', err);

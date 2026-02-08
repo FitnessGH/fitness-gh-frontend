@@ -56,9 +56,15 @@ class GymsAPI {
 
   /**
    * Get all gyms (public)
+   * @param includeOwner - Include owner information in response
    */
-  static async getAllGyms(): Promise<Gym[]> {
-    const response = await fetch(`${API_BASE_URL}/gyms`, {
+  static async getAllGyms(includeOwner?: boolean): Promise<Gym[] | GymWithOwner[]> {
+    const url = new URL(`${API_BASE_URL}/gyms`);
+    if (includeOwner) {
+      url.searchParams.append('includeOwner', 'true');
+    }
+    
+    const response = await fetch(url.toString(), {
       method: 'GET',
       headers: this.getHeaders(),
     });
@@ -68,7 +74,7 @@ class GymsAPI {
       throw new Error(error.message || 'Failed to get gyms');
     }
 
-    return this.parseResponse<Gym[]>(response);
+    return this.parseResponse<Gym[] | GymWithOwner[]>(response);
   }
 
   /**

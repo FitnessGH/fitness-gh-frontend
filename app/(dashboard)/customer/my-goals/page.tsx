@@ -3,7 +3,8 @@
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Progress } from '@ui/progress';
-import { Plus, Target } from 'lucide-react';
+import { AlertCircle, Plus, Target } from 'lucide-react';
+import { useState } from 'react';
 
 interface FitnessGoal {
   id: string;
@@ -42,6 +43,10 @@ const mockGoals: FitnessGoal[] = [
 ];
 
 export default function MyGoalsPage() {
+  // TODO: Replace with real API data when fitness goals API is implemented
+  // Fitness Goals API endpoint needs to be created in the backend
+  const [goals] = useState<FitnessGoal[]>(mockGoals);
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -59,8 +64,22 @@ export default function MyGoalsPage() {
         </Button>
       </div>
 
+      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+              Fitness Goals API Not Yet Implemented
+            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+              This page is currently using mock data. The fitness goals API endpoint needs to be created in the backend to enable real goal tracking.
+            </p>
+          </div>
+        </div>
+      </Card>
+
       <div className="space-y-4">
-        {mockGoals.map((goal) => (
+        {goals.map((goal) => (
           <Card
             key={goal.id}
             className="p-6 border-border/50 hover:border-primary/50 transition-colors"

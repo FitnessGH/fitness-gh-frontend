@@ -1,10 +1,94 @@
 'use client';
 
+import { useAuth } from '@/components/auth-context';
+import UsersAPI from '@/lib/api/users';
 import { Badge } from '@ui/badge';
 import { Card } from '@ui/card';
-import { AlertTriangle, Coins, ShoppingCart, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Coins, Loader2, ShoppingCart, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+interface MarketplaceStats {
+  activeVendors: number;
+  totalTransactions: number;
+  monthlyRevenue: number;
+  openDisputes: number;
+}
 
 export default function AdminMarketplacePage() {
+  const { isLoading: authLoading } = useAuth();
+  const [stats, setStats] = useState<MarketplaceStats>({
+    activeVendors: 0,
+    totalTransactions: 0,
+    monthlyRevenue: 0,
+    openDisputes: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (authLoading) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch all users to count vendors (EMPLOYEE userType)
+        const users = await UsersAPI.getAllUsers();
+        const activeVendors = users.filter(
+          (u) => u.userType === 'EMPLOYEE' && u.isActive,
+        ).length;
+
+        // Marketplace features not yet implemented in backend
+        // TODO: Create marketplace API endpoints for:
+        // - Products/Orders
+        // - Transactions
+        // - Disputes
+        // - Vendor sales data
+
+        setStats({
+          activeVendors,
+          totalTransactions: 0, // TODO: Implement when marketplace API is ready
+          monthlyRevenue: 0, // TODO: Implement when marketplace API is ready
+          openDisputes: 0, // TODO: Implement when disputes system is ready
+        });
+      } catch (err: any) {
+        console.error('Failed to fetch marketplace stats:', err);
+        setError(err.message || 'Failed to load marketplace statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [authLoading]);
+
+  if (authLoading || loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">
+            {authLoading ? 'Loading...' : 'Loading marketplace data...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -18,10 +102,32 @@ export default function AdminMarketplacePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: 'Active Vendors', value: '28', icon: ShoppingCart },
-          { label: 'Total Transactions', value: '1,245', icon: TrendingUp },
-          { label: 'Monthly Revenue', value: 'GH₵45,230', icon: Coins },
-          { label: 'Open Disputes', value: '3', icon: AlertTriangle },
+          {
+            label: 'Active Vendors',
+            value: stats.activeVendors.toLocaleString(),
+            icon: ShoppingCart,
+          },
+          {
+            label: 'Total Transactions',
+            value: stats.totalTransactions > 0
+              ? stats.totalTransactions.toLocaleString()
+              : 'N/A',
+            icon: TrendingUp,
+          },
+          {
+            label: 'Monthly Revenue',
+            value: stats.monthlyRevenue > 0
+              ? `GH₵${stats.monthlyRevenue.toLocaleString()}`
+              : 'N/A',
+            icon: Coins,
+          },
+          {
+            label: 'Open Disputes',
+            value: stats.openDisputes > 0
+              ? stats.openDisputes.toLocaleString()
+              : '0',
+            icon: AlertTriangle,
+          },
         ].map((stat, i) => {
           const Icon = stat.icon;
           return (
@@ -48,7 +154,17 @@ export default function AdminMarketplacePage() {
           Recent Disputes
         </h2>
         <div className="space-y-3">
-          {[
+          {stats.openDisputes === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No disputes at this time. Disputes will appear here when reported.
+            </p>
+          ) : (
+            // TODO: Fetch real disputes when disputes API is implemented
+            <p className="text-muted-foreground text-sm">
+              Disputes system coming soon.
+            </p>
+          )}
+          {/* {[
             {
               id: 'DSP-001',
               vendor: 'Elite Supplements',
@@ -95,7 +211,7 @@ export default function AdminMarketplacePage() {
                 </Badge>
               </div>
             </div>
-          ))}
+          ))} */}
         </div>
       </Card>
 
@@ -104,6 +220,16 @@ export default function AdminMarketplacePage() {
           Top Vendors
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {stats.activeVendors === 0 ? (
+            <p className="text-muted-foreground text-sm col-span-3">
+              No active vendors yet. Vendor sales data will appear here when marketplace transactions are processed.
+            </p>
+          ) : (
+            <p className="text-muted-foreground text-sm col-span-3">
+              Vendor sales analytics coming soon. This will show top vendors by sales and orders.
+            </p>
+          )}
+          {/* TODO: Fetch real vendor sales data when marketplace API is implemented
           {[
             { name: 'Elite Supplements', sales: 'GH₵12,450', orders: 234 },
             { name: 'Fit Gear Co', sales: 'GH₵8,920', orders: 156 },
@@ -129,7 +255,7 @@ export default function AdminMarketplacePage() {
                 </div>
               </div>
             </div>
-          ))}
+          ))} */}
         </div>
       </Card>
     </div>

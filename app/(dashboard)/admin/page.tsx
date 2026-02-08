@@ -1,7 +1,101 @@
+'use client';
+
+import { useAuth } from '@/components/auth-context';
+import GymsAPI from '@/lib/api/gyms';
+import UsersAPI from '@/lib/api/users';
 import { Card } from '@ui/card';
-import { AlertCircle, Building2, TrendingUp, Users } from 'lucide-react';
+import { AlertCircle, Building2, Loader2, TrendingUp, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+interface DashboardStats {
+  totalGyms: number;
+  totalUsers: number;
+  suspendedAccounts: number;
+  marketplaceTransactions: number;
+}
 
 export default function AdminDashboard() {
+  const { isLoading: authLoading } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalGyms: 0,
+    totalUsers: 0,
+    suspendedAccounts: 0,
+    marketplaceTransactions: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (authLoading) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch all gyms
+        const gyms = await GymsAPI.getAllGyms();
+        const totalGyms = gyms.length;
+
+        // Fetch all users
+        const users = await UsersAPI.getAllUsers();
+        const totalUsers = users.length;
+        const suspendedAccounts = users.filter((u) => !u.isActive).length;
+
+        // Marketplace transactions - for now, we'll set to 0
+        // TODO: Create an admin endpoint to get all payments/transactions
+        const marketplaceTransactions = 0;
+
+        setStats({
+          totalGyms,
+          totalUsers,
+          suspendedAccounts,
+          marketplaceTransactions,
+        });
+      } catch (err: any) {
+        console.error('Failed to fetch dashboard stats:', err);
+        setError(err.message || 'Failed to load dashboard statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [authLoading]);
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'k';
+    }
+    return num.toString();
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">
+            {authLoading ? 'Loading...' : 'Loading dashboard...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-destructive font-medium">Error</p>
+          <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-2">
@@ -15,25 +109,27 @@ export default function AdminDashboard() {
         {[
           {
             label: 'Total Gyms',
-            value: '48',
+            value: stats.totalGyms.toLocaleString(),
             icon: Building2,
             color: 'bg-blue-100 text-blue-600',
           },
           {
             label: 'Total Users',
-            value: '2,834',
+            value: stats.totalUsers.toLocaleString(),
             icon: Users,
             color: 'bg-green-100 text-green-600',
           },
           {
             label: 'Suspended Accounts',
-            value: '12',
+            value: stats.suspendedAccounts.toLocaleString(),
             icon: AlertCircle,
             color: 'bg-red-100 text-red-600',
           },
           {
             label: 'Marketplace Transactions',
-            value: '1,245',
+            value: stats.marketplaceTransactions > 0
+              ? stats.marketplaceTransactions.toLocaleString()
+              : 'N/A',
             icon: TrendingUp,
             color: 'bg-purple-100 text-purple-600',
           },
@@ -66,23 +162,27 @@ export default function AdminDashboard() {
             Recent System Activity
           </h2>
           <div className="space-y-4">
-            {[
-              {
-                action: 'New gym registered',
-                details: 'FitClub Downtown',
-                time: '2 hours ago',
-              },
-              {
-                action: 'Vendor account suspended',
-                details: 'Mike Supplements Inc',
-                time: '5 hours ago',
-              },
-              {
-                action: 'Marketplace dispute reported',
-                details: 'Order #ORD-984',
-                time: 'Yesterday',
-              },
-            ].map((activity, i) => (
+            {stats.totalGyms === 0 && stats.totalUsers === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No activity to display yet. Activity will appear here as users and gyms are registered.
+              </p>
+            ) : (
+              [
+                {
+                  action: 'System Statistics',
+                  details: `${stats.totalGyms} gyms and ${stats.totalUsers} users registered`,
+                  time: 'Just now',
+                },
+                ...(stats.suspendedAccounts > 0
+                  ? [
+                      {
+                        action: 'Suspended Accounts',
+                        details: `${stats.suspendedAccounts} account(s) currently suspended`,
+                        time: 'Just now',
+                      },
+                    ]
+                  : []),
+              ].map((activity, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/30"
@@ -99,7 +199,8 @@ export default function AdminDashboard() {
                   {activity.time}
                 </span>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
 

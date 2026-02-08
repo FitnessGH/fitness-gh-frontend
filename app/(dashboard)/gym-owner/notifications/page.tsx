@@ -2,6 +2,7 @@
 
 import { Card } from '@ui/card';
 import { AlertCircle, Bell, CheckCircle, Info } from 'lucide-react';
+import { useState } from 'react';
 
 interface Notification {
   id: string;
@@ -50,6 +51,10 @@ const mockNotifications: Notification[] = [
 ];
 
 export default function NotificationsPage() {
+  // TODO: Replace with real API data when notifications API is implemented
+  // Notifications API endpoint needs to be created in the backend
+  const [notifications] = useState<Notification[]>(mockNotifications);
+
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'Renewal':
@@ -89,8 +94,22 @@ export default function NotificationsPage() {
         </p>
       </div>
 
+      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+              Notifications API Not Yet Implemented
+            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+              This page is currently using mock data. The notifications API endpoint needs to be created in the backend to enable real-time notifications.
+            </p>
+          </div>
+        </div>
+      </Card>
+
       <div className="space-y-3">
-        {mockNotifications.map((notification) => (
+        {notifications.map((notification) => (
           <Card
             key={notification.id}
             className={`p-4 border ${getNotificationBgColor(notification.type)} cursor-pointer hover:border-primary/50 transition-colors ${

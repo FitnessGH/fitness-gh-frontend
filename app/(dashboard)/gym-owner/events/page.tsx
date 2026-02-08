@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@ui/button';
+import { Card } from '@ui/card';
 import { Column, DataTable } from '@ui/data-table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@ui/dialog';
 import {
@@ -11,6 +12,7 @@ import {
 } from '@ui/dropdown-menu';
 import { Input } from '@ui/input';
 import {
+  AlertCircle,
   CalendarIcon,
   Clock,
   Eye,
@@ -89,6 +91,8 @@ const mockEvents: GymEvent[] = [
 ];
 
 export default function EventsPage() {
+  // TODO: Replace with real API data when events API is implemented
+  // Events API endpoint needs to be created in the backend
   const [events, setEvents] = useState<GymEvent[]>(mockEvents);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -323,6 +327,19 @@ export default function EventsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+              Events API Not Yet Implemented
+            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+              This page is currently using mock data. The events API endpoint needs to be created in the backend to enable real event management.
+            </p>
+          </div>
+        </div>
+      </Card>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Pump Sessions</h1>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">

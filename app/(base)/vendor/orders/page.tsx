@@ -5,7 +5,7 @@ import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { Calendar, MapPin, Package, Search } from 'lucide-react';
+import { AlertCircle, Calendar, MapPin, Package, Search } from 'lucide-react';
 import { useState } from 'react';
 
 interface Order {
@@ -68,6 +68,8 @@ const mockOrders: Order[] = [
 ];
 
 export default function VendorOrdersPage() {
+  // TODO: Replace with real API data when marketplace/orders API is implemented
+  // Marketplace/Orders API endpoint needs to be created in the backend
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<
@@ -105,6 +107,20 @@ export default function VendorOrdersPage() {
         <h1 className="text-3xl font-bold text-foreground">Orders</h1>
         <p className="text-muted-foreground">Track and manage your orders</p>
       </div>
+
+      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+              Marketplace/Orders API Not Yet Implemented
+            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+              This page is currently using mock data. The marketplace/orders API endpoint needs to be created in the backend to enable real order management.
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[

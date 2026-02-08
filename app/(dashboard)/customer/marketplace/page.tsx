@@ -3,7 +3,7 @@
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
-import { Search, ShoppingCart, Star } from 'lucide-react';
+import { AlertCircle, Search, ShoppingCart, Star } from 'lucide-react';
 import { useState } from 'react';
 
 interface Product {
@@ -87,6 +87,8 @@ const mockProducts: Product[] = [
 ];
 
 export default function CustomerMarketplacePage() {
+  // TODO: Replace with real API data when marketplace/products API is implemented
+  // Marketplace/Products API endpoint needs to be created in the backend
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState<string[]>([]);
@@ -115,6 +117,31 @@ export default function CustomerMarketplacePage() {
             Shop fitness products and supplements
           </p>
         </div>
+        <div className="relative">
+          <ShoppingCart className="w-5 h-5 text-primary absolute right-3 top-3" />
+          {cart.length > 0 && (
+            <div className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+              {cart.length}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+              Marketplace/Products API Not Yet Implemented
+            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+              This page is currently using mock data. The marketplace/products API endpoint needs to be created in the backend to enable real product browsing and purchasing.
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      <div className="flex items-center justify-end">
         <div className="relative">
           <ShoppingCart className="w-5 h-5 text-primary absolute right-3 top-3" />
           {cart.length > 0 && (

@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@ui/dropdown-menu';
 import { Input } from '@ui/input';
-import { Coins, MoreVertical, Plus, Search } from 'lucide-react';
+import { AlertCircle, Coins, MoreVertical, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 
 interface PayrollEntry {
@@ -73,6 +73,8 @@ const mockPayroll: PayrollEntry[] = [
 ];
 
 export default function PayrollPage() {
+  // TODO: Replace with real API data when payroll API is implemented
+  // Payroll API endpoint needs to be created in the backend
   const [payroll, setPayroll] = useState<PayrollEntry[]>(mockPayroll);
 
   const columns: Column<PayrollEntry>[] = [
@@ -194,6 +196,20 @@ export default function PayrollPage() {
           <span className="text-foreground">Management</span>
         </div>
       </div>
+
+      <Card className="p-4 border-yellow-500/20 bg-yellow-500/10">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+              Payroll API Not Yet Implemented
+            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+              This page is currently using mock data. The payroll API endpoint needs to be created in the backend to enable real payroll management.
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 bg-card border-none">
