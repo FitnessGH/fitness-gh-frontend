@@ -22,6 +22,7 @@ interface AuthContextType {
     gymName?: string;
     businessName?: string;
   }) => Promise<AuthUser>;
+  setUserFromAuthResponse: (authResponse: AuthResponse) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -176,6 +177,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [buildAuthUser, setUser],
   );
 
+  const setUserFromAuthResponse = useCallback((authResponse: AuthResponse) => {
+    if (!authResponse?.account) {
+      console.error('Invalid auth response:', authResponse);
+      return;
+    }
+
+    const authUser = buildAuthUser(authResponse);
+
+    // Store tokens if available
+    if (typeof window !== 'undefined' && authResponse.tokens) {
+      localStorage.setItem('accessToken', authResponse.tokens.accessToken);
+      localStorage.setItem('refreshToken', authResponse.tokens.refreshToken);
+    }
+
+    setUser(authUser);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('user', JSON.stringify(authUser));
+    }
+  }, [buildAuthUser]);
+
   React.useEffect(() => {
     const hydrateUser = async () => {
       if (typeof window === 'undefined') {
@@ -224,6 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         switchRole,
         updateUser,
         signup,
+        setUserFromAuthResponse,
       }}
     >
       {children}

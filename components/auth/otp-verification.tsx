@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 interface OTPVerificationProps {
   email: string;
-  onVerified: () => void;
+  onVerified: (authResponse?: any) => void;
   onBack: () => void;
 }
 
@@ -72,8 +72,8 @@ export default function OTPVerification({ email, onVerified, onBack }: OTPVerifi
 
     try {
       const { AuthAPI } = await import('@/lib/api/auth');
-      await AuthAPI.verifyOTP(email, otpValue);
-      onVerified();
+      const authResponse = await AuthAPI.verifyOTP(email, otpValue);
+      onVerified(authResponse);
     } catch (err: any) {
       setError(err.message || 'Failed to verify OTP');
     } finally {

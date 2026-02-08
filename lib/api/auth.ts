@@ -149,7 +149,7 @@ export class AuthAPI {
     return this.parseResponse<OTPResponse>(response);
   }
 
-  static async verifyOTP(email: string, otp: string): Promise<OTPResponse> {
+  static async verifyOTP(email: string, otp: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -161,7 +161,7 @@ export class AuthAPI {
       throw new Error(error.message || 'Failed to verify OTP');
     }
 
-    return this.parseResponse<OTPResponse>(response);
+    return this.parseResponse<AuthResponse>(response);
   }
 
   static async register(data: RegistrationData): Promise<AuthResponse> {

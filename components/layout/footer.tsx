@@ -9,11 +9,11 @@ type FooterProps = {
 export function Footer({ className }: FooterProps) {
   return (
     <footer
-      className={cn('border-t border-border bg-card/40 px-6 py-10', className)}
+      className={cn('border-t border-border bg-card/40 px-4 py-10 sm:px-6', className)}
     >
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 text-center text-sm text-muted-foreground md:flex-row md:text-left">
         <p>&copy; {new Date().getFullYear()} FitnessGH. All rights reserved.</p>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-6 md:justify-end">
           <Link
             href="/marketplace"
             className="transition-colors hover:text-foreground"

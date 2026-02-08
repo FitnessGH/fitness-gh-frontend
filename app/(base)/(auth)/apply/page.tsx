@@ -3,7 +3,7 @@
 import { useAuth } from '@/components/auth-context';
 import OTPVerification from '@/components/auth/otp-verification';
 import { BebasFont } from '@/constant';
-import { getDashboardPath } from '@/lib/auth';
+import { getDashboardPath, mapBackendUserTypeToRole } from '@/lib/auth';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
@@ -42,7 +42,7 @@ export default function ApplyPage() {
   });
 
   const router = useRouter();
-  const { signup, login, user, isLoading: authLoading } = useAuth();
+  const { signup, login, user, isLoading: authLoading, setUserFromAuthResponse } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
     if (!value || value.trim() === '') {
@@ -144,22 +144,28 @@ export default function ApplyPage() {
     }
   };
 
-  const handleOTPVerified = async () => {
+  const handleOTPVerified = async (authResponse?: any) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const authUser = await signup({
-        name: signupData.name,
-        email: signupData.email,
-        password: signupData.password,
-        userType: 'owner',
-        gymName: signupData.gymName,
-      });
-      await login(signupData.email, signupData.password);
-      router.push(getDashboardPath(authUser.role));
+      if (authResponse) {
+        setUserFromAuthResponse(authResponse);
+        const role = mapBackendUserTypeToRole(authResponse.account.userType);
+        router.push(getDashboardPath(role));
+      } else {
+        const authUser = await signup({
+          name: signupData.name,
+          email: signupData.email,
+          password: signupData.password,
+          userType: 'owner',
+          gymName: signupData.gymName,
+        });
+        await login(signupData.email, signupData.password);
+        router.push(getDashboardPath(authUser.role));
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+      setError(err.message || 'Failed to complete verification');
       setShowOTP(false); // Go back to signup on error
     } finally {
       setIsLoading(false);
@@ -173,7 +179,10 @@ export default function ApplyPage() {
 
   useEffect(() => {
     if (!authLoading && user && user.emailVerified !== false && !showOTP) {
-      router.replace(getDashboardPath(user.role));
+      const dashboardPath = getDashboardPath(user.role);
+      if (typeof window !== 'undefined' && window.location.pathname !== dashboardPath) {
+        router.replace(dashboardPath);
+      }
     }
   }, [authLoading, user, showOTP, router]);
 

@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { AuthAPI } from '@/lib/api/auth';
-import { getDashboardPath, type UserRole } from '@/lib/auth';
+import { getDashboardPath, mapBackendUserTypeToRole, type UserRole } from '@/lib/auth';
 import { Dumbbell, Eye, EyeOff, Sparkles, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
@@ -43,7 +43,7 @@ export default function AthleteSignupPage() {
   });
 
   const router = useRouter();
-  const { signup, login, user, isLoading: authLoading } = useAuth();
+  const { signup, login, user, isLoading: authLoading, setUserFromAuthResponse } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
     if (!value || value.trim() === '') {
@@ -144,22 +144,34 @@ export default function AthleteSignupPage() {
     }
   };
 
-  const handleOTPVerified = async () => {
+  const handleOTPVerified = async (authResponse?: any) => {
     setShowOTP(false);
     setIsLoading(true);
     try {
-      await login(pendingEmail || signupData.email, signupData.password);
-      router.push(getDashboardPath(pendingRole));
+      if (authResponse) {
+        // Use the auth response from OTP verification
+        setUserFromAuthResponse(authResponse);
+        const role = mapBackendUserTypeToRole(authResponse.account.userType);
+        router.push(getDashboardPath(role));
+      } else {
+        // Fallback to login if no auth response
+        await login(pendingEmail || signupData.email, signupData.password);
+        router.push(getDashboardPath(pendingRole));
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to log in after verification');
+      setError(err.message || 'Failed to complete verification');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    // Only redirect if user is verified and not in OTP flow
     if (!authLoading && user && user.emailVerified !== false && !showOTP) {
-      router.replace(getDashboardPath(user.role));
+      const dashboardPath = getDashboardPath(user.role);
+      if (window.location.pathname !== dashboardPath) {
+        router.replace(dashboardPath);
+      }
     }
   }, [authLoading, user, showOTP, router]);
 
