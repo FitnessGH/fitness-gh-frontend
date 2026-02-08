@@ -2,18 +2,25 @@
 
 import { useAuth } from '@/components/auth-context';
 import { getDashboardPath } from '@/lib/auth';
-import SubscriptionsAPI, { type Membership } from '@/lib/api/subscriptions';
+import SubscriptionsAPI from '@/lib/api/subscriptions';
+import { useMembershipStore } from '@/store';
 import { Card } from '@ui/card';
 import { Calendar, ShoppingBag, Target, Users, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function CustomerDashboard() {
   const { user, userData, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [memberships, setMemberships] = useState<Membership[]>([]);
-  const [membershipsLoading, setMembershipsLoading] = useState(true);
-  const [membershipsError, setMembershipsError] = useState<string | null>(null);
+  const {
+    memberships,
+    activeMembership,
+    isLoading: membershipsLoading,
+    error: membershipsError,
+    setMemberships,
+    setLoading,
+    setError,
+  } = useMembershipStore();
 
   useEffect(() => {
     if (isLoading) return;
