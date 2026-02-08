@@ -188,7 +188,7 @@ export default function EmployeesPage() {
         setError(null);
 
         // Get user's gyms
-        const gymsData = await GymsAPI.getMyGyms(userData.tokens.accessToken);
+        const gymsData = await GymsAPI.getMyGyms(userData.tokens?.accessToken);
         const allGyms = [...gymsData.owned, ...gymsData.employed];
 
         if (allGyms.length === 0) {
@@ -204,7 +204,7 @@ export default function EmployeesPage() {
         // Fetch employees for the gym
         const apiEmployees = await EmployeesAPI.getGymEmployees(
           gymId,
-          userData.tokens.accessToken,
+          userData.tokens?.accessToken,
         );
 
         // Transform employees

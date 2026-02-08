@@ -120,7 +120,7 @@ export default function MembersPage() {
         setError(null);
 
         // Get user's gyms
-        const gymsData = await GymsAPI.getMyGyms(userData.tokens.accessToken);
+        const gymsData = await GymsAPI.getMyGyms(userData.tokens?.accessToken);
         const allGyms = [...gymsData.owned, ...gymsData.employed];
 
         if (allGyms.length === 0) {
@@ -136,7 +136,7 @@ export default function MembersPage() {
         // Fetch memberships for the gym
         const memberships = await SubscriptionsAPI.getGymMemberships(
           gymId,
-          userData.tokens.accessToken,
+          userData.tokens?.accessToken,
         );
 
         console.log('Fetched memberships:', memberships);

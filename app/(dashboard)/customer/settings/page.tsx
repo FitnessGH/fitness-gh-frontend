@@ -27,8 +27,7 @@ export default function CustomerSettingsPage() {
     const fetchUserData = async () => {
       if (userData || isLoading) return;
 
-      const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-      if (!accessToken || !user) return;
+      if (!user) return;
 
       try {
         setLoadingData(true);
@@ -68,11 +67,7 @@ export default function CustomerSettingsPage() {
   const handleSave = async () => {
     if (!userData || !userData.profile) return;
 
-    const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (!accessToken) {
-      setError('Not authenticated');
-      return;
-    }
+    // Access token will be retrieved automatically by the API
 
     try {
       setSaving(true);
@@ -84,7 +79,7 @@ export default function CustomerSettingsPage() {
         lastName: profileData.lastName || undefined,
       };
 
-      await UsersAPI.updateProfile(userData.profile.id, updateData, accessToken);
+      await UsersAPI.updateProfile(userData.profile.id, updateData);
       
       // Refresh user data in auth context (this will update userData automatically)
       await refreshUserData();

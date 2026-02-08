@@ -47,12 +47,6 @@ export default function CustomerDashboard() {
     const fetchMemberships = async () => {
       if (!user || user.role !== 'customer') return;
 
-      const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-      if (!accessToken) {
-        setLoading(false);
-        return;
-      }
-
       // Only fetch if we don't have memberships already
       if (memberships.length > 0) {
         return;
@@ -61,7 +55,7 @@ export default function CustomerDashboard() {
       try {
         setLoading(true);
         setError(null);
-        const membershipData = await SubscriptionsAPI.getMyMemberships(accessToken);
+        const membershipData = await SubscriptionsAPI.getMyMemberships();
         setMemberships(membershipData);
       } catch (error: any) {
         console.error('Failed to fetch memberships:', error);

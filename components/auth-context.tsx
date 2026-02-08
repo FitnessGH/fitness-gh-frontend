@@ -4,6 +4,7 @@ import { AuthAPI, type AuthResponse } from '@/lib/api/auth';
 import { DataTransformer } from '@/lib/api/data-transformers';
 import type { AuthUser, UserRole } from '@/lib/auth';
 import { mapBackendUserTypeToRole } from '@/lib/auth';
+import { tokenStorage } from '@/lib/utils/token-storage';
 import React, { createContext, useCallback, useContext, useState } from 'react';
 
 interface AuthContextType {
@@ -64,9 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const authUser = buildAuthUser(authResponse);
 
-      if (typeof window !== 'undefined' && authResponse.tokens) {
-        localStorage.setItem('accessToken', authResponse.tokens.accessToken);
-        localStorage.setItem('refreshToken', authResponse.tokens.refreshToken);
+      if (authResponse.tokens) {
+        tokenStorage.setTokens(
+          authResponse.tokens.accessToken,
+          authResponse.tokens.refreshToken,
+        );
       }
 
       setUser(authUser);
@@ -81,10 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setUserData(null);
     sessionStorage.removeItem('user');
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-    }
+    tokenStorage.clearTokens();
   }, []);
 
   const switchRole = useCallback(
@@ -161,9 +161,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const authUser = buildAuthUser(authResponse);
 
         // Store tokens only if issued (email verified)
-        if (typeof window !== 'undefined' && authResponse.tokens) {
-          localStorage.setItem('accessToken', authResponse.tokens.accessToken);
-          localStorage.setItem('refreshToken', authResponse.tokens.refreshToken);
+        if (authResponse.tokens) {
+          tokenStorage.setTokens(
+            authResponse.tokens.accessToken,
+            authResponse.tokens.refreshToken,
+          );
         }
 
         setUser(authUser);
@@ -192,9 +194,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const authUser = buildAuthUser(authResponse);
 
     // Store tokens if available
-    if (typeof window !== 'undefined' && authResponse.tokens) {
-      localStorage.setItem('accessToken', authResponse.tokens.accessToken);
-      localStorage.setItem('refreshToken', authResponse.tokens.refreshToken);
+    if (authResponse.tokens) {
+      tokenStorage.setTokens(
+        authResponse.tokens.accessToken,
+        authResponse.tokens.refreshToken,
+      );
     }
 
     setUser(authUser);
@@ -207,7 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUserData = useCallback(async () => {
     if (typeof window === 'undefined') return;
 
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = tokenStorage.getAccessToken();
     if (!accessToken) return;
 
     try {
@@ -215,12 +219,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const authUser = buildAuthUser(authResponse);
       setUser(authUser);
       setUserData(authResponse);
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('user', JSON.stringify(authUser));
-      }
-    } catch (error) {
+      sessionStorage.setItem('user', JSON.stringify(authUser));
+    } catch (error: any) {
       console.error('Failed to refresh user data:', error);
-      // Don't clear tokens on refresh failure, might be temporary
+      
+      // If access token expired, try to refresh it
+      if (error?.message?.includes('Unauthorized') || error?.message?.includes('expired')) {
+        const refreshToken = tokenStorage.getRefreshToken();
+        if (refreshToken) {
+          try {
+            const newTokens = await AuthAPI.refreshToken(refreshToken);
+            tokenStorage.setTokens(newTokens.accessToken, newTokens.refreshToken);
+            
+            // Retry getting user data with new token
+            const authResponse = await AuthAPI.getMe(newTokens.accessToken);
+            const authUser = buildAuthUser(authResponse);
+            setUser(authUser);
+            setUserData(authResponse);
+            sessionStorage.setItem('user', JSON.stringify(authUser));
+            return;
+          } catch (refreshError) {
+            console.error('Failed to refresh token:', refreshError);
+            // Clear tokens if refresh fails
+            tokenStorage.clearTokens();
+            setUser(null);
+            setUserData(null);
+            sessionStorage.removeItem('user');
+          }
+        }
+      }
     }
   }, [buildAuthUser]);
 
@@ -231,7 +258,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const accessToken = localStorage.getItem('accessToken');
+      const accessToken = tokenStorage.getAccessToken();
       if (accessToken) {
         try {
           const authResponse = await AuthAPI.getMe(accessToken);
@@ -241,12 +268,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           sessionStorage.setItem('user', JSON.stringify(authUser));
           setIsLoading(false);
           return;
-        } catch (error) {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+        } catch (error: any) {
+          console.error('Failed to hydrate user with access token:', error);
+          
+          // Try to refresh token if access token is invalid
+          const refreshToken = tokenStorage.getRefreshToken();
+          if (refreshToken) {
+            try {
+              const newTokens = await AuthAPI.refreshToken(refreshToken);
+              tokenStorage.setTokens(newTokens.accessToken, newTokens.refreshToken);
+              
+              // Retry with new access token
+              const authResponse = await AuthAPI.getMe(newTokens.accessToken);
+              const authUser = buildAuthUser(authResponse);
+              setUser(authUser);
+              setUserData(authResponse);
+              sessionStorage.setItem('user', JSON.stringify(authUser));
+              setIsLoading(false);
+              return;
+            } catch (refreshError) {
+              console.error('Failed to refresh token on hydration:', refreshError);
+              tokenStorage.clearTokens();
+            }
+          } else {
+            tokenStorage.clearTokens();
+          }
         }
       }
 
+      // Fallback to sessionStorage user data if available
       const stored = sessionStorage.getItem('user');
       if (stored) {
         try {

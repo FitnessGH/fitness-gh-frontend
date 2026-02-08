@@ -1,3 +1,5 @@
+import { tokenStorage } from '../utils/token-storage';
+
 // Base URL for API
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 const API_BASE_URL = `${BASE_URL}/api/v1`;
@@ -49,11 +51,17 @@ class UsersAPI {
 
   /**
    * Get all users with account information (for admin)
+   * If accessToken is not provided, gets it from tokenStorage
    */
-  static async getAllUsers(accessToken: string): Promise<UserWithAccount[]> {
+  static async getAllUsers(accessToken?: string): Promise<UserWithAccount[]> {
+    const token = accessToken || tokenStorage.getAccessToken();
+    if (!token) {
+      throw new Error('No access token available');
+    }
+
     const response = await fetch(`${API_BASE_URL}/users?withAccounts=true`, {
       method: 'GET',
-      headers: this.getAuthHeaders(accessToken),
+      headers: this.getAuthHeaders(token),
     });
 
     if (!response.ok) {
@@ -66,15 +74,21 @@ class UsersAPI {
 
   /**
    * Update user profile
+   * If accessToken is not provided, gets it from tokenStorage
    */
   static async updateProfile(
     profileId: string,
     data: UpdateProfileData,
-    accessToken: string,
+    accessToken?: string,
   ): Promise<UserProfile> {
+    const token = accessToken || tokenStorage.getAccessToken();
+    if (!token) {
+      throw new Error('No access token available');
+    }
+
     const response = await fetch(`${API_BASE_URL}/users/${profileId}`, {
       method: 'PUT',
-      headers: this.getAuthHeaders(accessToken),
+      headers: this.getAuthHeaders(token),
       body: JSON.stringify(data),
     });
 

@@ -3,6 +3,7 @@
 import { useAuth } from '@/components/auth-context';
 import UsersAPI, { type UserWithAccount } from '@/lib/api/users';
 import { mapBackendUserTypeToRole } from '@/lib/auth';
+import { tokenStorage } from '@/lib/utils/token-storage';
 import { Badge } from '@ui/badge';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
@@ -15,7 +16,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'Gym Owner' | 'Member' | 'Vendor' | 'Admin';
+  role: 'Gym Owner' | 'Member' | 'Vendor';
   status: 'Active' | 'Suspended';
   joinDate: string;
   gym?: string;
@@ -35,6 +36,7 @@ function transformUser(apiUser: UserWithAccount): User {
   }
 
   // Map backend userType to frontend role
+  // Note: SUPER_ADMIN and ADMIN are filtered out before this function is called
   const backendRole = mapBackendUserTypeToRole(apiUser.userType);
   const role =
     backendRole === 'gym_owner'
@@ -43,7 +45,7 @@ function transformUser(apiUser: UserWithAccount): User {
         ? 'Member'
         : backendRole === 'vendor'
           ? 'Vendor'
-          : 'Admin';
+          : 'Member'; // Fallback to Member if unknown (shouldn't happen)
 
   const status = apiUser.isActive ? 'Active' : 'Suspended';
   
@@ -75,19 +77,26 @@ function transformUser(apiUser: UserWithAccount): User {
 }
 
 export default function AdminUsersPage() {
-  const { userData } = useAuth();
+  const { userData, isLoading: authLoading } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<
-    'All' | 'Gym Owner' | 'Member' | 'Vendor' | 'Admin'
+    'All' | 'Gym Owner' | 'Member' | 'Vendor'
   >('All');
 
   // Fetch users from API
   useEffect(() => {
     const fetchUsers = async () => {
-      if (!userData?.tokens?.accessToken) {
+      // Wait for auth context to finish loading
+      if (authLoading) {
+        return;
+      }
+
+      // Try to get token from storage directly (more reliable than userData)
+      const token = tokenStorage.getAccessToken() || userData?.tokens?.accessToken;
+      if (!token) {
         setError('Not authenticated');
         setLoading(false);
         return;
@@ -97,8 +106,13 @@ export default function AdminUsersPage() {
         setLoading(true);
         setError(null);
 
-        const apiUsers = await UsersAPI.getAllUsers(userData.tokens.accessToken);
-        const transformedUsers = apiUsers.map(transformUser);
+        // API will automatically get token from storage if not provided
+        const apiUsers = await UsersAPI.getAllUsers();
+        // Filter out SUPER_ADMIN users - they should not be displayed
+        const filteredApiUsers = apiUsers.filter(
+          (user) => user.userType !== 'SUPER_ADMIN' && user.userType !== 'ADMIN'
+        );
+        const transformedUsers = filteredApiUsers.map(transformUser);
         setUsers(transformedUsers);
       } catch (err: any) {
         console.error('Failed to fetch users:', err);
@@ -109,7 +123,7 @@ export default function AdminUsersPage() {
     };
 
     fetchUsers();
-  }, [userData]);
+  }, [userData, authLoading]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -131,12 +145,14 @@ export default function AdminUsersPage() {
     );
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading users...</p>
+          <p className="text-muted-foreground">
+            {authLoading ? 'Loading...' : 'Loading users...'}
+          </p>
         </div>
       </div>
     );
@@ -157,7 +173,6 @@ export default function AdminUsersPage() {
     'Gym Owner': 'bg-blue-100 text-blue-700',
     Member: 'bg-green-100 text-green-700',
     Vendor: 'bg-purple-100 text-purple-700',
-    Admin: 'bg-red-100 text-red-700',
   };
 
   return (
@@ -236,8 +251,7 @@ export default function AdminUsersPage() {
                     | 'All'
                     | 'Gym Owner'
                     | 'Member'
-                    | 'Vendor'
-                    | 'Admin',
+                    | 'Vendor',
                 )
               }
               className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
@@ -246,7 +260,6 @@ export default function AdminUsersPage() {
               <option>Gym Owner</option>
               <option>Member</option>
               <option>Vendor</option>
-              <option>Admin</option>
             </select>
           </div>
         </div>

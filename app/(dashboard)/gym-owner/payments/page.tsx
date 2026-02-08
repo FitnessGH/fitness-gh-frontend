@@ -73,7 +73,7 @@ export default function PaymentsPage() {
         setError(null);
 
         // Get user's gyms
-        const gymsData = await GymsAPI.getMyGyms(userData.tokens.accessToken);
+        const gymsData = await GymsAPI.getMyGyms(userData.tokens?.accessToken);
         const allGyms = [...gymsData.owned, ...gymsData.employed];
 
         if (allGyms.length === 0) {
@@ -89,7 +89,7 @@ export default function PaymentsPage() {
         // Fetch payments for the gym
         const apiPayments = await PaymentsAPI.getGymPayments(
           gymId,
-          userData.tokens.accessToken,
+          userData.tokens?.accessToken,
         );
 
         // Transform payments

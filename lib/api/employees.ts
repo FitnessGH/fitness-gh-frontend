@@ -1,3 +1,5 @@
+import { tokenStorage } from '../utils/token-storage';
+
 // Base URL for API
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 const API_BASE_URL = `${BASE_URL}/api/v1`;
@@ -43,14 +45,20 @@ class EmployeesAPI {
 
   /**
    * Get gym employees (authenticated)
+   * If accessToken is not provided, gets it from tokenStorage
    */
   static async getGymEmployees(
     gymId: string,
-    accessToken: string,
+    accessToken?: string,
   ): Promise<Employee[]> {
+    const token = accessToken || tokenStorage.getAccessToken();
+    if (!token) {
+      throw new Error('No access token available');
+    }
+
     const response = await fetch(`${API_BASE_URL}/gyms/${gymId}/employees`, {
       method: 'GET',
-      headers: this.getAuthHeaders(accessToken),
+      headers: this.getAuthHeaders(token),
     });
 
     if (!response.ok) {

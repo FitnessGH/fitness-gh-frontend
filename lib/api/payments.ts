@@ -1,3 +1,5 @@
+import { tokenStorage } from '../utils/token-storage';
+
 // Base URL for API
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 const API_BASE_URL = `${BASE_URL}/api/v1`;
@@ -60,11 +62,17 @@ class PaymentsAPI {
 
   /**
    * Get my payments (authenticated user)
+   * If accessToken is not provided, gets it from tokenStorage
    */
-  static async getMyPayments(accessToken: string): Promise<Payment[]> {
+  static async getMyPayments(accessToken?: string): Promise<Payment[]> {
+    const token = accessToken || tokenStorage.getAccessToken();
+    if (!token) {
+      throw new Error('No access token available');
+    }
+
     const response = await fetch(`${API_BASE_URL}/payments/my`, {
       method: 'GET',
-      headers: this.getAuthHeaders(accessToken),
+      headers: this.getAuthHeaders(token),
     });
 
     if (!response.ok) {
@@ -77,14 +85,20 @@ class PaymentsAPI {
 
   /**
    * Get gym payments (gym owner/manager)
+   * If accessToken is not provided, gets it from tokenStorage
    */
   static async getGymPayments(
     gymId: string,
-    accessToken: string,
+    accessToken?: string,
   ): Promise<Payment[]> {
+    const token = accessToken || tokenStorage.getAccessToken();
+    if (!token) {
+      throw new Error('No access token available');
+    }
+
     const response = await fetch(`${API_BASE_URL}/payments/gyms/${gymId}`, {
       method: 'GET',
-      headers: this.getAuthHeaders(accessToken),
+      headers: this.getAuthHeaders(token),
     });
 
     if (!response.ok) {

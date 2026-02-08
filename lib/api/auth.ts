@@ -161,5 +161,19 @@ export class AuthAPI {
     return this.parseResponse<AuthResponse>(response);
   }
 
+  static async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to refresh token');
+    }
+
+    return this.parseResponse<{ accessToken: string; refreshToken: string }>(response);
+  }
 }
 
