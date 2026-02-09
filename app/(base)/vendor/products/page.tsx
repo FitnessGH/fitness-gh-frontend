@@ -1,12 +1,14 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import MarketplaceAPI, { type Product as ApiProduct, ProductStatus } from '@/lib/api/marketplace';
+import MarketplaceAPI, { type Product as ApiProduct, ProductStatus, type ProductCategory } from '@/lib/api/marketplace';
 import { tokenStorage } from '@/lib/utils/token-storage';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@ui/dialog';
+import { ImageUpload } from '@/components/image-upload';
 import { Edit2, Eye, EyeOff, Loader2, Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -42,6 +44,21 @@ export default function VendorProductsPage() {
   const [filterStatus, setFilterStatus] = useState<'All' | 'Active' | 'Draft'>(
     'All',
   );
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    category: 'OTHER' as ProductCategory,
+    price: '',
+    currency: 'GHS',
+    stock: '',
+    sku: '',
+    imageUrl: '',
+  });
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   // Fetch products from API
   useEffect(() => {
@@ -108,6 +125,55 @@ export default function VendorProductsPage() {
     }
   };
 
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setIsCreating(true);
+      
+      // Use uploaded image if available, otherwise use imageUrl from form
+      const imageUrl = uploadedImages.length > 0 ? uploadedImages[0] : (formData.imageUrl || undefined);
+      const images = uploadedImages.length > 1 ? uploadedImages.slice(1) : undefined;
+      
+      await MarketplaceAPI.createProduct({
+        name: formData.name,
+        description: formData.description || undefined,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        currency: formData.currency,
+        stock: parseInt(formData.stock) || 0,
+        sku: formData.sku || undefined,
+        imageUrl: imageUrl,
+        images: images,
+      });
+      
+      // Reset form
+      setFormData({
+        name: '',
+        description: '',
+        category: 'OTHER',
+        price: '',
+        currency: 'GHS',
+        stock: '',
+        sku: '',
+        imageUrl: '',
+      });
+      setUploadedImages([]);
+      
+      setIsAddDialogOpen(false);
+      
+      // Refresh products
+      const apiProducts = await MarketplaceAPI.getMyProducts();
+      const transformedProducts = apiProducts.map(transformProduct);
+      setProducts(transformedProducts);
+    } catch (err: any) {
+      console.error('Failed to create product:', err);
+      alert(err.message || 'Failed to create product');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -139,10 +205,148 @@ export default function VendorProductsPage() {
           <h1 className="text-3xl font-bold text-foreground">Products</h1>
           <p className="text-muted-foreground">Manage your product listings</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-2">
-          <Plus className="w-4 h-4" />
-          Add Product
-        </Button>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary hover:bg-primary/90 gap-2">
+              <Plus className="w-4 h-4" />
+              Add Product
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Product</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateProduct} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Product Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  placeholder="Enter product name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground min-h-[100px]"
+                  placeholder="Enter product description"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="category">Category *</Label>
+                <select
+                  id="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value as ProductCategory })}
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  required
+                >
+                  <option value="SUPPLEMENTS">Supplements</option>
+                  <option value="EQUIPMENT">Equipment</option>
+                  <option value="ACCESSORIES">Accessories</option>
+                  <option value="APPAREL">Apparel</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="price">Price (GHS) *</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    required
+                    placeholder="0.00"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="stock">Stock *</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    min="0"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    required
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="sku">SKU (Optional)</Label>
+                <Input
+                  id="sku"
+                  value={formData.sku}
+                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  placeholder="Product SKU"
+                />
+              </div>
+              
+              <div>
+                <Label>Product Images</Label>
+                <ImageUpload
+                  value={uploadedImages}
+                  onChange={(urls) => {
+                    const urlArray = Array.isArray(urls) ? urls : [urls].filter(Boolean);
+                    setUploadedImages(urlArray);
+                    // Also set imageUrl for backward compatibility
+                    if (urlArray.length > 0) {
+                      setFormData({ ...formData, imageUrl: urlArray[0] });
+                    }
+                  }}
+                  multiple={true}
+                  maxFiles={5}
+                  maxSize={5}
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Or enter an image URL below
+                </p>
+                <Input
+                  id="imageUrl"
+                  type="url"
+                  value={formData.imageUrl}
+                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
+                  className="mt-2"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddDialogOpen(false)}
+                  disabled={isCreating}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isCreating}>
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Product'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card className="p-4 border-border/50">
