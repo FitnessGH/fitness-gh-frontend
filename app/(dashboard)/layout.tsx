@@ -9,28 +9,24 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useUIStore } from '@/store';
 import { BebasFont } from '@/constant';
+import { useUIStore } from '@/store';
 import { Dumbbell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import { useEffect } from 'react';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const {
-    sidebarOpen,
-    mobileMenuOpen,
-    setSidebarOpen,
-    setMobileMenuOpen,
-  } = useUIStore();
+  const { sidebarOpen, mobileMenuOpen, setSidebarOpen, setMobileMenuOpen } =
+    useUIStore();
 
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isLoading) return;
 
     if (!isAuthenticated) {
@@ -42,9 +38,6 @@ export default function DashboardLayout({
       router.replace('/login');
       return;
     }
-
-    // Allow all authenticated and verified users to access their dashboards
-    // Role-based routing is handled by individual dashboard pages if needed
   }, [isAuthenticated, user, router, isLoading]);
 
   if (!user) {
@@ -68,8 +61,8 @@ export default function DashboardLayout({
     <div className="flex h-screen bg-background">
       <aside
         className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } border-r border-border bg-sidebar transition-all duration-300 hidden md:flex flex-col`}
+          sidebarOpen ? 'w-64' : 'w-0'
+        } border-r border-border bg-sidebar transition-all duration-300 hidden md:flex flex-col overflow-hidden`}
       >
         <div className="p-4 border-b border-sidebar-border flex items-center justify-center h-16">
           <h1 className="text-xl font-bold text-sidebar-primary">FitnessGH</h1>
