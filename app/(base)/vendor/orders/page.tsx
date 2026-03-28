@@ -1,7 +1,9 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import MarketplaceAPI, { type Order as ApiOrder, OrderStatus } from '@/lib/api/marketplace';
+import MarketplaceAPI, { OrderStatus } from '@/lib/api/marketplace';
+import { transformOrder } from '@/lib/utils';
+import type { Order } from '@/types';
 import { Badge } from '@ui/badge';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
@@ -9,71 +11,6 @@ import { Input } from '@ui/input';
 import { Label } from '@ui/label';
 import { Calendar, Loader2, MapPin, Package, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  customer: string;
-  items: number;
-  total: number;
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered';
-  orderDate: string;
-  dueDate: string;
-  destination: string;
-  orderItems?: Array<{
-    productName: string;
-    quantity: number;
-    price: number;
-  }>;
-}
-
-// Transform API order to frontend format
-function transformOrder(apiOrder: ApiOrder): Order {
-  const customerName = apiOrder.customer
-    ? `${apiOrder.customer.firstName || ''} ${apiOrder.customer.lastName || ''}`.trim() || apiOrder.customer.username
-    : 'Unknown Customer';
-
-  const shippingAddress = apiOrder.shippingAddress as any;
-  const destination = shippingAddress
-    ? `${shippingAddress.street || ''}, ${shippingAddress.city || ''}, ${shippingAddress.region || ''}`.trim()
-    : 'Address not provided';
-
-  // Map backend status to frontend status
-  const statusMap: Record<OrderStatus, 'Pending' | 'Processing' | 'Shipped' | 'Delivered'> = {
-    PENDING: 'Pending',
-    PROCESSING: 'Processing',
-    SHIPPED: 'Shipped',
-    DELIVERED: 'Delivered',
-    CANCELLED: 'Pending', // Fallback
-    REFUNDED: 'Pending', // Fallback
-  };
-
-  const orderDate = apiOrder.createdAt
-    ? new Date(apiOrder.createdAt).toISOString().split('T')[0]
-    : new Date().toISOString().split('T')[0];
-
-  // Calculate due date (7 days from order date)
-  const dueDate = new Date(apiOrder.createdAt);
-  dueDate.setDate(dueDate.getDate() + 7);
-  const dueDateStr = dueDate.toISOString().split('T')[0];
-
-  return {
-    id: apiOrder.id,
-    orderNumber: apiOrder.orderNumber,
-    customer: customerName,
-    items: apiOrder.items.length,
-    total: apiOrder.total,
-    status: statusMap[apiOrder.status],
-    orderDate,
-    dueDate: dueDateStr,
-    destination,
-    orderItems: apiOrder.items.map((item) => ({
-      productName: item.product.name,
-      quantity: item.quantity,
-      price: item.price,
-    })),
-  };
-}
 
 export default function VendorOrdersPage() {
   const { isLoading: authLoading } = useAuth();
@@ -86,7 +23,6 @@ export default function VendorOrdersPage() {
   >('All');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  // Fetch orders from API
   useEffect(() => {
     const fetchOrders = async () => {
       if (authLoading) {
@@ -120,10 +56,15 @@ export default function VendorOrdersPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+  const handleStatusChange = async (
+    orderId: string,
+    newStatus: Order['status'],
+  ) => {
     try {
-      // Map frontend status to backend status
-      const statusMap: Record<'Pending' | 'Processing' | 'Shipped' | 'Delivered', OrderStatus> = {
+      const statusMap: Record<
+        'Pending' | 'Processing' | 'Shipped' | 'Delivered',
+        OrderStatus
+      > = {
         Pending: 'PENDING',
         Processing: 'PROCESSING',
         Shipped: 'SHIPPED',
@@ -131,8 +72,7 @@ export default function VendorOrdersPage() {
       };
 
       await MarketplaceAPI.updateOrderStatus(orderId, statusMap[newStatus]);
-      
-      // Refresh orders
+
       const apiOrders = await MarketplaceAPI.getVendorOrders();
       const transformedOrders = apiOrders.map(transformOrder);
       setOrders(transformedOrders);
@@ -151,7 +91,7 @@ export default function VendorOrdersPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
+      <div className="p-6 flex items-center justify-center min-h-100">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-muted-foreground">
@@ -186,29 +126,37 @@ export default function VendorOrdersPage() {
             label: 'Pending',
             value: orders.filter((o) => o.status === 'Pending').length,
             color: 'bg-yellow-100',
+            textColor: 'text-yellow-900',
           },
           {
             label: 'Processing',
             value: orders.filter((o) => o.status === 'Processing').length,
             color: 'bg-blue-100',
+            textColor: 'text-blue-900',
           },
           {
             label: 'Shipped',
             value: orders.filter((o) => o.status === 'Shipped').length,
             color: 'bg-purple-100',
+            textColor: 'text-purple-900',
           },
           {
             label: 'Delivered',
             value: orders.filter((o) => o.status === 'Delivered').length,
             color: 'bg-green-100',
+            textColor: 'text-green-900',
           },
         ].map((stat, i) => (
           <Card
             key={i}
             className={`p-4 border-0 ${stat.color}`}
           >
-            <p className="text-sm font-medium text-foreground">{stat.label}</p>
-            <p className="text-3xl font-bold mt-2">{stat.value}</p>
+            <p className={`text-sm font-medium ${stat.textColor}`}>
+              {stat.label}
+            </p>
+            <p className={`text-3xl font-bold mt-2 ${stat.textColor}`}>
+              {stat.value}
+            </p>
           </Card>
         ))}
       </div>
@@ -311,8 +259,12 @@ export default function VendorOrdersPage() {
                       </p>
                       <div className="space-y-1">
                         {order.orderItems?.map((item, idx) => (
-                          <p key={idx} className="text-sm text-foreground">
-                            {item.productName} × {item.quantity} - GH₵{item.price.toFixed(2)}
+                          <p
+                            key={idx}
+                            className="text-sm text-foreground"
+                          >
+                            {item.productName} × {item.quantity} - GH₵
+                            {item.price.toFixed(2)}
                           </p>
                         )) || (
                           <p className="font-semibold text-foreground">
