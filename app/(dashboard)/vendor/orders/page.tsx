@@ -233,7 +233,7 @@ export default function VendorOrdersPage() {
                 <div>
                   <p className="text-xs text-muted-foreground">Total</p>
                   <p className="font-semibold text-primary">
-                    ${order.total.toFixed(2)}
+                    GH₵{order.total.toFixed(2)}
                   </p>
                 </div>
                 <div>

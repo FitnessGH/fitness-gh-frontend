@@ -1,15 +1,32 @@
 'use client';
 
 import { useAuth } from '@/components/auth-context';
-import MarketplaceAPI, { type Product as ApiProduct, ProductStatus, type ProductCategory } from '@/lib/api/marketplace';
-import { tokenStorage } from '@/lib/utils/token-storage';
+import { ImageUpload } from '@/components/image-upload';
+import MarketplaceAPI, {
+  ProductStatus,
+  type Product as ApiProduct,
+  type ProductCategory,
+} from '@/lib/api/marketplace';
 import { Button } from '@ui/button';
 import { Card } from '@ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@ui/dialog';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@ui/dialog';
-import { ImageUpload } from '@/components/image-upload';
-import { Edit2, Eye, EyeOff, Loader2, Plus, Search, Trash2 } from 'lucide-react';
+import {
+  Edit2,
+  Eye,
+  EyeOff,
+  Loader2,
+  Plus,
+  Search,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Product {
@@ -18,11 +35,10 @@ interface Product {
   category: string;
   price: number;
   stock: number;
-  sales: number; // Not available in API yet
+  sales: number;
   status: 'Active' | 'Draft';
 }
 
-// Transform API product to frontend format
 function transformProduct(apiProduct: ApiProduct): Product {
   return {
     id: apiProduct.id,
@@ -36,7 +52,6 @@ function transformProduct(apiProduct: ApiProduct): Product {
 }
 
 export default function VendorProductsPage() {
-  const { isLoading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,8 +61,6 @@ export default function VendorProductsPage() {
   );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  
-  // Form state
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -60,7 +73,8 @@ export default function VendorProductsPage() {
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
-  // Fetch products from API
+  const { isLoading: authLoading } = useAuth();
+
   useEffect(() => {
     const fetchProducts = async () => {
       if (authLoading) {
@@ -114,8 +128,7 @@ export default function VendorProductsPage() {
       await MarketplaceAPI.updateProduct(product.id, {
         status: newStatus as ProductStatus,
       });
-      
-      // Refresh products
+
       const apiProducts = await MarketplaceAPI.getMyProducts();
       const transformedProducts = apiProducts.map(transformProduct);
       setProducts(transformedProducts);
@@ -127,14 +140,17 @@ export default function VendorProductsPage() {
 
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setIsCreating(true);
-      
-      // Use uploaded image if available, otherwise use imageUrl from form
-      const imageUrl = uploadedImages.length > 0 ? uploadedImages[0] : (formData.imageUrl || undefined);
-      const images = uploadedImages.length > 1 ? uploadedImages.slice(1) : undefined;
-      
+
+      const imageUrl =
+        uploadedImages.length > 0
+          ? uploadedImages[0]
+          : formData.imageUrl || undefined;
+      const images =
+        uploadedImages.length > 1 ? uploadedImages.slice(1) : undefined;
+
       await MarketplaceAPI.createProduct({
         name: formData.name,
         description: formData.description || undefined,
@@ -146,8 +162,7 @@ export default function VendorProductsPage() {
         imageUrl: imageUrl,
         images: images,
       });
-      
-      // Reset form
+
       setFormData({
         name: '',
         description: '',
@@ -159,10 +174,9 @@ export default function VendorProductsPage() {
         imageUrl: '',
       });
       setUploadedImages([]);
-      
+
       setIsAddDialogOpen(false);
-      
-      // Refresh products
+
       const apiProducts = await MarketplaceAPI.getMyProducts();
       const transformedProducts = apiProducts.map(transformProduct);
       setProducts(transformedProducts);
@@ -176,7 +190,7 @@ export default function VendorProductsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
+      <div className="p-6 flex items-center justify-center min-h-100">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-muted-foreground">
@@ -205,7 +219,10 @@ export default function VendorProductsPage() {
           <h1 className="text-3xl font-bold text-foreground">Products</h1>
           <p className="text-muted-foreground">Manage your product listings</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+        >
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90 gap-2">
               <Plus className="w-4 h-4" />
@@ -216,35 +233,62 @@ export default function VendorProductsPage() {
             <DialogHeader>
               <DialogTitle>Add New Product</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreateProduct} className="space-y-4">
+            <form
+              onSubmit={handleCreateProduct}
+              className="space-y-4"
+            >
               <div>
-                <Label htmlFor="name">Product Name *</Label>
+                <Label
+                  htmlFor="name"
+                  className="mb-1 block"
+                >
+                  Product Name *
+                </Label>
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   placeholder="Enter product name"
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label
+                  htmlFor="description"
+                  className="mb-1 block"
+                >
+                  Description
+                </Label>
                 <textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground min-h-[100px]"
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground min-h-25"
                   placeholder="Enter product description"
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="category">Category *</Label>
+                <Label
+                  htmlFor="category"
+                  className="mb-1 block"
+                >
+                  Category *
+                </Label>
                 <select
                   id="category"
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value as ProductCategory })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      category: e.target.value as ProductCategory,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
                   required
                 >
@@ -255,54 +299,76 @@ export default function VendorProductsPage() {
                   <option value="OTHER">Other</option>
                 </select>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="price">Price (GHS) *</Label>
+                  <Label
+                    htmlFor="price"
+                    className="mb-1 block"
+                  >
+                    Price (GHS) *
+                  </Label>
                   <Input
                     id="price"
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
                     required
                     placeholder="0.00"
                   />
                 </div>
-                
+
                 <div>
-                  <Label htmlFor="stock">Stock *</Label>
+                  <Label
+                    htmlFor="stock"
+                    className="mb-1 block"
+                  >
+                    Stock *
+                  </Label>
                   <Input
                     id="stock"
                     type="number"
                     min="0"
                     value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
                     required
                     placeholder="0"
                   />
                 </div>
               </div>
-              
+
               <div>
-                <Label htmlFor="sku">SKU (Optional)</Label>
+                <Label
+                  htmlFor="sku"
+                  className="mb-1 block"
+                >
+                  SKU (Optional)
+                </Label>
                 <Input
                   id="sku"
                   value={formData.sku}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, sku: e.target.value })
+                  }
                   placeholder="Product SKU"
                 />
               </div>
-              
+
               <div>
-                <Label>Product Images</Label>
+                <Label className="mb-1 block">Product Images</Label>
                 <ImageUpload
                   value={uploadedImages}
                   onChange={(urls) => {
-                    const urlArray = Array.isArray(urls) ? urls : [urls].filter(Boolean);
+                    const urlArray = Array.isArray(urls)
+                      ? urls
+                      : [urls].filter(Boolean);
                     setUploadedImages(urlArray);
-                    // Also set imageUrl for backward compatibility
                     if (urlArray.length > 0) {
                       setFormData({ ...formData, imageUrl: urlArray[0] });
                     }
@@ -318,12 +384,14 @@ export default function VendorProductsPage() {
                   id="imageUrl"
                   type="url"
                   value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, imageUrl: e.target.value })
+                  }
                   placeholder="https://example.com/image.jpg"
                   className="mt-2"
                 />
               </div>
-              
+
               <div className="flex justify-end gap-2 pt-4">
                 <Button
                   type="button"
@@ -333,7 +401,10 @@ export default function VendorProductsPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isCreating}>
+                <Button
+                  type="submit"
+                  disabled={isCreating}
+                >
                   {isCreating ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -424,7 +495,7 @@ export default function VendorProductsPage() {
                   {product.category}
                 </td>
                 <td className="py-3 px-4 text-primary font-semibold">
-                  ${product.price.toFixed(2)}
+                  GH₵{product.price.toFixed(2)}
                 </td>
                 <td className="py-3 px-4">
                   <span

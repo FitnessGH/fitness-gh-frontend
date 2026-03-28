@@ -6,11 +6,47 @@ import { Button } from '@ui/button';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
-import { Bell, Lock, User, Loader2 } from 'lucide-react';
+import {
+  AlertCircle,
+  Bell,
+  CheckCircle,
+  Loader2,
+  Lock,
+  User,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
+
+function StatusMessage({
+  status,
+  message,
+}: {
+  status: SaveStatus;
+  message?: string;
+}) {
+  if (status === 'saving')
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+      </div>
+    );
+  if (status === 'success')
+    return (
+      <div className="flex items-center gap-2 text-sm text-green-500">
+        <CheckCircle className="w-4 h-4" /> Saved successfully
+      </div>
+    );
+  if (status === 'error')
+    return (
+      <div className="flex items-center gap-2 text-sm text-destructive">
+        <AlertCircle className="w-4 h-4" /> {message || 'Something went wrong'}
+      </div>
+    );
+  return null;
+}
+
 export default function CustomerSettingsPage() {
-  const { user, userData, refreshUserData, isLoading } = useAuth();
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -21,8 +57,14 @@ export default function CustomerSettingsPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState<SaveStatus>('idle');
+  const [passwordError, setPasswordError] = useState('');
 
-  // Fetch user data if not available
+  const { user, userData, refreshUserData, isLoading } = useAuth();
+
   useEffect(() => {
     const fetchUserData = async () => {
       if (userData || isLoading) return;
@@ -43,7 +85,6 @@ export default function CustomerSettingsPage() {
     fetchUserData();
   }, [user, userData, isLoading, refreshUserData]);
 
-  // Populate form with data from auth context
   useEffect(() => {
     if (userData) {
       setProfileData({
@@ -53,7 +94,6 @@ export default function CustomerSettingsPage() {
         phone: userData.account.phone || '',
       });
     } else if (user) {
-      // Fallback to user data if userData is not available
       const nameParts = user.name.split(' ');
       setProfileData({
         firstName: nameParts[0] || '',
@@ -67,8 +107,6 @@ export default function CustomerSettingsPage() {
   const handleSave = async () => {
     if (!userData || !userData.profile) return;
 
-    // Access token will be retrieved automatically by the API
-
     try {
       setSaving(true);
       setError(null);
@@ -80,10 +118,8 @@ export default function CustomerSettingsPage() {
       };
 
       await UsersAPI.updateProfile(userData.profile.id, updateData);
-      
-      // Refresh user data in auth context (this will update userData automatically)
       await refreshUserData();
-      
+
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error: any) {
@@ -94,20 +130,63 @@ export default function CustomerSettingsPage() {
     }
   };
 
-  // Show loading only if auth is still loading or we're fetching user data
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      setPasswordStatus('error');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      setPasswordStatus('error');
+      return;
+    }
+
+    setPasswordStatus('saving');
+    setPasswordError('');
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/v1/auth/change-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken') || ''}`,
+          },
+          body: JSON.stringify({ currentPassword, newPassword }),
+        },
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to change password');
+      }
+
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordStatus('success');
+      setTimeout(() => setPasswordStatus('idle'), 3000);
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to change password');
+      setPasswordStatus('error');
+    }
+  };
+
   if (isLoading || loadingData) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
+      <div className="p-6 flex items-center justify-center min-h-100">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  // If no user, redirect should happen in layout, but show error just in case
   if (!user) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Please log in to access settings</p>
+      <div className="p-6 flex items-center justify-center min-h-100">
+        <p className="text-muted-foreground">
+          Please log in to access settings
+        </p>
       </div>
     );
   }
@@ -242,24 +321,79 @@ export default function CustomerSettingsPage() {
         </div>
       </Card>
 
-      <Card className="p-6 border-border/50 space-y-6">
-        <div className="flex items-center gap-3 pb-6 border-b border-border">
+      <Card className="p-6 border-border/50 space-y-5">
+        <div className="flex items-center gap-3 pb-4 border-b border-border">
           <Lock className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Security</h2>
         </div>
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="password">Change Password</Label>
+            <Label
+              htmlFor="currentPassword"
+              className="mb-1 block"
+            >
+              Current Password
+            </Label>
             <Input
-              id="password"
+              id="currentPassword"
               type="password"
-              placeholder="New password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Current password"
             />
           </div>
-          <Button className="bg-primary hover:bg-primary/90 w-full">
-            Update Password
-          </Button>
+          <div>
+            <Label
+              htmlFor="newPassword"
+              className="mb-1 block"
+            >
+              New Password
+            </Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New password (min. 8 characters)"
+            />
+          </div>
+          <div>
+            <Label
+              htmlFor="confirmPassword"
+              className="mb-1 block"
+            >
+              Confirm New Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <StatusMessage
+              status={passwordStatus}
+              message={passwordError}
+            />
+            <Button
+              onClick={handleChangePassword}
+              disabled={
+                passwordStatus === 'saving' ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword
+              }
+              className="bg-primary hover:bg-primary/90 ml-auto"
+            >
+              {passwordStatus === 'saving' && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              Update Password
+            </Button>
+          </div>
         </div>
       </Card>
     </div>

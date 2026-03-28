@@ -54,7 +54,7 @@ export function ShoppingCart({
                   <div>
                     <p className="font-semibold text-foreground">{item.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      ${item.price.toFixed(2)} x {item.quantity}
+                      GH₵{item.price.toFixed(2)} x {item.quantity}
                     </p>
                   </div>
                   <button
@@ -70,7 +70,7 @@ export function ShoppingCart({
                 <div className="flex justify-between mb-4">
                   <p className="font-semibold text-foreground">Total:</p>
                   <p className="text-lg font-bold text-primary">
-                    ${total.toFixed(2)}
+                    GH₵{total.toFixed(2)}
                   </p>
                 </div>
                 <Button className="w-full bg-primary hover:bg-primary/90">

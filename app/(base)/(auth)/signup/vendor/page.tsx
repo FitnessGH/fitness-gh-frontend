@@ -115,14 +115,12 @@ export default function VendorSignupPage() {
   const handleChange = (field: keyof SignupData, value: string) => {
     setSignupData((prev) => ({ ...prev, [field]: value }));
 
-    // Validate field in real-time
     const errorMessage = validateField(field, value);
     setValidationErrors((prev) => ({
       ...prev,
       [field]: errorMessage || undefined,
     }));
 
-    // Clear general error when user starts typing
     if (error) {
       setError('');
     }
@@ -132,7 +130,6 @@ export default function VendorSignupPage() {
     e.preventDefault();
     setError('');
 
-    // Validate all fields
     const errors: ValidationErrors = {};
     Object.keys(signupData).forEach((field) => {
       const errorMessage = validateField(
@@ -146,7 +143,6 @@ export default function VendorSignupPage() {
 
     setValidationErrors(errors);
 
-    // Check if there are any validation errors
     if (Object.keys(errors).length > 0) {
       return;
     }

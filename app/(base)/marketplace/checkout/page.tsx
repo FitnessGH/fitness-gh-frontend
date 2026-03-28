@@ -172,25 +172,25 @@ export default function CheckoutPage() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="text-foreground font-medium">
-                      ${orderSummary.subtotal.toFixed(2)}
+                      GH₵{orderSummary.subtotal.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="text-foreground font-medium">
-                      ${orderSummary.shipping.toFixed(2)}
+                      GH₵{orderSummary.shipping.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax</span>
                     <span className="text-foreground font-medium">
-                      ${orderSummary.tax.toFixed(2)}
+                      GH₵{orderSummary.tax.toFixed(2)}
                     </span>
                   </div>
                   <div className="border-t border-border pt-2 flex justify-between">
                     <span className="font-semibold text-foreground">Total</span>
                     <span className="font-bold text-primary text-lg">
-                      ${orderSummary.total.toFixed(2)}
+                      GH₵{orderSummary.total.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
                 <div>
                   <p className="text-muted-foreground">Total Amount</p>
                   <p className="font-semibold text-primary">
-                    ${orderSummary.total.toFixed(2)}
+                    GH₵{orderSummary.total.toFixed(2)}
                   </p>
                 </div>
               </div>

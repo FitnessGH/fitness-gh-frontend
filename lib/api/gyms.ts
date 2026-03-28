@@ -1,6 +1,5 @@
 import { tokenStorage } from '../utils/token-storage';
 
-// Base URL for API
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
@@ -35,6 +34,19 @@ export interface GymWithOwner extends Gym {
   };
 }
 
+export interface UpdateGymData {
+  name?: string;
+  description?: string;
+  address?: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  logoUrl?: string;
+}
+
 class GymsAPI {
   private static getHeaders(): HeadersInit {
     return {
@@ -45,7 +57,7 @@ class GymsAPI {
   private static getAuthHeaders(accessToken: string): HeadersInit {
     return {
       ...this.getHeaders(),
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     };
   }
 
@@ -58,12 +70,14 @@ class GymsAPI {
    * Get all gyms (public)
    * @param includeOwner - Include owner information in response
    */
-  static async getAllGyms(includeOwner?: boolean): Promise<Gym[] | GymWithOwner[]> {
+  static async getAllGyms(
+    includeOwner?: boolean,
+  ): Promise<Gym[] | GymWithOwner[]> {
     const url = new URL(`${API_BASE_URL}/gyms`);
     if (includeOwner) {
       url.searchParams.append('includeOwner', 'true');
     }
-    
+
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: this.getHeaders(),
@@ -99,7 +113,9 @@ class GymsAPI {
    * Returns both owned and employed gyms
    * If accessToken is not provided, gets it from tokenStorage
    */
-  static async getMyGyms(accessToken?: string): Promise<{ owned: Gym[]; employed: Gym[] }> {
+  static async getMyGyms(
+    accessToken?: string,
+  ): Promise<{ owned: Gym[]; employed: Gym[] }> {
     const token = accessToken || tokenStorage.getAccessToken();
     if (!token) {
       throw new Error('No access token available');
@@ -116,6 +132,28 @@ class GymsAPI {
     }
 
     return this.parseResponse<{ owned: Gym[]; employed: Gym[] }>(response);
+  }
+
+  static async updateGym(
+    gymId: string,
+    data: UpdateGymData,
+    accessToken?: string,
+  ): Promise<Gym> {
+    const token = accessToken || tokenStorage.getAccessToken();
+    if (!token) throw new Error('No access token available');
+
+    const response = await fetch(`${API_BASE_URL}/gyms/${gymId}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(token),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update gym');
+    }
+
+    return this.parseResponse<Gym>(response);
   }
 }
 
