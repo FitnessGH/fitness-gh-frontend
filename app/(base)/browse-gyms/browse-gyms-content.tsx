@@ -30,8 +30,6 @@ import Link from 'next/link';
 import GymsAPI from '@/lib/api/gyms';
 import { useGymStore } from '@/store';
 import { useCallback, useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
-
 interface Gym {
   id: number;
   name: string;
