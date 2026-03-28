@@ -1,6 +1,5 @@
 'use client';
 
-import OTPVerification from '@/components/auth/otp-verification';
 import { useAuth } from '@/components/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -8,11 +7,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BebasFont } from '@/constant';
 import { AuthAPI } from '@/lib/api/auth';
-import { getDashboardPath, mapBackendUserTypeToRole, type UserRole } from '@/lib/auth';
-import { Package, ShieldCheck, ShoppingBag, Eye, EyeOff, Loader2 } from 'lucide-react';
+import {
+  getDashboardPath,
+  mapBackendUserTypeToRole,
+  type UserRole,
+} from '@/lib/auth';
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Package,
+  ShieldCheck,
+  ShoppingBag,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
+
+import OTPVerification from '@/components/auth/otp-verification';
 
 import Link from 'next/link';
 
@@ -37,7 +49,9 @@ export default function VendorSignupPage() {
   const [showOTP, setShowOTP] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
   const [pendingRole, setPendingRole] = useState<UserRole>('vendor');
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {},
+  );
   const [signupData, setSignupData] = useState<SignupData>({
     name: '',
     email: '',
@@ -46,7 +60,13 @@ export default function VendorSignupPage() {
   });
 
   const router = useRouter();
-  const { signup, login, user, isLoading: authLoading, setUserFromAuthResponse } = useAuth();
+  const {
+    signup,
+    login,
+    user,
+    isLoading: authLoading,
+    setUserFromAuthResponse,
+  } = useAuth();
 
   const validateField = (field: keyof SignupData, value: string): string => {
     if (!value || value.trim() === '') {
@@ -94,14 +114,14 @@ export default function VendorSignupPage() {
 
   const handleChange = (field: keyof SignupData, value: string) => {
     setSignupData((prev) => ({ ...prev, [field]: value }));
-    
+
     // Validate field in real-time
     const errorMessage = validateField(field, value);
     setValidationErrors((prev) => ({
       ...prev,
       [field]: errorMessage || undefined,
     }));
-    
+
     // Clear general error when user starts typing
     if (error) {
       setError('');
@@ -111,23 +131,26 @@ export default function VendorSignupPage() {
   const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     // Validate all fields
     const errors: ValidationErrors = {};
     Object.keys(signupData).forEach((field) => {
-      const errorMessage = validateField(field as keyof SignupData, signupData[field as keyof SignupData]);
+      const errorMessage = validateField(
+        field as keyof SignupData,
+        signupData[field as keyof SignupData],
+      );
       if (errorMessage) {
         errors[field as keyof ValidationErrors] = errorMessage;
       }
     });
-    
+
     setValidationErrors(errors);
-    
+
     // Check if there are any validation errors
     if (Object.keys(errors).length > 0) {
       return;
     }
-    
+
     setIsLoading(true);
 
     try {
@@ -226,144 +249,156 @@ export default function VendorSignupPage() {
           />
         ) : (
           <Card className="p-8 border-border bg-card/70 backdrop-blur-sm shadow-2xl shadow-primary/10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
-          <div className="text-center mb-8 space-y-2">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary">
-              <ShoppingBag className="w-6 h-6" />
-            </div>
-            <h2 className={`${BebasFont.className} text-3xl`}>
-              Create Vendor Account
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Start listing products for gyms and members.
-            </p>
-          </div>
-
-          <form
-            onSubmit={handleSignup}
-            className="space-y-4"
-          >
-            {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm">
-                {error}
+            <div className="text-center mb-8 space-y-2">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary">
+                <ShoppingBag className="w-6 h-6" />
               </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="Kojo Asare"
-                value={signupData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                disabled={isLoading}
-                className={validationErrors.name ? 'border-red-500' : ''}
-              />
-              {validationErrors.name && (
-                <p className="text-xs text-red-500">{validationErrors.name}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="vendor@shop.com"
-                value={signupData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                disabled={isLoading}
-                className={validationErrors.email ? 'border-red-500' : ''}
-              />
-              {validationErrors.email && (
-                <p className="text-xs text-red-500">{validationErrors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="businessName">Business Name</Label>
-              <Input
-                id="businessName"
-                placeholder="Elite Supplements"
-                value={signupData.businessName}
-                onChange={(e) => handleChange('businessName', e.target.value)}
-                disabled={isLoading}
-                className={validationErrors.businessName ? 'border-red-500' : ''}
-              />
-              {validationErrors.businessName && (
-                <p className="text-xs text-red-500">{validationErrors.businessName}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={signupData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                  disabled={isLoading}
-                  className={`pr-10 ${validationErrors.password ? 'border-red-500' : ''}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  disabled={isLoading}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-              {validationErrors.password && (
-                <p className="text-xs text-red-500">{validationErrors.password}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                At least 8 characters with uppercase, lowercase, and number
+              <h2 className={`${BebasFont.className} text-3xl`}>
+                Create a Seller Account
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Start listing products for gyms and members.
               </p>
             </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
+            <form
+              onSubmit={handleSignup}
+              className="space-y-4"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                'Create Vendor Account'
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm">
+                  {error}
+                </div>
               )}
-            </Button>
 
-            <p className="text-xs text-center text-muted-foreground">
-              By signing up, you agree to our Terms of Service
-            </p>
-          </form>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Kojo Asare"
+                  value={signupData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  disabled={isLoading}
+                  className={validationErrors.name ? 'border-red-500' : ''}
+                />
+                {validationErrors.name && (
+                  <p className="text-xs text-red-500">
+                    {validationErrors.name}
+                  </p>
+                )}
+              </div>
 
-          <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
-            <span>Already have access?</span>
-            <Link
-              href="/login"
-              className="text-primary hover:text-primary/80"
-            >
-              Sign in
-            </Link>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="vendor@shop.com"
+                  value={signupData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  disabled={isLoading}
+                  className={validationErrors.email ? 'border-red-500' : ''}
+                />
+                {validationErrors.email && (
+                  <p className="text-xs text-red-500">
+                    {validationErrors.email}
+                  </p>
+                )}
+              </div>
 
-          <div className="mt-6 rounded-2xl border border-border bg-background/70 p-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2 text-primary">
-              <ShieldCheck className="h-4 w-4" />
-              Payouts are verified after your first order.
+              <div className="space-y-2">
+                <Label htmlFor="businessName">Business Name</Label>
+                <Input
+                  id="businessName"
+                  placeholder="Elite Supplements"
+                  value={signupData.businessName}
+                  onChange={(e) => handleChange('businessName', e.target.value)}
+                  disabled={isLoading}
+                  className={
+                    validationErrors.businessName ? 'border-red-500' : ''
+                  }
+                />
+                {validationErrors.businessName && (
+                  <p className="text-xs text-red-500">
+                    {validationErrors.businessName}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={signupData.password}
+                    onChange={(e) => handleChange('password', e.target.value)}
+                    disabled={isLoading}
+                    className={`pr-10 ${validationErrors.password ? 'border-red-500' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={isLoading}
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                {validationErrors.password && (
+                  <p className="text-xs text-red-500">
+                    {validationErrors.password}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  At least 8 characters with uppercase, lowercase, and number
+                </p>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  'Create a Seller Account'
+                )}
+              </Button>
+
+              <p className="text-xs text-center text-muted-foreground">
+                By signing up, you agree to our Terms of Service
+              </p>
+            </form>
+
+            <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
+              <span>Already have access?</span>
+              <Link
+                href="/login"
+                className="text-primary hover:text-primary/80"
+              >
+                Sign in
+              </Link>
             </div>
-          </div>
+
+            <div className="mt-6 rounded-2xl border border-border bg-background/70 p-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 text-primary">
+                <ShieldCheck className="h-4 w-4" />
+                Payouts are verified after your first order.
+              </div>
+            </div>
           </Card>
         )}
       </div>

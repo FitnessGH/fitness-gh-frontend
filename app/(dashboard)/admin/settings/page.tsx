@@ -5,7 +5,7 @@ import { Card } from '@ui/card';
 import { Input } from '@ui/input';
 import { Label } from '@ui/label';
 import { Textarea } from '@ui/textarea';
-import { Bell, Globe, Image, Lock, Settings, Upload } from 'lucide-react';
+import { Bell, Globe, Lock, Settings, Upload } from 'lucide-react';
 import { useState } from 'react';
 
 export default function AdminSettingsPage() {
@@ -88,7 +88,7 @@ export default function AdminSettingsPage() {
           {[
             { label: 'Dispute escalations', enabled: true },
             { label: 'New gym registrations', enabled: true },
-            { label: 'Vendor account changes', enabled: true },
+            { label: 'Seller account changes', enabled: true },
             { label: 'Daily summary report', enabled: false },
           ].map((notification, i) => (
             <div
@@ -184,7 +184,11 @@ export default function AdminSettingsPage() {
                   })
                 }
               />
-              <Button variant="outline" size="icon" title="Upload video">
+              <Button
+                variant="outline"
+                size="icon"
+                title="Upload video"
+              >
                 <Upload className="w-4 h-4" />
               </Button>
             </div>

@@ -36,7 +36,7 @@ const signupOptions = [
   },
   {
     href: '/signup/vendor',
-    label: 'Join as Vendor',
+    label: 'Join as Seller',
     description: 'Sell products to gyms and members',
     icon: ShoppingBag,
   },

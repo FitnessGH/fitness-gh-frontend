@@ -11,7 +11,7 @@ export default function VendorSettingsPage() {
     <div className="p-6 space-y-6 max-w-2xl">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground">Manage your vendor account</p>
+        <p className="text-muted-foreground">Manage your Seller account</p>
       </div>
 
       <Card className="p-6 border-border/50 space-y-6">

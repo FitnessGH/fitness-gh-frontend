@@ -1,8 +1,6 @@
-// Base URL for API - should be in environment variables
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
-// API response types
 export interface AuthResponse {
   account: {
     id: string;
@@ -42,7 +40,6 @@ export interface OTPResponse {
   message: string;
 }
 
-// Registration data types for different user types
 export interface BaseRegistrationData {
   email: string;
   password: string;
@@ -66,9 +63,9 @@ export interface VendorRegistrationData extends BaseRegistrationData {
   businessName: string;
 }
 
-export type RegistrationData = 
-  | GymOwnerRegistrationData 
-  | CustomerRegistrationData 
+export type RegistrationData =
+  | GymOwnerRegistrationData
+  | CustomerRegistrationData
   | VendorRegistrationData;
 
 // API class
@@ -81,7 +78,7 @@ export class AuthAPI {
 
   private static async parseResponse<T>(response: Response): Promise<T> {
     const result = await response.json();
-    return (result?.data ?? result) as T;
+    return ('data' in result ? result.data : result) as T;
   }
 
   static async sendOTP(email: string): Promise<OTPResponse> {
@@ -149,7 +146,7 @@ export class AuthAPI {
       method: 'GET',
       headers: {
         ...this.getHeaders(),
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -161,7 +158,9 @@ export class AuthAPI {
     return this.parseResponse<AuthResponse>(response);
   }
 
-  static async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  static async refreshToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -173,7 +172,8 @@ export class AuthAPI {
       throw new Error(error.message || 'Failed to refresh token');
     }
 
-    return this.parseResponse<{ accessToken: string; refreshToken: string }>(response);
+    return this.parseResponse<{ accessToken: string; refreshToken: string }>(
+      response,
+    );
   }
 }
-
