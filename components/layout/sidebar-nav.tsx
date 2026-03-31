@@ -43,7 +43,7 @@ const navItems: Record<UserRole, NavItem[]> = {
       icon: <Users className="w-5 h-5" />,
     },
     {
-      label: 'Batch Schedule',
+      label: 'Schedule Event',
       href: '/gym-owner/events',
       icon: <Calendar className="w-5 h-5" />,
     },
