@@ -18,6 +18,7 @@ interface CartItem {
 interface Product {
   id: string;
   name: string;
+  description: string | null;
   vendor: string;
   price: number;
   rating: number;
@@ -35,6 +36,7 @@ function transformProduct(apiProduct: ApiProduct): Product {
   return {
     id: apiProduct.id,
     name: apiProduct.name,
+    description: apiProduct.description,
     vendor: vendorName,
     price: apiProduct.price,
     rating: apiProduct.rating || 0,
@@ -203,6 +205,7 @@ function MarketplaceContent() {
                     key={product.id}
                     {...product}
                     onAddToCart={handleAddToCart}
+                    detailBasePath="/marketplace"
                   />
                 ))}
               </div>

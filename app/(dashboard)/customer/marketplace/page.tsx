@@ -1,15 +1,19 @@
 'use client';
 
-import MarketplaceAPI, { type Product as ApiProduct, ProductCategory } from '@/lib/api/marketplace';
-import { Button } from '@ui/button';
+import MarketplaceAPI, {
+  type Product as ApiProduct,
+  type ProductCategory,
+} from '@/lib/api/marketplace';
+import { ProductCard } from '@/components/marketplace/product-card';
 import { Card } from '@ui/card';
 import { Input } from '@ui/input';
-import { Loader2, Search, ShoppingCart, Star } from 'lucide-react';
+import { Loader2, Search, ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Product {
   id: string;
   name: string;
+  description: string | null;
   vendor: string;
   price: number;
   rating: number;
@@ -21,17 +25,21 @@ interface Product {
 // Transform API product to frontend format
 function transformProduct(apiProduct: ApiProduct): Product {
   const vendorName = apiProduct.vendor
-    ? `${apiProduct.vendor.firstName || ''} ${apiProduct.vendor.lastName || ''}`.trim() || apiProduct.vendor.username
+    ? `${apiProduct.vendor.firstName || ''} ${apiProduct.vendor.lastName || ''}`.trim() ||
+      apiProduct.vendor.username
     : 'Unknown Vendor';
 
   return {
     id: apiProduct.id,
     name: apiProduct.name,
+    description: apiProduct.description,
     vendor: vendorName,
     price: apiProduct.price,
     rating: apiProduct.rating || 0,
     reviews: apiProduct.reviewCount || 0,
-    image: apiProduct.imageUrl || 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
+    image:
+      apiProduct.imageUrl ||
+      'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&h=450&fit=crop',
     category: apiProduct.category,
   };
 }
@@ -44,7 +52,14 @@ export default function CustomerMarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState<string[]>([]);
 
-  const categories = ['All', 'SUPPLEMENTS', 'EQUIPMENT', 'ACCESSORIES', 'APPAREL', 'OTHER'];
+  const categories = [
+    'All',
+    'SUPPLEMENTS',
+    'EQUIPMENT',
+    'ACCESSORIES',
+    'APPAREL',
+    'OTHER',
+  ];
 
   // Fetch products from API
   useEffect(() => {
@@ -143,11 +158,17 @@ export default function CustomerMarketplacePage() {
                     : 'bg-muted text-foreground hover:bg-muted/80'
                 }`}
               >
-                {category === 'SUPPLEMENTS' ? 'Supplements' :
-                 category === 'EQUIPMENT' ? 'Equipment' :
-                 category === 'ACCESSORIES' ? 'Accessories' :
-                 category === 'APPAREL' ? 'Apparel' :
-                 category === 'OTHER' ? 'Other' : category}
+                {category === 'SUPPLEMENTS'
+                  ? 'Supplements'
+                  : category === 'EQUIPMENT'
+                    ? 'Equipment'
+                    : category === 'ACCESSORIES'
+                      ? 'Accessories'
+                      : category === 'APPAREL'
+                        ? 'Apparel'
+                        : category === 'OTHER'
+                          ? 'Other'
+                          : category}
               </button>
             ))}
           </div>
@@ -157,62 +178,12 @@ export default function CustomerMarketplacePage() {
       {!loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProducts.map((product) => (
-          <Card
-            key={product.id}
-            className="border-border/50 overflow-hidden hover:border-primary/50 transition-colors"
-          >
-            <div className="p-4 pb-3 bg-muted/30">
-              <div className="aspect-4/3 overflow-hidden rounded-lg border border-border/40 bg-background">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-
-            <div className="p-4 space-y-3">
-              <div>
-                <p className="font-semibold text-foreground text-sm">
-                  {product.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {product.vendor}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-3 h-3 ${
-                      i < Math.floor(product.rating)
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-muted-foreground'
-                    }`}
-                  />
-                ))}
-                <span className="text-xs text-muted-foreground ml-1">
-                  ({product.reviews})
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <p className="text-lg font-bold text-primary">
-                  GH₵{product.price.toFixed(2)}
-                </p>
-                <Button
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => handleAddToCart(product.id)}
-                >
-                  <ShoppingCart className="w-3 h-3 mr-1" />
-                  Add
-                </Button>
-              </div>
-            </div>
-          </Card>
+            <ProductCard
+              key={product.id}
+              {...product}
+              onAddToCart={handleAddToCart}
+              detailBasePath="/customer/marketplace"
+            />
           ))}
         </div>
       )}
