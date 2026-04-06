@@ -58,8 +58,15 @@ export default function CustomerDashboard() {
         const membershipData = await SubscriptionsAPI.getMyMemberships();
         setMemberships(membershipData);
       } catch (error: any) {
-        console.error('Failed to fetch memberships:', error);
-        setError(error.message || 'Failed to load memberships');
+        const msg = error.message || 'Failed to load memberships';
+        // "Profile not found" means the user doesn't have a profile yet;
+        // treat as no memberships rather than an error state.
+        if (msg === 'Profile not found') {
+          setMemberships([]);
+        } else {
+          console.error('Failed to fetch memberships:', error);
+          setError(msg);
+        }
       } finally {
         setLoading(false);
       }
